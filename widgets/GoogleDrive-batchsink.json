@@ -1,0 +1,156 @@
+{
+  "metadata": {
+    "spec-version": "1.5"
+  },
+  "display-name": "Google Drive Sink",
+  "configuration-groups": [
+    {
+      "label": "Basic",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "Reference Name",
+          "name": "referenceName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "File Body Field",
+          "name": "schemaBodyFieldName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "File Name Field",
+          "name": "schemaNameFieldName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "File Mime Field",
+          "name": "schemaMimeFieldName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Directory Identifier",
+          "name": "directoryIdentifier"
+        }
+      ]
+    },
+    {
+      "label": "Authentication",
+      "properties": [
+        {
+          "widget-type": "radio-group",
+          "label": "Authentication Type",
+          "name": "authType",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "oAuth2",
+            "options": [
+              {
+                "id": "oAuth2",
+                "label": "OAuth2"
+              },
+              {
+                "id": "serviceAccount",
+                "label": "Service account"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Account File Path",
+          "name": "accountFilePath",
+          "widget-attributes": {
+            "default": "auto-detect"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Client ID",
+          "name": "clientId"
+        },
+        {
+          "widget-type": "password",
+          "label": "Client Secret",
+          "name": "clientSecret"
+        },
+        {
+          "widget-type": "password",
+          "label": "Refresh Token",
+          "name": "refreshToken"
+        }
+      ]
+    },
+    {
+      "label": "Retrying",
+      "properties": [
+        {
+          "widget-type": "number",
+          "label": "Max Retry Count",
+          "name": "maxRetryCount",
+          "widget-attributes": {
+            "min": "0",
+            "default": "8"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Max Retry Wait",
+          "name": "maxRetryWait",
+          "widget-attributes": {
+            "min": "0",
+            "default": "200"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Max Retry Jitter Wait",
+          "name": "maxRetryJitterWait",
+          "widget-attributes": {
+            "min": "0",
+            "default": "100"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": [],
+  "filters": [
+    {
+      "name": "Authenticate with OAuth2",
+      "condition": {
+        "property": "authType",
+        "operator": "equal to",
+        "value": "oAuth2"
+      },
+      "show": [
+        {
+          "name": "clientId",
+          "type": "property"
+        },
+        {
+          "name": "clientSecret",
+          "type": "property"
+        },
+        {
+          "name": "refreshToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with service account",
+      "condition": {
+        "property": "authType",
+        "operator": "equal to",
+        "value": "serviceAccount"
+      },
+      "show": [
+        {
+          "name": "accountFilePath",
+          "type": "property"
+        }
+      ]
+    }
+  ]
+}

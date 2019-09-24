@@ -8,18 +8,22 @@ Sink plugin saves files from the pipeline to Google Drive directory via Google D
 Properties
 ----------
 
-**File body field** Name of the schema field (should be BYTES type) which will be used as body of file.
+### Basic
+
+**File body field:** Name of the schema field (should be BYTES type) which will be used as body of file.
 The minimal input schema should contain only this field.
 
-**File name field** Name of the schema field (should be STRING type) which will be used as name of file. 
+**File name field:** Name of the schema field (should be STRING type) which will be used as name of file. 
 Is optional. In the case it is not set files have randomly generated 16-symbols names.
 
-**Directory identifier** Identifier of the destination folder.
+**Directory identifier:** Identifier of the destination folder.
 
-**Client ID** OAuth2 client id.
+### Authentication
 
-**Client secret** OAuth2 client secret.
+**Client ID:** OAuth2 client id.
 
-**Refresh token** OAuth2 refresh token.
+**Client secret:** OAuth2 client secret.
 
-**Access token** OAuth2 access token.
+**Refresh token:** OAuth2 refresh token.
+
+**Access token:** OAuth2 access token.

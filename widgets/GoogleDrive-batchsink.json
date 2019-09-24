@@ -14,13 +14,13 @@
         },
         {
           "widget-type": "textbox",
-          "label": "File name field",
-          "name": "schemaNameFieldName"
+          "label": "File body field",
+          "name": "schemaBodyFieldName"
         },
         {
           "widget-type": "textbox",
-          "label": "File body field",
-          "name": "schemaBodyFieldName"
+          "label": "File name field",
+          "name": "schemaNameFieldName"
         },
         {
           "widget-type": "textbox",

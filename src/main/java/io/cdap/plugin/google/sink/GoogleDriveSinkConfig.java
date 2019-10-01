@@ -30,8 +30,15 @@ import javax.annotation.Nullable;
  * Configurations for Google Drive Batch Sink plugin.
  */
 public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
-  public static final String SCHEMA_NAME_FIELD_NAME = "schemaNameFieldName";
   public static final String SCHEMA_BODY_FIELD_NAME = "schemaBodyFieldName";
+  public static final String SCHEMA_NAME_FIELD_NAME = "schemaNameFieldName";
+  public static final String SCHEMA_MIME_FIELD_NAME = "schemaMimeFieldName";
+
+  @Name(SCHEMA_BODY_FIELD_NAME)
+  @Description("Name of the schema field (should be BYTES type) which will be used as body of file.\n" +
+    "The minimal input schema should contain only this field.")
+  @Macro
+  protected String schemaBodyFieldName;
 
   @Nullable
   @Name(SCHEMA_NAME_FIELD_NAME)
@@ -40,11 +47,13 @@ public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
   @Macro
   protected String schemaNameFieldName;
 
-  @Name(SCHEMA_BODY_FIELD_NAME)
-  @Description("Name of the schema field (should be BYTES type) which will be used as body of file.\n" +
-    "The minimal input schema should contain only this field.")
+  @Nullable
+  @Name(SCHEMA_MIME_FIELD_NAME)
+  @Description("Name of the schema field (should be STRING type) which will be used as MIME type of file. \n" +
+    "All MIME types are supported except Google Drive types: https://developers.google.com/drive/api/v3/mime-types.\n" +
+    "Is optional. In the case it is not set Google API will try to recognize file's MIME type automatically.")
   @Macro
-  protected String schemaBodyFieldName;
+  protected String schemaMimeFieldName;
 
   public void validate(FailureCollector collector, Schema schema) {
     super.validate(collector);
@@ -56,6 +65,10 @@ public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
     // validate name field is in schema and has valid format
     validateSchemaField(collector, schema, SCHEMA_NAME_FIELD_NAME, schemaNameFieldName,
                         "File name field", Schema.Type.STRING);
+
+    // validate mime field is in schema and has valid format
+    validateSchemaField(collector, schema, SCHEMA_MIME_FIELD_NAME, schemaMimeFieldName,
+                        "File mime field", Schema.Type.STRING);
   }
 
   private void validateSchemaField(FailureCollector collector, Schema schema, String propertyName,
@@ -88,12 +101,17 @@ public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
     }
   }
 
+  public String getSchemaBodyFieldName() {
+    return schemaBodyFieldName;
+  }
+
   @Nullable
   public String getSchemaNameFieldName() {
     return schemaNameFieldName;
   }
 
-  public String getSchemaBodyFieldName() {
-    return schemaBodyFieldName;
+  @Nullable
+  public String getSchemaMimeFieldName() {
+    return schemaMimeFieldName;
   }
 }

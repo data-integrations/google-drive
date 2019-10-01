@@ -16,23 +16,37 @@
 
 package io.cdap.plugin.google.common;
 
+import com.google.api.services.drive.model.File;
+
 /**
  * Representation for file can be written to Google Drive system..
  */
 public class FileFromFolder {
   private final byte[] content;
-  private final String name;
+  private final long offset;
+  private final File file;
 
-  public FileFromFolder(byte[] content, String name) {
+  public FileFromFolder(byte[] content, long offset, File file) {
     this.content = content;
-    this.name = name;
+    this.offset = offset;
+    this.file = file;
+  }
+
+  public FileFromFolder(byte[] content, File file) {
+    this.content = content;
+    this.file = file;
+    this.offset = 0L;
   }
 
   public byte[] getContent() {
     return content;
   }
 
-  public String getName() {
-    return name;
+  public long getOffset() {
+    return offset;
+  }
+
+  public File getFile() {
+    return file;
   }
 }

@@ -24,6 +24,11 @@
         },
         {
           "widget-type": "textbox",
+          "label": "File mime field",
+          "name": "schemaMimeFieldName"
+        },
+        {
+          "widget-type": "textbox",
           "label": "Directory identifier",
           "name": "directoryIdentifier"
         }

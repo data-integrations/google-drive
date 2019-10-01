@@ -16,6 +16,7 @@
 
 package io.cdap.plugin.google.sink;
 
+import com.google.api.services.drive.model.File;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.plugin.google.common.FileFromFolder;
@@ -26,33 +27,49 @@ import org.apache.commons.lang3.RandomStringUtils;
  * to a {@link io.cdap.plugin.google.common.FileFromFolder}
  */
 public class StructuredRecordToFileFromFolderTransformer {
-  private static final Integer RANDON_FILE_NAME_LENGTH = 16;
+  public static final Integer RANDOM_FILE_NAME_LENGTH = 16;
   private final String bodyFieldName;
   private final String nameFieldName;
+  private final String mimeFieldName;
 
-  public StructuredRecordToFileFromFolderTransformer(String bodyFieldName, String nameFieldName) {
+  public StructuredRecordToFileFromFolderTransformer(String bodyFieldName, String nameFieldName, String mimeFieldName) {
     this.bodyFieldName = bodyFieldName;
     this.nameFieldName = nameFieldName;
+    this.mimeFieldName = mimeFieldName;
   }
 
   public FileFromFolder transform(StructuredRecord input) {
     byte[] content = new byte[]{};
-    String name;
+    String name = null;
+    String mimeType = null;
 
+    File file = new File();
     Schema schema = input.getSchema();
     if (schema.getField(bodyFieldName) != null) {
       content = input.get(bodyFieldName);
     }
+    if (content == null) {
+      content = new byte[]{};
+    }
+
     if (schema.getField(nameFieldName) != null) {
       name = input.get(nameFieldName);
-    } else {
+    }
+    if (name == null) {
       name = generateRandomName();
     }
-    FileFromFolder fileFromFolder = new FileFromFolder(content, name);
+
+    if (schema.getField(mimeFieldName) != null) {
+      mimeType = input.get(mimeFieldName);
+    }
+
+    file.setName(name);
+    file.setMimeType(mimeType);
+    FileFromFolder fileFromFolder = new FileFromFolder(content, file);
     return fileFromFolder;
   }
 
-  public String generateRandomName() {
-    return RandomStringUtils.randomAlphanumeric(RANDON_FILE_NAME_LENGTH);
+  private String generateRandomName() {
+    return RandomStringUtils.randomAlphanumeric(RANDOM_FILE_NAME_LENGTH);
   }
 }

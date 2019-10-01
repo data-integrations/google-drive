@@ -38,7 +38,8 @@ public class GoogleDriveSinkClient extends GoogleDriveClient<GoogleDriveSinkConf
 
     File fileToWrite = new File();
 
-    fileToWrite.setName(fileFromFolder.getName());
+    fileToWrite.setName(fileFromFolder.getFile().getName());
+    fileToWrite.setMimeType(fileFromFolder.getFile().getMimeType());
     fileToWrite.setParents(Collections.singletonList(folderId));
     ByteArrayContent fileContent = new ByteArrayContent(null, fileFromFolder.getContent());
     service.files().create(fileToWrite, fileContent).execute();

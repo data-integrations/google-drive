@@ -83,7 +83,8 @@ public class GoogleDriveSink extends BatchSink<StructuredRecord, Void, FileFromF
   public void initialize(BatchRuntimeContext context) throws Exception {
     super.initialize(context);
     transformer = new StructuredRecordToFileFromFolderTransformer(config.getSchemaBodyFieldName(),
-                                                                  config.getSchemaNameFieldName());
+                                                                  config.getSchemaNameFieldName(),
+                                                                  config.getSchemaMimeFieldName());
   }
 
   @Override

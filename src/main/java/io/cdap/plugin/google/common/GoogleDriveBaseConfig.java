@@ -24,18 +24,18 @@ import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.common.IdUtils;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
  * Base Google Drive batch config. Contains common configuration properties and methods.
  */
 public abstract class GoogleDriveBaseConfig extends PluginConfig {
+  public static final String AUTO_DETECT_VALUE = "auto-detect";
   public static final String REFERENCE_NAME = "referenceName";
-  public static final String CLIENT_ID = "clientId";
-  public static final String CLIENT_SECRET = "clientSecret";
-  public static final String REFRESH_TOKEN = "refreshToken";
-  public static final String ACCESS_TOKEN = "accessToken";
+  public static final String ACCOUNT_FILE_PATH = "accountFilePath";
   public static final String DIRECTORY_IDENTIFIER = "directoryIdentifier";
+  public static final String GOOGLE_APPLICATION_CREDENTIALS_ENV_PROP = "GOOGLE_APPLICATION_CREDENTIALS";
 
   @Name(REFERENCE_NAME)
   @Description("Reference Name")
@@ -43,26 +43,22 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
 
   // TODO remove these properties after OAuth2 will be provided by cdap
   // start of workaround
-  @Name(CLIENT_ID)
-  @Description("OAuth2 client id.")
+  @Name(ACCOUNT_FILE_PATH)
+  @Description("Path on the local file system of the user/service account key used for authorization. " +
+    "Can be set to 'auto-detect' when running on a Dataproc cluster. " +
+    "When running on other clusters, the file must be present on every node in the cluster." +
+    "Required minimal json format for user account:" +
+    "{" +
+    "  \"client_id\": \"<clientId>\"," +
+    "  \"client_secret\": \"<clientSecret>\"," +
+    "  \"refresh_token\": \"<refreshToken>\"," +
+    "  \"type\": \"authorized_user\"" +
+    "}" +
+    "Service account json can be generated on Google Cloud " +
+    "Service Account page (https://console.cloud.google.com/iam-admin/serviceaccounts)")
   @Macro
-  protected String clientId;
-
-  @Name(CLIENT_SECRET)
-  @Description("OAuth2 client secret.")
-  @Macro
-  protected String clientSecret;
-
-  @Name(REFRESH_TOKEN)
-  @Description("OAuth2 refresh token.")
-  @Macro
-  protected String refreshToken;
+  protected String accountFilePath;
   // end of workaround
-
-  @Name(ACCESS_TOKEN)
-  @Description("OAuth2 access token.")
-  @Macro
-  protected String accessToken;
 
   @Name(DIRECTORY_IDENTIFIER)
   @Description("ID of target directory, the last part of the URL.")
@@ -73,7 +69,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
     IdUtils.validateReferenceName(referenceName, collector);
 
     try {
-      GoogleDriveClient client = new GoogleDriveClient(this);
+      GoogleDriveClient client = getDriveClient();
 
       // validate auth
       validateCredentials(collector, client);
@@ -87,20 +83,17 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
         "Check message and reconfigure the plugin")
         .withStacktrace(e.getStackTrace());
     }
-
   }
 
+  protected abstract GoogleDriveClient getDriveClient();
+
   private void validateCredentials(FailureCollector collector, GoogleDriveClient driveClient) throws IOException {
-    if (!containsMacro(CLIENT_ID) && !containsMacro(CLIENT_SECRET) && !containsMacro(REFRESH_TOKEN)
-      && !containsMacro(ACCESS_TOKEN)) {
+    if (!containsMacro(ACCOUNT_FILE_PATH)) {
       try {
         driveClient.checkRootFolder();
       } catch (GoogleJsonResponseException e) {
         collector.addFailure(e.getMessage(), "Provide valid credentials")
-          .withConfigProperty(CLIENT_ID)
-          .withConfigProperty(CLIENT_SECRET)
-          .withConfigProperty(REFRESH_TOKEN)
-          .withConfigProperty(ACCESS_TOKEN)
+          .withConfigProperty(ACCOUNT_FILE_PATH)
           .withStacktrace(e.getStackTrace());
       }
     }
@@ -123,23 +116,18 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
     return referenceName;
   }
 
-  public String getAccessToken() {
-    return accessToken;
-  }
-
   public String getDirectoryIdentifier() {
     return directoryIdentifier;
   }
 
-  public String getClientId() {
-    return clientId;
-  }
-
-  public String getClientSecret() {
-    return clientSecret;
-  }
-
-  public String getRefreshToken() {
-    return refreshToken;
+  public String getAccountFilePath() {
+    if (AUTO_DETECT_VALUE.equals(accountFilePath)) {
+      accountFilePath = System.getenv(GOOGLE_APPLICATION_CREDENTIALS_ENV_PROP);
+    }
+    if (!new File(accountFilePath).exists()) {
+      throw new RuntimeException(String.format("There is no account file from neither \"Account file path\" property " +
+                                   "nor environment variable '%s'", GOOGLE_APPLICATION_CREDENTIALS_ENV_PROP));
+    }
+    return accountFilePath;
   }
 }

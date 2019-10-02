@@ -24,10 +24,17 @@ Is optional. In the case it is not set Google API will try to recognize file's M
 
 ### Authentication
 
-**Client ID:** OAuth2 client id.
-
-**Client secret:** OAuth2 client secret.
-
-**Refresh token:** OAuth2 refresh token.
-
-**Access token:** OAuth2 access token.
+**Account file path:** Path on the local file system of the user/service account key used for authorization. 
+Can be set to 'auto-detect' when running on a Dataproc cluster. 
+When running on other clusters, the file must be present on every node in the cluster.
+Required minimal json format for user account:
+```
+{
+  "client_id": "<clientId>",
+  "client_secret": "<clientSecret>",
+  "refresh_token": "<refreshToken>",
+  "type": "authorized_user"
+}
+```
+Service account json can be generated on Google Cloud 
+[Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)

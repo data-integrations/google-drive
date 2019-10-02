@@ -38,9 +38,11 @@ import java.util.stream.Collectors;
  * Batch sink to writing multiple files to Google Drive directory.
  */
 @Plugin(type = BatchSink.PLUGIN_TYPE)
-@Name("GoogleDrive")
+@Name(GoogleDriveSink.NAME)
 @Description("Sink plugin to save files from the pipeline to Google Drive directory.")
 public class GoogleDriveSink extends BatchSink<StructuredRecord, Void, FileFromFolder> {
+  public static final String NAME = "GoogleDrive";
+
   private final GoogleDriveSinkConfig config;
   private StructuredRecordToFileFromFolderTransformer transformer;
 

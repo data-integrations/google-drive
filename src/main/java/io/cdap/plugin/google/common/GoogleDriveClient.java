@@ -24,16 +24,19 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * Base client for working with Google Drive API
  *
  * @param <C> configuration
  */
-public class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
+public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final String ROOT_FOLDER_ID = "root";
+  protected static final String FULL_PERMISSIONS_SCOPE = "https://www.googleapis.com/auth/drive";
   protected Drive service;
   protected final C config;
   private NetHttpTransport httpTransport;
@@ -45,31 +48,27 @@ public class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
     } catch (Exception e) {
       throw new RuntimeException("There was issue during communicating with Google Drive API.", e);
     }
-    service = new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials(httpTransport))
+    service = new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials())
       .build();
   }
 
-  private Credential getCredentials(NetHttpTransport httpTransport) {
+  private Credential getCredentials() {
+    GoogleCredential credential;
 
     // TODO fix authentication after OAuth2 will be provided by cdap
-    // So for now plugins require all needed info for auth: clientId, clientSecret, refreshToken, accessToken
+    // So for now plugins require user or service account json
     // start of workaround
-    String clientId = config.getClientId();
-    String clientSecret = config.getClientSecret();
-    String refreshToken = config.getRefreshToken();
+    try {
+      credential = GoogleCredential.fromStream(new FileInputStream(config.getAccountFilePath()))
+        .createScoped(Collections.singleton(getRequiredScope()));
+      return credential;
+    } catch (IOException e) {
+      throw new RuntimeException("There was issue during loading of account file.", e);
+    }
     // end of workaround
-
-    GoogleCredential credential = new GoogleCredential.Builder()
-      .setTransport(httpTransport)
-      .setJsonFactory(JSON_FACTORY)
-      .setClientSecrets(clientId,
-                        clientSecret)
-      .build();
-    credential.setRefreshToken(refreshToken);
-    credential.setAccessToken(config.getAccessToken());
-
-    return credential;
   }
+
+  protected abstract String getRequiredScope();
 
   public void checkRootFolder() throws IOException {
     service.files().get(ROOT_FOLDER_ID).execute();

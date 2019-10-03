@@ -39,23 +39,11 @@
       "properties": [
         {
           "widget-type": "textbox",
-          "label": "Client ID",
-          "name": "clientId"
-        },
-        {
-          "widget-type": "textbox",
-          "label": "Client secret",
-          "name": "clientSecret"
-        },
-        {
-          "widget-type": "textbox",
-          "label": "Refresh Token",
-          "name": "refreshToken"
-        },
-        {
-          "widget-type": "textbox",
-          "label": "Access Token",
-          "name": "accessToken"
+          "label": "Account file path",
+          "name": "accountFilePath",
+          "widget-attributes": {
+            "default": "auto-detect"
+          }
         }
       ]
     }

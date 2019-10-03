@@ -23,6 +23,7 @@ import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.google.common.GoogleDriveBaseConfig;
+import io.cdap.plugin.google.common.GoogleDriveClient;
 
 import javax.annotation.Nullable;
 
@@ -113,5 +114,10 @@ public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
   @Nullable
   public String getSchemaMimeFieldName() {
     return schemaMimeFieldName;
+  }
+
+  @Override
+  protected GoogleDriveClient getDriveClient() {
+    return new GoogleDriveSinkClient(this);
   }
 }

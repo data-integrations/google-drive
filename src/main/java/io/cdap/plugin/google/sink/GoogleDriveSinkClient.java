@@ -33,6 +33,11 @@ public class GoogleDriveSinkClient extends GoogleDriveClient<GoogleDriveSinkConf
     super(config);
   }
 
+  @Override
+  protected String getRequiredScope() {
+    return FULL_PERMISSIONS_SCOPE;
+  }
+
   public void createFile(FileFromFolder fileFromFolder) throws IOException {
     String folderId = config.getDirectoryIdentifier();
 

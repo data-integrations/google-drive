@@ -59,11 +59,16 @@ public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
     // So for now plugins require user or service account json
     // start of workaround
     try {
-      credential = GoogleCredential.fromStream(new FileInputStream(config.getAccountFilePath()))
-        .createScoped(Collections.singleton(getRequiredScope()));
-      return credential;
+      String accountFilePath = config.getAccountFilePath();
+      if (GoogleDriveBaseConfig.AUTO_DETECT_VALUE.equals(accountFilePath)) {
+        credential = GoogleCredential.getApplicationDefault();
+      } else {
+        credential = GoogleCredential.fromStream(new FileInputStream(accountFilePath));
+      }
+
+      return credential.createScoped(Collections.singleton(getRequiredScope()));
     } catch (IOException e) {
-      throw new RuntimeException("There was issue during loading of account file.", e);
+      throw new RuntimeException(String.format("There was issue while loading account file: %s", e.getMessage()), e);
     }
     // end of workaround
   }

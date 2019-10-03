@@ -35,7 +35,6 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   public static final String REFERENCE_NAME = "referenceName";
   public static final String ACCOUNT_FILE_PATH = "accountFilePath";
   public static final String DIRECTORY_IDENTIFIER = "directoryIdentifier";
-  public static final String GOOGLE_APPLICATION_CREDENTIALS_ENV_PROP = "GOOGLE_APPLICATION_CREDENTIALS";
 
   @Name(REFERENCE_NAME)
   @Description("Reference Name")
@@ -68,24 +67,39 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   public void validate(FailureCollector collector) {
     IdUtils.validateReferenceName(referenceName, collector);
 
-    try {
-      GoogleDriveClient client = getDriveClient();
+    if (validateAccountFilePath(collector)) {
+      try {
+        GoogleDriveClient client = getDriveClient();
 
-      // validate auth
-      validateCredentials(collector, client);
+        // validate auth
+        validateCredentials(collector, client);
 
-      // validate directory
-      validateDirectoryIdentifier(collector, client);
+        // validate directory
+        validateDirectoryIdentifier(collector, client);
 
-    } catch (Exception e) {
-      collector.addFailure(
-        String.format("Exception during authentication/directory properties check: %s", e.getMessage()),
-        "Check message and reconfigure the plugin")
-        .withStacktrace(e.getStackTrace());
+      } catch (Exception e) {
+        collector.addFailure(
+          String.format("Exception during authentication/directory properties check: %s", e.getMessage()),
+          "Check message and reconfigure the plugin")
+          .withStacktrace(e.getStackTrace());
+      }
     }
   }
 
   protected abstract GoogleDriveClient getDriveClient();
+
+  private boolean validateAccountFilePath(FailureCollector collector) {
+    if (!containsMacro(ACCOUNT_FILE_PATH)) {
+      if (!AUTO_DETECT_VALUE.equals(accountFilePath) && !new File(accountFilePath).exists()) {
+        collector.addFailure("Account file is not available",
+                             "Provide path to existing account file")
+          .withConfigProperty(ACCOUNT_FILE_PATH);
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
 
   private void validateCredentials(FailureCollector collector, GoogleDriveClient driveClient) throws IOException {
     if (!containsMacro(ACCOUNT_FILE_PATH)) {
@@ -121,13 +135,6 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   }
 
   public String getAccountFilePath() {
-    if (AUTO_DETECT_VALUE.equals(accountFilePath)) {
-      accountFilePath = System.getenv(GOOGLE_APPLICATION_CREDENTIALS_ENV_PROP);
-    }
-    if (!new File(accountFilePath).exists()) {
-      throw new RuntimeException(String.format("There is no account file from neither \"Account file path\" property " +
-                                   "nor environment variable '%s'", GOOGLE_APPLICATION_CREDENTIALS_ENV_PROP));
-    }
     return accountFilePath;
   }
 }

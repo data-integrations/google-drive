@@ -23,7 +23,6 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
-import io.cdap.plugin.google.common.exceptions.InvalidPropertyType;
 import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 
 import java.io.FileInputStream;
@@ -81,7 +80,7 @@ public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
           }
           break;
         default:
-          throw new InvalidPropertyTypeException(InvalidPropertyType.AUTH_TYPE, authType.toString());
+          throw new InvalidPropertyTypeException(GoogleDriveBaseConfig.AUTH_TYPE_LABEL, authType.toString());
       }
 
       return credential.createScoped(Collections.singleton(getRequiredScope()));

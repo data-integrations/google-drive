@@ -37,6 +37,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   public static final String AUTO_DETECT_VALUE = "auto-detect";
   public static final String REFERENCE_NAME = "referenceName";
   public static final String AUTH_TYPE = "authType";
+  public static final String AUTH_TYPE_LABEL = "Auth type";
   public static final String CLIENT_ID = "clientId";
   public static final String CLIENT_ID_LABEL = "Client ID";
   public static final String CLIENT_SECRET = "clientSecret";
@@ -47,7 +48,6 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   public static final String DIRECTORY_IDENTIFIER = "directoryIdentifier";
 
   private static final String IS_SET_FAILURE_MESSAGE_PATTERN = "'%s' property is empty or macro is not available";
-  private static final String CHECK_CORRECTIVE_MESSAGE_PATTERN = "Enter valid '%s' property";
 
   @Name(REFERENCE_NAME)
   @Description("Reference Name")
@@ -56,8 +56,8 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   // TODO remove these properties after OAuth2 will be provided by cdap
   // start of workaround
   @Name(AUTH_TYPE)
-  @Description("Defines the authentication type. OAuth2 and Service account types are available. \n" +
-    "Default is OAuth2.")
+  @Description("Type of authentication used to access Google API. \n" +
+    "OAuth2 and Service account types are available. Default is OAuth2.")
   @Macro
   protected String authType;
 
@@ -104,7 +104,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
 
     if (validateAuthType(collector)) {
       AuthType authType = getAuthType();
-      boolean propertiesAreValid = false;
+      boolean propertiesAreValid;
       switch (authType) {
         case OAUTH2:
           propertiesAreValid = validateOAuth2Properties(collector);
@@ -112,6 +112,8 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
         case SERVICE_ACCOUNT:
           propertiesAreValid = validateAccountFilePath(collector);
           break;
+        default:
+          throw new InvalidPropertyTypeException(GoogleDriveBaseConfig.AUTH_TYPE_LABEL, authType.toString());
       }
       if (propertiesAreValid) {
         try {
@@ -141,9 +143,8 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
         getAuthType();
         return true;
       } catch (InvalidPropertyTypeException e) {
-        collector.addFailure(String.format("Auth type has invalid value '%s'", authType),
-                             "Provide correct auth type")
-          .withConfigProperty(AUTH_TYPE).withStacktrace(e.getStackTrace());
+        collector.addFailure(e.getMessage(), null)
+          .withConfigProperty(AUTH_TYPE);
         return false;
       }
     }
@@ -196,22 +197,13 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
                                        String propertyLabel) {
     if (!containsMacro(propertyName)) {
       if (Strings.isNullOrEmpty(propertyValue)) {
-        collector.addFailure(getIsSetValidationFailedMessage(propertyLabel),
-                             getValidationFailedCorrectiveAction(propertyLabel))
+        collector.addFailure(String.format(IS_SET_FAILURE_MESSAGE_PATTERN, propertyLabel), null)
           .withConfigProperty(propertyName);
       } else {
         return true;
       }
     }
     return false;
-  }
-
-  protected String getIsSetValidationFailedMessage(String propertyLabel) {
-    return String.format(IS_SET_FAILURE_MESSAGE_PATTERN, propertyLabel);
-  }
-
-  protected String getValidationFailedCorrectiveAction(String propertyLabel) {
-    return String.format(CHECK_CORRECTIVE_MESSAGE_PATTERN, propertyLabel);
   }
 
   public String getReferenceName() {

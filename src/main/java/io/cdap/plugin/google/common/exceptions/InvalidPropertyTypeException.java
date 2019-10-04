@@ -21,7 +21,7 @@ package io.cdap.plugin.google.common.exceptions;
  */
 public class InvalidPropertyTypeException extends RuntimeException {
 
-  public InvalidPropertyTypeException(InvalidPropertyType invalidPropertyType, String value) {
-    super(String.format("'%s' is not a value for %s", value, invalidPropertyType.getValue()));
+  public InvalidPropertyTypeException(String propertyLabel, String value) {
+    super(String.format("'%s' is not a value for '%s' property", value, propertyLabel));
   }
 }

@@ -24,8 +24,8 @@ Is optional. In the case it is not set Google API will try to recognize file's M
 
 ### Authentication
 
-**Authentication type:** Defines the authentication type. OAuth2 and Service account types are available. 
-Default is OAuth2.
+**Authentication type:** Type of authentication used to access Google API. 
+OAuth2 and Service account types are available. Default is OAuth2.
 
 **Client ID:** OAuth2 client id. Is shown only when _OAuth2_ auth type is selected for **Authentication type** property.
 

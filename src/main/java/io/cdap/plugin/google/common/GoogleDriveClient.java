@@ -23,6 +23,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
+import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,11 +60,27 @@ public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
     // So for now plugins require user or service account json
     // start of workaround
     try {
-      String accountFilePath = config.getAccountFilePath();
-      if (GoogleDriveBaseConfig.AUTO_DETECT_VALUE.equals(accountFilePath)) {
-        credential = GoogleCredential.getApplicationDefault();
-      } else {
-        credential = GoogleCredential.fromStream(new FileInputStream(accountFilePath));
+      AuthType authType = config.getAuthType();
+      switch (authType) {
+        case OAUTH2:
+          credential = new GoogleCredential.Builder()
+            .setTransport(httpTransport)
+            .setJsonFactory(JSON_FACTORY)
+            .setClientSecrets(config.getClientId(),
+                              config.getClientSecret())
+            .build();
+          credential.setRefreshToken(config.getRefreshToken());
+          break;
+        case SERVICE_ACCOUNT:
+          String accountFilePath = config.getAccountFilePath();
+          if (GoogleDriveBaseConfig.AUTO_DETECT_VALUE.equals(accountFilePath)) {
+            credential = GoogleCredential.getApplicationDefault();
+          } else {
+            credential = GoogleCredential.fromStream(new FileInputStream(accountFilePath));
+          }
+          break;
+        default:
+          throw new InvalidPropertyTypeException(GoogleDriveBaseConfig.AUTH_TYPE_LABEL, authType.toString());
       }
 
       return credential.createScoped(Collections.singleton(getRequiredScope()));

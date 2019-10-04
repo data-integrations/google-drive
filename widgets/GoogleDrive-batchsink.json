@@ -38,15 +38,83 @@
       "label": "Authentication",
       "properties": [
         {
+          "widget-type": "radio-group",
+          "label": "Authentication type",
+          "name": "authType",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "oAuth2",
+            "options": [
+              {
+                "id": "oAuth2",
+                "label": "OAuth2"
+              },
+              {
+                "id": "serviceAccount",
+                "label": "Service account"
+              }
+            ]
+          }
+        },
+        {
           "widget-type": "textbox",
           "label": "Account file path",
           "name": "accountFilePath",
           "widget-attributes": {
             "default": "auto-detect"
           }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Client ID",
+          "name": "clientId"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Client secret",
+          "name": "clientSecret"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Refresh Token",
+          "name": "refreshToken"
         }
       ]
     }
   ],
-  "outputs": []
+  "outputs": [],
+  "filters": [
+    {
+      "name": "Authenticate with OAuth2",
+      "condition": {
+        "expression": "authType == 'oAuth2'"
+      },
+      "show": [
+        {
+          "name": "clientId",
+          "type": "property"
+        },
+        {
+          "name": "clientSecret",
+          "type": "property"
+        },
+        {
+          "name": "refreshToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with service account",
+      "condition": {
+        "expression": "authType == 'serviceAccount'"
+      },
+      "show": [
+        {
+          "name": "accountFilePath",
+          "type": "property"
+        }
+      ]
+    }
+  ]
 }

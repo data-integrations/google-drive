@@ -57,35 +57,31 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   // start of workaround
   @Name(AUTH_TYPE)
   @Description("Type of authentication used to access Google API. \n" +
-    "OAuth2 and Service account types are available. Default is OAuth2.")
+    "OAuth2 and Service account types are available.")
   @Macro
   protected String authType;
 
   @Nullable
   @Name(CLIENT_ID)
-  @Description("OAuth2 client id. " +
-    "Is shown only when 'OAuth2' auth type is selected for 'Authentication type' property.")
+  @Description("OAuth2 client id.")
   @Macro
   protected String clientId;
 
   @Nullable
   @Name(CLIENT_SECRET)
-  @Description("OAuth2 client secret. " +
-    "Is shown only when 'OAuth2' auth type is selected for 'Authentication type' property.")
+  @Description("OAuth2 client secret.")
   @Macro
   protected String clientSecret;
 
   @Nullable
   @Name(REFRESH_TOKEN)
-  @Description("OAuth2 refresh token. " +
-    "Is shown only when 'OAuth2' auth type is selected for 'Authentication type' property.")
+  @Description("OAuth2 refresh token.")
   @Macro
   protected String refreshToken;
 
   @Nullable
   @Name(ACCOUNT_FILE_PATH)
   @Description("Path on the local file system of the service account key used for authorization. " +
-    "Is shown only when 'Service account' auth type is selected for 'Authentication type' property. " +
     "Can be set to 'auto-detect' when running on a Dataproc cluster. " +
     "When running on other clusters, the file must be present on every node in the cluster." +
     "Service account json can be generated on Google Cloud " +
@@ -95,7 +91,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   // end of workaround
 
   @Name(DIRECTORY_IDENTIFIER)
-  @Description("ID of target directory, the last part of the URL.")
+  @Description("Identifier of the folder.")
   @Macro
   protected String directoryIdentifier;
 

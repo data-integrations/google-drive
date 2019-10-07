@@ -29,11 +29,11 @@
     <properties>
         <cdap.version>6.1.0-SNAPSHOT</cdap.version>
         <cdap.plugin.version>2.3.0-SNAPSHOT</cdap.plugin.version>
-        <hadoop.version>2.8.0</hadoop.version>
-        <junit.version>4.11</junit.version>
-        <easymock.version>4.0.2</easymock.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <drive-api.version>v3-rev162-1.23.0</drive-api.version>
+        <easymock.version>4.0.2</easymock.version>
+        <hadoop.version>2.8.0</hadoop.version>
+        <junit.version>4.11</junit.version>
     </properties>
 
     <repositories>

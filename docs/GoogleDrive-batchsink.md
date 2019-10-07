@@ -25,21 +25,21 @@ Is optional. In the case it is not set Google API will try to recognize file's M
 ### Authentication
 
 **Authentication type:** Type of authentication used to access Google API. 
-OAuth2 and Service account types are available. Default is OAuth2.
+OAuth2 and Service account types are available.
 
-**Client ID:** OAuth2 client id. Is shown only when _OAuth2_ auth type is selected for **Authentication type** property.
+#### OAuth2 properties
 
-**Client secret:** OAuth2 client secret. 
-Is shown only when _OAuth2_ auth type is selected for **Authentication type** property.
+**Client ID:** OAuth2 client id.
 
-**Refresh token:** OAuth2 refresh token. 
-Is shown only when _OAuth2_ auth type is selected for **Authentication type** property.
+**Client secret:** OAuth2 client secret.
 
-**Access token:** OAuth2 access token. 
-Is shown only when _OAuth2_ auth type is selected for **Authentication type** property.
+**Refresh token:** OAuth2 refresh token.
 
-**Account file path:** Path on the local file system of the service account key used for authorization. 
-Is shown only when _Service account_ auth type is selected for **Authentication type** property.
+**Access token:** OAuth2 access token.
+
+#### Service account properties
+
+**Account file path:** Path on the local file system of the service account key used for authorization.
 Can be set to 'auto-detect' when running on a Dataproc cluster. 
 When running on other clusters, the file must be present on every node in the cluster.
 Service account json can be generated on Google Cloud 

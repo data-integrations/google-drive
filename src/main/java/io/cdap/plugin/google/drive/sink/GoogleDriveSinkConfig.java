@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.google.sink;
+package io.cdap.plugin.google.drive.sink;
 
 import com.google.common.base.Strings;
 import io.cdap.cdap.api.annotation.Description;
@@ -22,8 +22,8 @@ import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.etl.api.FailureCollector;
-import io.cdap.plugin.google.common.GoogleDriveBaseConfig;
-import io.cdap.plugin.google.common.GoogleDriveClient;
+import io.cdap.plugin.google.drive.common.GoogleDriveBaseConfig;
+import io.cdap.plugin.google.drive.common.GoogleDriveClient;
 
 import javax.annotation.Nullable;
 

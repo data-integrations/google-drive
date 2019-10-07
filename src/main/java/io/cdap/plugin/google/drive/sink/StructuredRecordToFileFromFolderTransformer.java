@@ -14,17 +14,17 @@
  * the License.
  */
 
-package io.cdap.plugin.google.sink;
+package io.cdap.plugin.google.drive.sink;
 
 import com.google.api.services.drive.model.File;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
-import io.cdap.plugin.google.common.FileFromFolder;
+import io.cdap.plugin.google.drive.common.FileFromFolder;
 import org.apache.commons.lang3.RandomStringUtils;
 
 /**
  * Transforms a {@link io.cdap.cdap.api.data.format.StructuredRecord}
- * to a {@link io.cdap.plugin.google.common.FileFromFolder}
+ * to a {@link FileFromFolder}
  */
 public class StructuredRecordToFileFromFolderTransformer {
   public static final Integer RANDOM_FILE_NAME_LENGTH = 16;

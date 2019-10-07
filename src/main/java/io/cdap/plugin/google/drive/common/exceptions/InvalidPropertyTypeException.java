@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.google.common.exceptions;
+package io.cdap.plugin.google.drive.common.exceptions;
 
 /**
  * Indicates illegal property.

@@ -14,12 +14,12 @@
  * the License.
  */
 
-package io.cdap.plugin.google.sink;
+package io.cdap.plugin.google.drive.sink;
 
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.services.drive.model.File;
-import io.cdap.plugin.google.common.FileFromFolder;
-import io.cdap.plugin.google.common.GoogleDriveClient;
+import io.cdap.plugin.google.drive.common.FileFromFolder;
+import io.cdap.plugin.google.drive.common.GoogleDriveClient;
 
 import java.io.IOException;
 import java.util.Collections;

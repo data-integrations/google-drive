@@ -14,9 +14,9 @@
  * the License.
  */
 
-package io.cdap.plugin.google.sink;
+package io.cdap.plugin.google.drive.sink;
 
-import io.cdap.plugin.google.common.FileFromFolder;
+import io.cdap.plugin.google.drive.common.FileFromFolder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -25,7 +25,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import java.io.IOException;
 
 /**
- * Writes {@link io.cdap.plugin.google.common.FileFromFolder} records to Google Drive via {@link GoogleDriveSinkClient}
+ * Writes {@link FileFromFolder} records to Google Drive via {@link GoogleDriveSinkClient}
  */
 public class GoogleDriveRecordWriter extends RecordWriter<NullWritable, FileFromFolder> {
 

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.google.sink;
+package io.cdap.plugin.google.drive.sink;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;

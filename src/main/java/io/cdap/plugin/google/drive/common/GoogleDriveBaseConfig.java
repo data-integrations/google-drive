@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.google.common;
+package io.cdap.plugin.google.drive.common;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.common.base.Strings;
@@ -24,7 +24,7 @@ import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.common.IdUtils;
-import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeException;
 
 import java.io.File;
 import java.io.IOException;

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.google.common;
+package io.cdap.plugin.google.drive.common;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -23,7 +23,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
-import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeException;
 
 import java.io.FileInputStream;
 import java.io.IOException;

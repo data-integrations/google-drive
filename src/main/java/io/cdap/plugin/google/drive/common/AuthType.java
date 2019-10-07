@@ -14,9 +14,9 @@
  * the License.
  */
 
-package io.cdap.plugin.google.common;
+package io.cdap.plugin.google.drive.common;
 
-import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeException;
 
 import java.util.Arrays;
 

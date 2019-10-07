@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.google.common;
+package io.cdap.plugin.google.drive.common;
 
 import com.google.api.services.drive.model.File;
 

@@ -25,6 +25,7 @@ import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.google.drive.common.GoogleDriveBaseConfig;
 import io.cdap.plugin.google.drive.common.GoogleDriveClient;
 
+import java.io.IOException;
 import javax.annotation.Nullable;
 
 /**
@@ -78,8 +79,8 @@ public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
       if (!Strings.isNullOrEmpty(propertyValue)) {
         Schema.Field field = schema.getField(propertyValue);
         if (field == null) {
-          collector.addFailure(String.format("Input schema doesn't contain '%s' field", propertyValue),
-                               String.format("Provide existent field from input schema for '%s'", propertyLabel))
+          collector.addFailure(String.format("Input schema doesn't contain '%s' field.", propertyValue),
+                               String.format("Provide existent field from input schema for '%s'.", propertyLabel))
             .withConfigProperty(propertyName);
         } else {
           Schema fieldSchema = field.getSchema();
@@ -88,11 +89,11 @@ public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
           }
 
           if (fieldSchema.getLogicalType() != null || fieldSchema.getType() != requiredSchemaType) {
-            collector.addFailure(String.format("Field '%s' must be of type '%s' but is of type '%s'",
+            collector.addFailure(String.format("Field '%s' must be of type '%s' but is of type '%s'.",
                                                field.getName(),
                                                requiredSchemaType,
                                                fieldSchema.getDisplayName()),
-                                 String.format("Provide field with '%s' format for '%s' property",
+                                 String.format("Provide field with '%s' format for '%s' property.",
                                                requiredSchemaType,
                                                propertyLabel))
               .withConfigProperty(propertyName).withInputSchemaField(propertyValue);
@@ -117,7 +118,7 @@ public class GoogleDriveSinkConfig extends GoogleDriveBaseConfig {
   }
 
   @Override
-  protected GoogleDriveClient getDriveClient() {
+  protected GoogleDriveClient getDriveClient() throws IOException {
     return new GoogleDriveSinkClient(this);
   }
 }

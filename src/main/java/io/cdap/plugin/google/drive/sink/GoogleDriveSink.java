@@ -57,7 +57,6 @@ public class GoogleDriveSink extends BatchSink<StructuredRecord, Void, FileFromF
     Schema inputSchema = pipelineConfigurer.getStageConfigurer().getInputSchema();
 
     config.validate(failureCollector, inputSchema);
-    failureCollector.getOrThrowException();
   }
 
   @Override

@@ -24,7 +24,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 /**
  * Transforms a {@link io.cdap.cdap.api.data.format.StructuredRecord}
- * to a {@link FileFromFolder}
+ * to a {@link FileFromFolder}.
  */
 public class StructuredRecordToFileFromFolderTransformer {
   public static final Integer RANDOM_FILE_NAME_LENGTH = 16;

@@ -29,7 +29,7 @@ import java.util.Collections;
  */
 public class GoogleDriveSinkClient extends GoogleDriveClient<GoogleDriveSinkConfig> {
 
-  public GoogleDriveSinkClient(GoogleDriveSinkConfig config) {
+  public GoogleDriveSinkClient(GoogleDriveSinkConfig config) throws IOException {
     super(config);
   }
 
@@ -46,7 +46,8 @@ public class GoogleDriveSinkClient extends GoogleDriveClient<GoogleDriveSinkConf
     fileToWrite.setName(fileFromFolder.getFile().getName());
     fileToWrite.setMimeType(fileFromFolder.getFile().getMimeType());
     fileToWrite.setParents(Collections.singletonList(folderId));
-    ByteArrayContent fileContent = new ByteArrayContent(null, fileFromFolder.getContent());
+    ByteArrayContent fileContent = new ByteArrayContent(fileFromFolder.getFile().getMimeType(),
+        fileFromFolder.getContent());
     service.files().create(fileToWrite, fileContent).execute();
   }
 }

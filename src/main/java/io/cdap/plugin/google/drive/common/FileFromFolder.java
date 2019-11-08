@@ -19,7 +19,7 @@ package io.cdap.plugin.google.drive.common;
 import com.google.api.services.drive.model.File;
 
 /**
- * Representation for file can be written to Google Drive system..
+ * Representation for file can be written to Google Drive system.
  */
 public class FileFromFolder {
   private final byte[] content;

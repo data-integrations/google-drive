@@ -25,13 +25,13 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import java.io.IOException;
 
 /**
- * Writes {@link FileFromFolder} records to Google Drive via {@link GoogleDriveSinkClient}
+ * Writes {@link FileFromFolder} records to Google Drive via {@link GoogleDriveSinkClient}.
  */
 public class GoogleDriveRecordWriter extends RecordWriter<NullWritable, FileFromFolder> {
 
   private GoogleDriveSinkClient driveSinkClient;
 
-  public GoogleDriveRecordWriter(TaskAttemptContext taskAttemptContext) {
+  public GoogleDriveRecordWriter(TaskAttemptContext taskAttemptContext) throws IOException {
     Configuration conf = taskAttemptContext.getConfiguration();
     String configJson = conf.get(GoogleDriveOutputFormatProvider.PROPERTY_CONFIG_JSON);
     GoogleDriveSinkConfig googleDriveSourceConfig =

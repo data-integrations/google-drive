@@ -27,11 +27,12 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import java.io.IOException;
 
 /**
- * An OutputFormat that sends the output of a Hadoop job to the Google Drive record writer
+ * An OutputFormat that sends the output of a Hadoop job to the Google Drive record writer.
  */
 public class GoogleDriveOutputFormat extends OutputFormat<NullWritable, FileFromFolder> {
   @Override
-  public RecordWriter<NullWritable, FileFromFolder> getRecordWriter(TaskAttemptContext taskAttemptContext) {
+  public RecordWriter<NullWritable, FileFromFolder> getRecordWriter(TaskAttemptContext taskAttemptContext)
+      throws IOException {
     return new GoogleDriveRecordWriter(taskAttemptContext);
   }
 

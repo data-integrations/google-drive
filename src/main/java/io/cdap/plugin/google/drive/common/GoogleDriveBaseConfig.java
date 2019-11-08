@@ -28,6 +28,8 @@ import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeExceptio
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
@@ -47,11 +49,11 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   public static final String ACCOUNT_FILE_PATH = "accountFilePath";
   public static final String DIRECTORY_IDENTIFIER = "directoryIdentifier";
 
-  private static final String IS_SET_FAILURE_MESSAGE_PATTERN = "'%s' property is empty or macro is not available";
+  private static final String IS_SET_FAILURE_MESSAGE_PATTERN = "'%s' property is empty or macro is not available.";
 
   @Name(REFERENCE_NAME)
-  @Description("Reference Name")
-  protected String referenceName;
+  @Description("Reference Name.")
+  private String referenceName;
 
   // TODO remove these properties after OAuth2 will be provided by cdap
   // start of workaround
@@ -59,25 +61,25 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   @Description("Type of authentication used to access Google API. \n" +
     "OAuth2 and Service account types are available.")
   @Macro
-  protected String authType;
+  private String authType;
 
   @Nullable
   @Name(CLIENT_ID)
   @Description("OAuth2 client id.")
   @Macro
-  protected String clientId;
+  private String clientId;
 
   @Nullable
   @Name(CLIENT_SECRET)
   @Description("OAuth2 client secret.")
   @Macro
-  protected String clientSecret;
+  private String clientSecret;
 
   @Nullable
   @Name(REFRESH_TOKEN)
   @Description("OAuth2 refresh token.")
   @Macro
-  protected String refreshToken;
+  private String refreshToken;
 
   @Nullable
   @Name(ACCOUNT_FILE_PATH)
@@ -85,15 +87,15 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
     "Can be set to 'auto-detect' when running on a Dataproc cluster. " +
     "When running on other clusters, the file must be present on every node in the cluster." +
     "Service account json can be generated on Google Cloud " +
-    "Service Account page (https://console.cloud.google.com/iam-admin/serviceaccounts)")
+    "Service Account page (https://console.cloud.google.com/iam-admin/serviceaccounts).")
   @Macro
-  protected String accountFilePath;
+  private String accountFilePath;
   // end of workaround
 
   @Name(DIRECTORY_IDENTIFIER)
   @Description("Identifier of the folder.")
   @Macro
-  protected String directoryIdentifier;
+  private String directoryIdentifier;
 
   public void validate(FailureCollector collector) {
     IdUtils.validateReferenceName(referenceName, collector);
@@ -109,7 +111,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
           propertiesAreValid = validateAccountFilePath(collector);
           break;
         default:
-          throw new InvalidPropertyTypeException(GoogleDriveBaseConfig.AUTH_TYPE_LABEL, authType.toString());
+          throw new IllegalStateException(String.format("Untreated value '%s' for authentication type.", authType));
       }
       if (propertiesAreValid) {
         try {
@@ -123,15 +125,15 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
 
         } catch (Exception e) {
           collector.addFailure(
-            String.format("Exception during authentication/directory properties check: %s", e.getMessage()),
-            "Check message and reconfigure the plugin")
+            String.format("Exception during authentication/directory properties check: %s.", e.getMessage()),
+            "Check message and reconfigure the plugin.")
             .withStacktrace(e.getStackTrace());
         }
       }
     }
   }
 
-  protected abstract GoogleDriveClient getDriveClient();
+  protected abstract GoogleDriveClient getDriveClient() throws IOException;
 
   private boolean validateAuthType(FailureCollector collector) {
     if (!containsMacro(AUTH_TYPE)) {
@@ -139,7 +141,8 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
         getAuthType();
         return true;
       } catch (InvalidPropertyTypeException e) {
-        collector.addFailure(e.getMessage(), null)
+        collector.addFailure(e.getMessage(), Arrays.stream(AuthType.values()).map(v -> v.getValue())
+            .collect(Collectors.joining()))
           .withConfigProperty(AUTH_TYPE);
         return false;
       }
@@ -156,8 +159,8 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   private boolean validateAccountFilePath(FailureCollector collector) {
     if (!containsMacro(ACCOUNT_FILE_PATH)) {
       if (!AUTO_DETECT_VALUE.equals(accountFilePath) && !new File(accountFilePath).exists()) {
-        collector.addFailure("Account file is not available",
-                             "Provide path to existing account file")
+        collector.addFailure("Account file is not available.",
+                             "Provide path to existing account file.")
           .withConfigProperty(ACCOUNT_FILE_PATH);
       } else {
         return true;
@@ -170,7 +173,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
     try {
       driveClient.checkRootFolder();
     } catch (GoogleJsonResponseException e) {
-      collector.addFailure(e.getMessage(), "Provide valid credentials")
+      collector.addFailure(e.getMessage(), "Provide valid credentials.")
         .withConfigProperty(ACCOUNT_FILE_PATH)
         .withStacktrace(e.getStackTrace());
     }
@@ -182,7 +185,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
       try {
         driveClient.isFolderAccessible(directoryIdentifier);
       } catch (GoogleJsonResponseException e) {
-        collector.addFailure(e.getMessage(), "Provide an existing folder identifier")
+        collector.addFailure(e.getMessage(), "Provide an existing folder identifier.")
           .withConfigProperty(DIRECTORY_IDENTIFIER)
           .withStacktrace(e.getStackTrace());
       }

@@ -93,7 +93,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   // end of workaround
 
   @Name(DIRECTORY_IDENTIFIER)
-  @Description("Identifier of the folder.")
+  @Description("Identifier of the destination folder.")
   @Macro
   private String directoryIdentifier;
 
@@ -111,7 +111,9 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
           propertiesAreValid = validateAccountFilePath(collector);
           break;
         default:
-          throw new IllegalStateException(String.format("Untreated value '%s' for authentication type.", authType));
+          collector.addFailure(String.format("'%s' is not processed value.", authType.toString()), null)
+            .withConfigProperty(AUTH_TYPE);
+          return;
       }
       if (propertiesAreValid) {
         try {

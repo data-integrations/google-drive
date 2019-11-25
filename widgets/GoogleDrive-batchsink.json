@@ -2,7 +2,7 @@
   "metadata": {
     "spec-version": "1.5"
   },
-  "display-name": "Google Drive sink",
+  "display-name": "Google Drive Sink",
   "configuration-groups": [
     {
       "label": "Basic",
@@ -14,22 +14,22 @@
         },
         {
           "widget-type": "textbox",
-          "label": "File body field",
+          "label": "File Body Field",
           "name": "schemaBodyFieldName"
         },
         {
           "widget-type": "textbox",
-          "label": "File name field",
+          "label": "File Name Field",
           "name": "schemaNameFieldName"
         },
         {
           "widget-type": "textbox",
-          "label": "File mime field",
+          "label": "File Mime Field",
           "name": "schemaMimeFieldName"
         },
         {
           "widget-type": "textbox",
-          "label": "Directory identifier",
+          "label": "Directory Identifier",
           "name": "directoryIdentifier"
         }
       ]
@@ -39,7 +39,7 @@
       "properties": [
         {
           "widget-type": "radio-group",
-          "label": "Authentication type",
+          "label": "Authentication Type",
           "name": "authType",
           "widget-attributes": {
             "layout": "inline",
@@ -58,7 +58,7 @@
         },
         {
           "widget-type": "textbox",
-          "label": "Account file path",
+          "label": "Account File Path",
           "name": "accountFilePath",
           "widget-attributes": {
             "default": "auto-detect"
@@ -70,12 +70,12 @@
           "name": "clientId"
         },
         {
-          "widget-type": "textbox",
-          "label": "Client secret",
+          "widget-type": "password",
+          "label": "Client Secret",
           "name": "clientSecret"
         },
         {
-          "widget-type": "textbox",
+          "widget-type": "password",
           "label": "Refresh Token",
           "name": "refreshToken"
         }
@@ -87,7 +87,9 @@
     {
       "name": "Authenticate with OAuth2",
       "condition": {
-        "expression": "authType == 'oAuth2'"
+        "property": "authType",
+        "operator": "equal to",
+        "value": "oAuth2"
       },
       "show": [
         {
@@ -107,7 +109,9 @@
     {
       "name": "Authenticate with service account",
       "condition": {
-        "expression": "authType == 'serviceAccount'"
+        "property": "authType",
+        "operator": "equal to",
+        "value": "serviceAccount"
       },
       "show": [
         {

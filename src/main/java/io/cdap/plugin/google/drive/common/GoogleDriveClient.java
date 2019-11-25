@@ -37,6 +37,7 @@ public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final String ROOT_FOLDER_ID = "root";
   protected static final String FULL_PERMISSIONS_SCOPE = "https://www.googleapis.com/auth/drive";
+  protected static final String READONLY_PERMISSIONS_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
   protected Drive service;
   protected final C config;
   private NetHttpTransport httpTransport;

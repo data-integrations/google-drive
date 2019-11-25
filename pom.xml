@@ -34,6 +34,7 @@
         <easymock.version>4.0.2</easymock.version>
         <hadoop.version>2.8.0</hadoop.version>
         <junit.version>4.11</junit.version>
+        <powermock.version>1.6.5</powermock.version>
     </properties>
 
     <repositories>
@@ -212,6 +213,18 @@
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <version>${easymock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

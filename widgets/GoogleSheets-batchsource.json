@@ -1,0 +1,515 @@
+{
+  "metadata": {
+    "spec-version": "1.5"
+  },
+  "display-name": "Google Sheets Source",
+  "configuration-groups": [
+    {
+      "label": "Basic",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "Reference Name",
+          "name": "referenceName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Directory Identifier",
+          "name": "directoryIdentifier"
+        }
+      ]
+    },
+    {
+      "label": "Filtering",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "Filter",
+          "name": "filter"
+        },
+        {
+          "widget-type": "select",
+          "label": "Modification Date Range",
+          "name": "modificationDateRange",
+          "widget-attributes": {
+            "default": "today",
+            "values": [
+              "today",
+              "yesterday",
+              "this_week_sun_today",
+              "this_week_mon_today",
+              "last_week_sun_sat",
+              "last_week_mon_sun",
+              "this_month",
+              "last_month",
+              "this_quarter",
+              "last_3d",
+              "last_7d",
+              "last_14d",
+              "last_28d",
+              "last_30d",
+              "last_90d",
+              "this_year",
+              "last_year",
+              "lifetime",
+              "custom"
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Start Date",
+          "name": "startDate"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "End Date",
+          "name": "endDate"
+        },
+        {
+          "name": "sheetsToPull",
+          "widget-type": "select",
+          "label": "Sheets To Pull",
+          "widget-attributes": {
+            "default": "all",
+            "values": ["all", "numbers", "titles"]
+          }
+        },
+        {
+          "name": "sheetsIdentifiers",
+          "widget-type": "csv",
+          "label": "Sheets Identifiers",
+          "widget-attributes": {
+            "delimiter": ","
+          }
+        }
+      ]
+    },
+    {
+      "label": "Authentication",
+      "properties": [
+        {
+          "widget-type": "radio-group",
+          "label": "Authentication Type",
+          "name": "authType",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "oAuth2",
+            "options": [
+              {
+                "id": "oAuth2",
+                "label": "OAuth2"
+              },
+              {
+                "id": "serviceAccount",
+                "label": "Service account"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Account File Path",
+          "name": "accountFilePath",
+          "widget-attributes": {
+            "default": "auto-detect"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Client ID",
+          "name": "clientId"
+        },
+        {
+          "widget-type": "password",
+          "label": "Client Secret",
+          "name": "clientSecret"
+        },
+        {
+          "widget-type": "password",
+          "label": "Refresh Token",
+          "name": "refreshToken"
+        }
+      ]
+    },
+    {
+      "label": "Retrying",
+      "properties": [
+        {
+          "widget-type": "number",
+          "label": "Max Retry Count",
+          "name": "maxRetryCount",
+          "widget-attributes": {
+            "min": "0",
+            "default": "8"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Max Retry Wait",
+          "name": "maxRetryWait",
+          "widget-attributes": {
+            "min": "0",
+            "default": "200"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Max Retry Jitter Wait",
+          "name": "maxRetryJitterWait",
+          "widget-attributes": {
+            "min": "0",
+            "default": "100"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Metadata Extraction",
+      "properties": [
+
+        {
+          "widget-type": "toggle",
+          "label": "Extract Metadata",
+          "name": "extractMetadata",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Metadata Field Name",
+          "name": "metadataFieldName",
+          "widget-attributes": {
+            "default": "metadata"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "First Header Row Index",
+          "name": "firstHeaderRow",
+          "widget-attributes": {
+            "default": null,
+            "min": "1"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Last Header Row Index",
+          "name": "lastHeaderRow",
+          "widget-attributes": {
+            "default": null,
+            "min": "1"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "First Footer Row Index",
+          "name": "firstFooterRow",
+          "widget-attributes": {
+            "default": null,
+            "min": "1"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Last Footer Row Index",
+          "name": "lastFooterRow",
+          "widget-attributes": {
+            "default": null,
+            "min": "1"
+          }
+        },
+        {
+          "widget-type": "keyvalue",
+          "label": "Metadata Cells",
+          "name": "metadataCells",
+          "widget-attributes": {
+            "delimiter": ",",
+            "kv-delimiter": ":"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Advanced",
+      "properties": [
+        {
+          "widget-type": "radio-group",
+          "label": "Text Formatting",
+          "name": "formatting",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "valuesOnly",
+            "options": [
+              {
+                "id": "valuesOnly",
+                "label": "Values only"
+              },
+              {
+                "id": "formattedValues",
+                "label": "Formatted values"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "label": "Skip Empty Data",
+          "name": "skipEmptyData",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "label": "Add spreadsheet/sheet name fields",
+          "name": "addNameFields",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Spreadsheet field name",
+          "name": "spreadsheetFieldName",
+          "widget-attributes": {
+            "default": "spreadsheetName"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Sheet field name",
+          "name": "sheetFieldName",
+          "widget-attributes": {
+            "default": "sheetName"
+          }
+        },
+        {
+          "widget-type": "radio-group",
+          "label": "Column Names Selection",
+          "name": "columnNamesSelection",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "firstRowAsColumns",
+            "options": [
+              {
+                "id": "firstRowAsColumns",
+                "label": "Treat first row as column names"
+              },
+              {
+                "id": "customRowAsColumns",
+                "label": "Custom row as column names"
+              },
+              {
+                "id": "noColumnNames",
+                "label": "No column names"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Custom Row Index For Column Names",
+          "name": "customColumnNamesRow",
+          "widget-attributes": {
+            "default": "1",
+            "min": "1"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Last Data Column Index",
+          "name": "lastDataColumn",
+          "widget-attributes": {
+            "default": "26",
+            "min": "0"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Last Data Row Index",
+          "name": "lastDataRow",
+          "widget-attributes": {
+            "default": "1000",
+            "min": "0"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Read Buffer Size",
+          "name": "readBufferSize",
+          "widget-attributes": {
+            "default": "100",
+            "min": "1"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "widget-type": "non-editable-schema-editor",
+      "schema": {
+      }
+    }
+  ],
+  "filters": [
+    {
+      "name": "Select modification date range",
+      "condition": {
+        "property": "modificationDateRange",
+        "operator": "equal to",
+        "value": "custom"
+      },
+      "show": [
+        {
+          "name": "startDate",
+          "type": "property"
+        },
+        {
+          "name": "endDate",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Sheet numbers",
+      "condition": {
+        "expression": "sheetsToPull == 'numbers' || sheetsToPull == 'titles'"
+      },
+      "show": [
+        {
+          "name": "sheetsIdentifiers",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2",
+      "condition": {
+        "property": "authType",
+        "operator": "equal to",
+        "value": "oAuth2"
+      },
+      "show": [
+        {
+          "name": "clientId",
+          "type": "property"
+        },
+        {
+          "name": "clientSecret",
+          "type": "property"
+        },
+        {
+          "name": "refreshToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with service account",
+      "condition": {
+        "property": "authType",
+        "operator": "equal to",
+        "value": "serviceAccount"
+      },
+      "show": [
+        {
+          "name": "accountFilePath",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Custom header filter",
+      "condition": {
+        "property": "columnNamesSelection",
+        "operator": "equal to",
+        "value": "customRowAsColumns"
+      },
+      "show": [
+        {
+          "name": "customColumnNamesRow",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Extract metadata",
+      "condition": {
+        "property": "extractMetadata",
+        "operator": "equal to",
+        "value": "true"
+      },
+      "show": [
+        {
+          "name": "metadataRecordName",
+          "type": "property"
+        },
+        {
+          "name": "firstHeaderRow",
+          "type": "property"
+        },
+        {
+          "name": "lastHeaderRow",
+          "type": "property"
+        },
+        {
+          "name": "firstFooterRow",
+          "type": "property"
+        },
+        {
+          "name": "lastFooterRow",
+          "type": "property"
+        },
+        {
+          "name": "metadataCells",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Name fields",
+      "condition": {
+        "property": "addNameFields",
+        "operator": "equal to",
+        "value": "true"
+      },
+      "show": [
+        {
+          "name": "spreadsheetFieldName",
+          "type": "property"
+        },
+        {
+          "name": "sheetFieldName",
+          "type": "property"
+        }
+      ]
+    }
+  ]
+}

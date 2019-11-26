@@ -22,15 +22,12 @@ import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.etl.api.FailureCollector;
-import io.cdap.plugin.google.drive.common.GoogleDriveBaseConfig;
-import io.cdap.plugin.google.drive.common.GoogleDriveClient;
-import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.common.GoogleFilteringSourceConfig;
+import io.cdap.plugin.google.common.ValidationResult;
+import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 import io.cdap.plugin.google.drive.source.utils.BodyFormat;
 import io.cdap.plugin.google.drive.source.utils.ExportedType;
-import io.cdap.plugin.google.drive.source.utils.ModifiedDateRangeType;
-import io.cdap.plugin.google.drive.source.utils.ModifiedDateRangeUtils;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,11 +37,7 @@ import javax.annotation.Nullable;
 /**
  * Configurations for Google Drive Batch Source plugin.
  */
-public class GoogleDriveSourceConfig extends GoogleDriveBaseConfig {
-  public static final String FILTER = "filter";
-  public static final String MODIFICATION_DATE_RANGE = "modificationDateRange";
-  public static final String START_DATE = "startDate";
-  public static final String END_DATE = "endDate";
+public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   public static final String FILE_METADATA_PROPERTIES = "fileMetadataProperties";
   public static final String FILE_TYPES_TO_PULL = "fileTypesToPull";
   public static final String MAX_PARTITION_SIZE = "maxPartitionSize";
@@ -54,43 +47,9 @@ public class GoogleDriveSourceConfig extends GoogleDriveBaseConfig {
   public static final String DRAWINGS_EXPORTING_FORMAT = "drawingsExportingFormat";
   public static final String PRESENTATIONS_EXPORTING_FORMAT = "presentationsExportingFormat";
 
-  public static final String MODIFICATION_DATE_RANGE_LABEL = "Modification date range";
-  public static final String START_DATE_LABEL = "Start date";
-  public static final String END_DATE_LABEL = "End date";
+  public static final String FILE_METADATA_PROPERTIES_LABEL = "File properties";
   public static final String FILE_TYPES_TO_PULL_LABEL = "File types to pull";
   public static final String BODY_FORMAT_LABEL = "Body output format";
-
-  private static final String IS_VALID_FAILURE_MESSAGE_PATTERN = "'%s' property has invalid value %s";
-
-  @Nullable
-  @Name(FILTER)
-  @Description("Filter that can be applied to the files in the selected directory. \n" +
-    "Filters follow the [Google Drive filters syntax](https://developers.google.com/drive/api/v3/ref-search-terms).")
-  @Macro
-  protected String filter;
-
-  @Name(MODIFICATION_DATE_RANGE)
-  @Description("Filter that narrows set of files by modified date range. \n" +
-    "User can select either among predefined or custom entered ranges. \n" +
-    "For _Custom_ selection the dates range can be specified via **Start date** and **End date**.")
-  @Macro
-  protected String modificationDateRange;
-
-  @Nullable
-  @Name(START_DATE)
-  @Description("Start date for custom modification date range. \n" +
-    "Is shown only when 'Custom' range is selected for 'Modification date range' field. \n" +
-    "RFC3339 (https://tools.ietf.org/html/rfc3339) format, default timezone is UTC, e.g., 2012-06-04T12:00:00-08:00.")
-  @Macro
-  protected String startDate;
-
-  @Nullable
-  @Name(END_DATE)
-  @Description("End date for custom modification date range. \n" +
-    "Is shown only when 'Custom' range is selected for 'Modification date range' field.\n" +
-    "RFC3339 (https://tools.ietf.org/html/rfc3339) format, default timezone is UTC, e.g., 2012-06-04T12:00:00-08:00.")
-  @Macro
-  protected String endDate;
 
   @Nullable
   @Name(FILE_METADATA_PROPERTIES)
@@ -146,31 +105,15 @@ public class GoogleDriveSourceConfig extends GoogleDriveBaseConfig {
     return schema;
   }
 
-  public void validate(FailureCollector collector) {
-    super.validate(collector);
+  public ValidationResult validate(FailureCollector collector) {
+    ValidationResult validationResult = super.validate(collector);
 
     validateFileTypesToPull(collector);
 
     validateBodyFormat(collector);
 
-    if (validateModificationDateRange(collector)
-      && getModificationDateRangeType().equals(ModifiedDateRangeType.CUSTOM)) {
-      if (checkPropertyIsSet(collector, startDate, START_DATE, START_DATE_LABEL)) {
-        checkPropertyIsValid(collector, ModifiedDateRangeUtils.isValidDateString(startDate), startDate, START_DATE,
-                             START_DATE_LABEL);
-      }
-      if (checkPropertyIsSet(collector, endDate, END_DATE, END_DATE_LABEL)) {
-        checkPropertyIsValid(collector, ModifiedDateRangeUtils.isValidDateString(endDate), startDate, END_DATE,
-                             END_DATE_LABEL);
-      }
-    }
-
     validateFileProperties(collector);
-  }
-
-  @Override
-  protected GoogleDriveClient getDriveClient() throws IOException {
-    return new GoogleDriveSourceClient(this);
+    return validationResult;
   }
 
   private void validateFileTypesToPull(FailureCollector collector) {
@@ -198,18 +141,6 @@ public class GoogleDriveSourceConfig extends GoogleDriveBaseConfig {
     }
   }
 
-  private boolean validateModificationDateRange(FailureCollector collector) {
-    if (!containsMacro(MODIFICATION_DATE_RANGE)) {
-      try {
-        getModificationDateRangeType();
-        return true;
-      } catch (InvalidPropertyTypeException e) {
-        collector.addFailure(e.getMessage(), null).withConfigProperty(MODIFICATION_DATE_RANGE);
-      }
-    }
-    return false;
-  }
-
   private void validateFileProperties(FailureCollector collector) {
     if (!containsMacro(FILE_METADATA_PROPERTIES) && !Strings.isNullOrEmpty(fileMetadataProperties)) {
       try {
@@ -218,29 +149,6 @@ public class GoogleDriveSourceConfig extends GoogleDriveBaseConfig {
         collector.addFailure(e.getMessage(), null).withConfigProperty(FILE_METADATA_PROPERTIES);
       }
     }
-  }
-
-  protected void checkPropertyIsValid(FailureCollector collector, boolean isPropertyValid, String propertyName,
-                                      String propertyValue, String propertyLabel) {
-    if (isPropertyValid) {
-      return;
-    }
-    collector.addFailure(String.format(IS_VALID_FAILURE_MESSAGE_PATTERN, propertyLabel, propertyValue), null)
-      .withConfigProperty(propertyName);
-  }
-
-  public ModifiedDateRangeType getModificationDateRangeType() {
-    return ModifiedDateRangeType.fromValue(modificationDateRange);
-  }
-
-  @Nullable
-  public String getFilter() {
-    return filter;
-  }
-
-  @Nullable
-  public String getModificationDateRange() {
-    return modificationDateRange;
   }
 
   List<String> getFileMetadataProperties() {
@@ -280,15 +188,5 @@ public class GoogleDriveSourceConfig extends GoogleDriveBaseConfig {
 
   public String getPresentationsExportingFormat() {
     return presentationsExportingFormat;
-  }
-
-  @Nullable
-  public String getStartDate() {
-    return startDate;
-  }
-
-  @Nullable
-  public String getEndDate() {
-    return endDate;
   }
 }

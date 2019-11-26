@@ -16,6 +16,7 @@
 
 package io.cdap.plugin.google.drive.source;
 
+import com.github.rholder.retry.RetryException;
 import io.cdap.plugin.google.drive.common.FileFromFolder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -24,6 +25,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * RecordReader implementation, which reads {@link FileFromFolder} wrappers from Google Drive using
@@ -43,7 +45,7 @@ public class GoogleDriveRecordReader extends RecordReader<NullWritable, FileFrom
     Configuration conf = taskAttemptContext.getConfiguration();
     String configJson = conf.get(GoogleDriveInputFormatProvider.PROPERTY_CONFIG_JSON);
     GoogleDriveSourceConfig googleDriveSourceConfig =
-      GoogleDriveInputFormatProvider.GSON.fromJson(configJson, GoogleDriveSourceConfig.class);
+        GoogleDriveInputFormatProvider.GSON.fromJson(configJson, GoogleDriveSourceConfig.class);
     googleDriveSourceClient = new GoogleDriveSourceClient(googleDriveSourceConfig);
 
     GoogleDriveSplit split = (GoogleDriveSplit) inputSplit;
@@ -68,10 +70,14 @@ public class GoogleDriveRecordReader extends RecordReader<NullWritable, FileFrom
   public FileFromFolder getCurrentValue() throws IOException {
     // read file and content
     isFileProcessed = true;
-    if (isPartitioned) {
-      return googleDriveSourceClient.getFilePartition(fileId, bytesFrom, bytesTo);
-    } else {
-      return googleDriveSourceClient.getFile(fileId);
+    try {
+      if (isPartitioned) {
+        return googleDriveSourceClient.getFilePartition(fileId, bytesFrom, bytesTo);
+      } else {
+        return googleDriveSourceClient.getFile(fileId);
+      }
+    } catch (ExecutionException | RetryException e) {
+      throw new RuntimeException("Exception during file or file part reading.", e);
     }
   }
 

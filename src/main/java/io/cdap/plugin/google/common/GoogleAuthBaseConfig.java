@@ -14,17 +14,16 @@
  * the License.
  */
 
-package io.cdap.plugin.google.drive.common;
+package io.cdap.plugin.google.common;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.common.base.Strings;
 import io.cdap.cdap.api.annotation.Description;
-import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.common.IdUtils;
-import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,9 +32,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
- * Base Google Drive batch config. Contains common configuration properties and methods.
+ * Base Google batch config. Contains common auth configuration properties and methods.
  */
-public abstract class GoogleDriveBaseConfig extends PluginConfig {
+public abstract class GoogleAuthBaseConfig extends PluginConfig {
   public static final String AUTO_DETECT_VALUE = "auto-detect";
   public static final String REFERENCE_NAME = "referenceName";
   public static final String AUTH_TYPE = "authType";
@@ -60,46 +59,41 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
   @Name(AUTH_TYPE)
   @Description("Type of authentication used to access Google API. \n" +
     "OAuth2 and Service account types are available.")
-  @Macro
   private String authType;
 
   @Nullable
   @Name(CLIENT_ID)
   @Description("OAuth2 client id.")
-  @Macro
   private String clientId;
 
   @Nullable
   @Name(CLIENT_SECRET)
   @Description("OAuth2 client secret.")
-  @Macro
   private String clientSecret;
 
   @Nullable
   @Name(REFRESH_TOKEN)
   @Description("OAuth2 refresh token.")
-  @Macro
   private String refreshToken;
 
   @Nullable
   @Name(ACCOUNT_FILE_PATH)
   @Description("Path on the local file system of the service account key used for authorization. " +
-    "Can be set to 'auto-detect' when running on a Dataproc cluster. " +
-    "When running on other clusters, the file must be present on every node in the cluster." +
+    "Can be set to 'auto-detect' for getting service account from system variable. " +
+    "The file/system variable must be present on every node in the cluster. " +
     "Service account json can be generated on Google Cloud " +
     "Service Account page (https://console.cloud.google.com/iam-admin/serviceaccounts).")
-  @Macro
   private String accountFilePath;
   // end of workaround
 
   @Name(DIRECTORY_IDENTIFIER)
   @Description("Identifier of the destination folder.")
-  @Macro
   private String directoryIdentifier;
 
-  public void validate(FailureCollector collector) {
+  public ValidationResult validate(FailureCollector collector) {
     IdUtils.validateReferenceName(referenceName, collector);
 
+    ValidationResult validationResult = new ValidationResult();
     if (validateAuthType(collector)) {
       AuthType authType = getAuthType();
       boolean propertiesAreValid;
@@ -113,11 +107,11 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
         default:
           collector.addFailure(String.format("'%s' is not processed value.", authType.toString()), null)
             .withConfigProperty(AUTH_TYPE);
-          return;
+          return validationResult;
       }
       if (propertiesAreValid) {
         try {
-          GoogleDriveClient client = getDriveClient();
+          GoogleDriveClient client = new GoogleDriveClient(this);
 
           // validate auth
           validateCredentials(collector, client);
@@ -125,6 +119,7 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
           // validate directory
           validateDirectoryIdentifier(collector, client);
 
+          validationResult.setDirectoryAccessible(true);
         } catch (Exception e) {
           collector.addFailure(
             String.format("Exception during authentication/directory properties check: %s.", e.getMessage()),
@@ -133,9 +128,8 @@ public abstract class GoogleDriveBaseConfig extends PluginConfig {
         }
       }
     }
+    return validationResult;
   }
-
-  protected abstract GoogleDriveClient getDriveClient() throws IOException;
 
   private boolean validateAuthType(FailureCollector collector) {
     if (!containsMacro(AUTH_TYPE)) {

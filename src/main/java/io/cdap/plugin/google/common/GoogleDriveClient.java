@@ -14,7 +14,7 @@
  * the License.
  */
 
-package io.cdap.plugin.google.drive.common;
+package io.cdap.plugin.google.common;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -23,24 +23,24 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Base client for working with Google Drive API.
  *
- * @param <C> configuration
+ * @param <C> configuration.
  */
-public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
+public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final String ROOT_FOLDER_ID = "root";
-  protected static final String FULL_PERMISSIONS_SCOPE = "https://www.googleapis.com/auth/drive";
-  protected static final String READONLY_PERMISSIONS_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
   protected Drive service;
   protected final C config;
-  private NetHttpTransport httpTransport;
+  protected NetHttpTransport httpTransport;
 
   public GoogleDriveClient(C config) throws IOException {
     this.config = config;
@@ -58,7 +58,7 @@ public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
    * @return filled credential.
    * @throws IOException on issues with service account file reading.
    */
-  private Credential getCredentials() throws IOException {
+  protected Credential getCredentials() throws IOException {
     GoogleCredential credential;
 
     // TODO fix authentication after OAuth2 will be provided by cdap
@@ -77,7 +77,7 @@ public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
         break;
       case SERVICE_ACCOUNT:
         String accountFilePath = config.getAccountFilePath();
-        if (GoogleDriveBaseConfig.AUTO_DETECT_VALUE.equals(accountFilePath)) {
+        if (GoogleAuthBaseConfig.AUTO_DETECT_VALUE.equals(accountFilePath)) {
           credential = GoogleCredential.getApplicationDefault();
         } else {
           credential = GoogleCredential.fromStream(new FileInputStream(accountFilePath));
@@ -87,11 +87,13 @@ public abstract class GoogleDriveClient<C extends GoogleDriveBaseConfig> {
         throw new IllegalStateException(String.format("Untreated value '%s' for authentication type.", authType));
     }
 
-    return credential.createScoped(Collections.singleton(getRequiredScope()));
+    return credential.createScoped(getRequiredScopes());
     // end of workaround
   }
 
-  protected abstract String getRequiredScope();
+  protected List<String> getRequiredScopes() {
+    return Collections.singletonList(DriveScopes.DRIVE_READONLY);
+  }
 
   public void checkRootFolder() throws IOException {
     service.files().get(ROOT_FOLDER_ID).execute();

@@ -16,13 +16,18 @@
 
 package io.cdap.plugin.google.drive.sink;
 
+import com.github.rholder.retry.RetryException;
 import com.google.api.client.http.ByteArrayContent;
+import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
+import io.cdap.plugin.google.common.APIRequestRetryer;
+import io.cdap.plugin.google.common.GoogleDriveClient;
 import io.cdap.plugin.google.drive.common.FileFromFolder;
-import io.cdap.plugin.google.drive.common.GoogleDriveClient;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Client for writing data via Google Drive API.
@@ -33,21 +38,26 @@ public class GoogleDriveSinkClient extends GoogleDriveClient<GoogleDriveSinkConf
     super(config);
   }
 
-  @Override
-  protected String getRequiredScope() {
-    return FULL_PERMISSIONS_SCOPE;
+  public void createFile(FileFromFolder fileFromFolder) throws ExecutionException, RetryException {
+    APIRequestRetryer.getRetryer(config,
+      String.format("Creating of file with name '%s'.", fileFromFolder.getFile().getName()))
+      .call(() -> {
+        String folderId = config.getDirectoryIdentifier();
+
+        File fileToWrite = new File();
+
+        fileToWrite.setName(fileFromFolder.getFile().getName());
+        fileToWrite.setMimeType(fileFromFolder.getFile().getMimeType());
+        fileToWrite.setParents(Collections.singletonList(folderId));
+        ByteArrayContent fileContent = new ByteArrayContent(fileFromFolder.getFile().getMimeType(),
+          fileFromFolder.getContent());
+        service.files().create(fileToWrite, fileContent).execute();
+        return null;
+      });
   }
 
-  public void createFile(FileFromFolder fileFromFolder) throws IOException {
-    String folderId = config.getDirectoryIdentifier();
-
-    File fileToWrite = new File();
-
-    fileToWrite.setName(fileFromFolder.getFile().getName());
-    fileToWrite.setMimeType(fileFromFolder.getFile().getMimeType());
-    fileToWrite.setParents(Collections.singletonList(folderId));
-    ByteArrayContent fileContent = new ByteArrayContent(fileFromFolder.getFile().getMimeType(),
-        fileFromFolder.getContent());
-    service.files().create(fileToWrite, fileContent).execute();
+  @Override
+  protected List<String> getRequiredScopes() {
+    return Collections.singletonList(DriveScopes.DRIVE);
   }
 }

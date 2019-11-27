@@ -1,0 +1,275 @@
+{
+  "metadata": {
+    "spec-version": "1.5"
+  },
+  "display-name": "Google Sheets Sink",
+  "configuration-groups": [
+    {
+      "label": "Basic",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "Reference Name",
+          "name": "referenceName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Directory Identifier",
+          "name": "directoryIdentifier"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Spreadsheet Name Field",
+          "name": "schemaSpreadsheetNameFieldName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Default Spreadsheet Name",
+          "name": "spreadsheetName",
+          "widget-attributes": {
+            "default": "Spreadsheet 1"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Sheet Name Field",
+          "name": "schemaSheetNameFieldName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Default Sheet Name",
+          "name": "sheetName",
+          "widget-attributes": {
+            "default": "Sheet 1"
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "label": "Write Schema As First Row",
+          "name": "writeSchema",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "true"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Authentication",
+      "properties": [
+        {
+          "widget-type": "radio-group",
+          "label": "Authentication Type",
+          "name": "authType",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "oAuth2",
+            "options": [
+              {
+                "id": "oAuth2",
+                "label": "OAuth2"
+              },
+              {
+                "id": "serviceAccount",
+                "label": "Service account"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Account File Path",
+          "name": "accountFilePath",
+          "widget-attributes": {
+            "default": "auto-detect"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Client ID",
+          "name": "clientId"
+        },
+        {
+          "widget-type": "password",
+          "label": "Client Secret",
+          "name": "clientSecret"
+        },
+        {
+          "widget-type": "password",
+          "label": "Refresh Token",
+          "name": "refreshToken"
+        }
+      ]
+    },
+    {
+      "label": "Retrying",
+      "properties": [
+        {
+          "widget-type": "number",
+          "label": "Max Retry Count",
+          "name": "maxRetryCount",
+          "widget-attributes": {
+            "min": "0",
+            "default": "8"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Max Retry Wait",
+          "name": "maxRetryWait",
+          "widget-attributes": {
+            "min": "0",
+            "default": "200"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Max Retry Jitter Wait",
+          "name": "maxRetryJitterWait",
+          "widget-attributes": {
+            "min": "0",
+            "default": "100"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Buffering And Paralellization",
+      "properties": [
+        {
+          "widget-type": "number",
+          "label": "Threads Number",
+          "name": "threadsNumber",
+          "widget-attributes": {
+            "min": "1",
+            "default": "5"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Maximal Buffer Size",
+          "name": "maxBufferSize",
+          "widget-attributes": {
+            "min": "1",
+            "default": "50"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Records Queue Length",
+          "name": "recordsQueueLength",
+          "widget-attributes": {
+            "min": "1",
+            "default": "500"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Maximum Flush Interval",
+          "name": "maxFlushInterval",
+          "widget-attributes": {
+            "min": "1",
+            "default": "10"
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Flush Execution Timeout",
+          "name": "flushExecutionTimeout",
+          "widget-attributes": {
+            "min": "1",
+            "default": "500"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Advanced",
+      "properties": [
+        {
+          "widget-type": "number",
+          "label": "Minimal Page Extension Size",
+          "name": "minPageExtensionSize",
+          "widget-attributes": {
+            "min": "1",
+            "default": "1000"
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "label": "Merge Data Cells",
+          "name": "mergeDataCells",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "label": "Skip spreadsheet/sheet name fields",
+          "name": "skipNameFields",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": [],
+  "filters": [
+    {
+      "name": "Authenticate with OAuth2",
+      "condition": {
+        "expression": "authType == 'oAuth2'"
+      },
+      "show": [
+        {
+          "name": "clientId",
+          "type": "property"
+        },
+        {
+          "name": "clientSecret",
+          "type": "property"
+        },
+        {
+          "name": "refreshToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with service account",
+      "condition": {
+        "expression": "authType == 'serviceAccount'"
+      },
+      "show": [
+        {
+          "name": "accountFilePath",
+          "type": "property"
+        }
+      ]
+    }
+  ]
+}

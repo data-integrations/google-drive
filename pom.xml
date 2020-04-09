@@ -29,6 +29,7 @@
     <properties>
         <cdap.version>6.1.0-SNAPSHOT</cdap.version>
         <cdap.plugin.version>2.3.0-SNAPSHOT</cdap.plugin.version>
+        <commons-collections.version>3.2.2</commons-collections.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <drive-api.version>v3-rev162-1.23.0</drive-api.version>
         <easymock.version>4.0.2</easymock.version>
@@ -36,6 +37,7 @@
         <hadoop.version>2.8.0</hadoop.version>
         <junit.version>4.11</junit.version>
         <powermock.version>1.6.5</powermock.version>
+        <sheets-api.version>v4-rev581-1.25.0</sheets-api.version>
     </properties>
 
     <repositories>
@@ -85,6 +87,11 @@
             <artifactId>google-api-services-drive</artifactId>
             <version>${drive-api.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-sheets</artifactId>
+            <version>${sheets-api.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -97,6 +104,13 @@
             <artifactId>guava-retrying</artifactId>
             <version>${guava.retrying.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${commons-collections.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>

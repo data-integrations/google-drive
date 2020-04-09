@@ -1,0 +1,504 @@
+{
+  "metadata": {
+    "spec-version": "1.5"
+  },
+  "display-name": "Google Drive Source",
+  "configuration-groups": [
+    {
+      "label": "Basic",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "Reference Name",
+          "name": "referenceName"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Directory Identifier",
+          "name": "directoryIdentifier"
+        },
+        {
+          "name": "fileMetadataProperties",
+          "widget-type": "multi-select",
+          "label": "File Metadata Properties",
+          "widget-attributes": {
+            "delimiter": ",",
+            "options": [
+              {
+                "id": "id",
+                "label": "ID"
+              },
+              {
+                "id": "name",
+                "label": "Name"
+              },
+              {
+                "id": "mimeType",
+                "label": "MIME Type"
+              },
+              {
+                "id": "description",
+                "label": "Description"
+              },
+              {
+                "id": "starred",
+                "label": "Starred"
+              },
+              {
+                "id": "trashed",
+                "label": "Trashed"
+              },
+              {
+                "id": "explicitlyTrashed",
+                "label": "Explicitly trashed"
+              },
+              {
+                "id": "trashedTime",
+                "label": "Trashed time"
+              },
+              {
+                "id": "parents",
+                "label": "Parents"
+              },
+              {
+                "id": "properties",
+                "label": "Properties"
+              },
+              {
+                "id": "spaces",
+                "label": "Spaces"
+              },
+              {
+                "id": "createdTime",
+                "label": "Created time"
+              },
+              {
+                "id": "modifiedTime",
+                "label": "Modified time"
+              },
+              {
+                "id": "driveId",
+                "label": "Drive id"
+              },
+              {
+                "id": "originalFilename",
+                "label": "Original file name"
+              },
+              {
+                "id": "fullFileExtension",
+                "label": "Full file extension"
+              },
+              {
+                "id": "md5Checksum",
+                "label": "md5 checksum"
+              },
+              {
+                "id": "size",
+                "label": "Size of file"
+              },
+              {
+                "id": "imageMediaMetadata.width",
+                "label": "Width of image"
+              },
+              {
+                "id": "imageMediaMetadata.height",
+                "label": "Height of image"
+              },
+              {
+                "id": "imageMediaMetadata.rotation",
+                "label": "Rotation of image"
+              },
+              {
+                "id": "imageMediaMetadata.location.latitude",
+                "label": "Latitude of place image was taken"
+              },
+              {
+                "id": "imageMediaMetadata.location.longitude",
+                "label": "Longitude of place image was taken"
+              },
+              {
+                "id": "imageMediaMetadata.location.altitude",
+                "label": "Altitude of place image was taken"
+              },
+              {
+                "id": "imageMediaMetadata.time",
+                "label": "Time image was taken"
+              },
+              {
+                "id": "imageMediaMetadata.cameraMake",
+                "label": "Camera make"
+              },
+              {
+                "id": "imageMediaMetadata.cameraModel",
+                "label": "Camera model"
+              },
+              {
+                "id": "imageMediaMetadata.exposureTime",
+                "label": "Exposure time"
+              },
+              {
+                "id": "imageMediaMetadata.aperture",
+                "label": "Aperture"
+              },
+              {
+                "id": "imageMediaMetadata.flashUsed",
+                "label": "Flash used"
+              },
+              {
+                "id": "imageMediaMetadata.focalLength",
+                "label": "Focal length"
+              },
+              {
+                "id": "imageMediaMetadata.isoSpeed",
+                "label": "ISO speed"
+              },
+              {
+                "id": "imageMediaMetadata.meteringMode",
+                "label": "Metering mode"
+              },
+              {
+                "id": "imageMediaMetadata.sensor",
+                "label": "Sensor"
+              },
+              {
+                "id": "imageMediaMetadata.exposureMode",
+                "label": "Exposure mode"
+              },
+              {
+                "id": "imageMediaMetadata.colorSpace",
+                "label": "Color space"
+              },
+              {
+                "id": "imageMediaMetadata.whiteBalance",
+                "label": "White balance"
+              },
+              {
+                "id": "imageMediaMetadata.exposureBias",
+                "label": "Exposure mode"
+              },
+              {
+                "id": "imageMediaMetadata.maxApertureValue",
+                "label": "Max aperture value"
+              },
+              {
+                "id": "imageMediaMetadata.subjectDistance",
+                "label": "Subject distance"
+              },
+              {
+                "id": "imageMediaMetadata.lens",
+                "label": "Lens"
+              },
+              {
+                "id": "videoMediaMetadata.width",
+                "label": "Video width"
+              },
+              {
+                "id": "videoMediaMetadata.height",
+                "label": "Video height"
+              },
+              {
+                "id": "videoMediaMetadata.durationMillis",
+                "label": "Video duration"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "label": "Filtering",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "Filter",
+          "name": "filter"
+        },
+        {
+          "widget-type": "select",
+          "label": "Modification Date Range",
+          "name": "modificationDateRange",
+          "widget-attributes": {
+            "default": "today",
+            "values": [
+              "today",
+              "yesterday",
+              "this_week_sun_today",
+              "this_week_mon_today",
+              "last_week_sun_sat",
+              "last_week_mon_sun",
+              "this_month",
+              "last_month",
+              "this_quarter",
+              "last_3d",
+              "last_7d",
+              "last_14d",
+              "last_28d",
+              "last_30d",
+              "last_90d",
+              "this_year",
+              "last_year",
+              "lifetime",
+              "custom"
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Start Date",
+          "name": "startDate"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "End Date",
+          "name": "endDate"
+        },
+        {
+          "name": "fileTypesToPull",
+          "widget-type": "multi-select",
+          "label": "File Types To Pull",
+          "widget-attributes": {
+            "delimiter": ",",
+            "default": "binary",
+            "options": [
+              {
+                "id": "binary",
+                "label": "Binary"
+              },
+              {
+                "id": "documents",
+                "label": "Google Documents"
+              },
+              {
+                "id": "spreadsheets",
+                "label": "Google Spreadsheets"
+              },
+              {
+                "id": "drawings",
+                "label": "Google Drawings"
+              },
+              {
+                "id": "presentations",
+                "label": "Google Presentations"
+              },
+              {
+                "id": "appsScripts",
+                "label": "Google Apps Scripts"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "label": "Authentication",
+      "properties": [
+        {
+          "widget-type": "radio-group",
+          "label": "Authentication Type",
+          "name": "authType",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "oAuth2",
+            "options": [
+              {
+                "id": "oAuth2",
+                "label": "OAuth2"
+              },
+              {
+                "id": "serviceAccount",
+                "label": "Service account"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Account File Path",
+          "name": "accountFilePath",
+          "widget-attributes": {
+            "default": "auto-detect"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Client ID",
+          "name": "clientId"
+        },
+        {
+          "widget-type": "password",
+          "label": "Client Secret",
+          "name": "clientSecret"
+        },
+        {
+          "widget-type": "password",
+          "label": "Refresh Token",
+          "name": "refreshToken"
+        }
+      ]
+    },
+    {
+      "label": "Advanced",
+      "properties": [
+        {
+          "widget-type": "number",
+          "label": "Maximum Partition Size",
+          "name": "maxPartitionSize",
+          "widget-attributes": {
+            "default": "0",
+            "min": "0"
+          }
+        },
+        {
+          "widget-type": "radio-group",
+          "label": "Body Output Format",
+          "name": "bodyFormat",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "bytes",
+            "options": [
+              {
+                "id": "bytes",
+                "label": "Bytes"
+              },
+              {
+                "id": "string",
+                "label": "String"
+              }
+            ]
+          }
+        }
+
+      ]
+    },
+    {
+      "label": "Exporting",
+      "properties": [
+        {
+          "widget-type": "select",
+          "label": "Google Documents Export Format",
+          "name": "docsExportingFormat",
+          "widget-attributes": {
+            "default": "text/plain",
+            "values": [
+              "text/html",
+              "application/zip",
+              "text/plain",
+              "application/rtf",
+              "application/vnd.oasis.opendocument.text",
+              "application/pdf",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "application/epub+zip"
+            ]
+          }
+        },
+        {
+          "widget-type": "select",
+          "name": "sheetsExportingFormat",
+          "label": "Google Spreadsheets Export Format",
+          "widget-attributes": {
+            "default": "text/csv",
+            "values": [
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/x-vnd.oasis.opendocument.spreadsheet",
+              "application/pdf",
+              "text/csv",
+              "text/tab-separated-values",
+              "application/zip"
+            ]
+          }
+        },
+        {
+          "widget-type": "select",
+          "name": "drawingsExportingFormat",
+          "label": "Google Drawings Export Format",
+          "widget-attributes": {
+            "default": "image/svg+xml",
+            "values": [
+              "image/jpeg",
+              "image/png",
+              "image/svg+xml",
+              "application/pdf"
+            ]
+          }
+        },
+        {
+          "widget-type": "select",
+          "name": "presentationsExportingFormat",
+          "label": "Google Presentations Export Format",
+          "widget-attributes": {
+            "default": "text/plain",
+            "values": [
+              "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+              "application/vnd.oasis.opendocument.presentation",
+              "application/pdf",
+              "text/plain"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "widget-type": "non-editable-schema-editor",
+      "schema": {
+      }
+    }
+  ],
+  "filters": [
+    {
+      "name": "Select modification date range",
+      "condition": {
+        "property": "modificationDateRange",
+        "operator": "equal to",
+        "value": "custom"
+      },
+      "show": [
+        {
+          "name": "startDate",
+          "type": "property"
+        },
+        {
+          "name": "endDate",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2",
+      "condition": {
+        "property": "authType",
+        "operator": "equal to",
+        "value": "oAuth2"
+      },
+      "show": [
+        {
+          "name": "clientId",
+          "type": "property"
+        },
+        {
+          "name": "clientSecret",
+          "type": "property"
+        },
+        {
+          "name": "refreshToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with service account",
+      "condition": {
+        "property": "authType",
+        "operator": "equal to",
+        "value": "serviceAccount"
+      },
+      "show": [
+        {
+          "name": "accountFilePath",
+          "type": "property"
+        }
+      ]
+    }
+  ]
+}

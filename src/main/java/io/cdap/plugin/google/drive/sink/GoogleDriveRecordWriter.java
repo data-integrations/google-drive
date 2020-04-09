@@ -16,6 +16,7 @@
 
 package io.cdap.plugin.google.drive.sink;
 
+import com.github.rholder.retry.RetryException;
 import io.cdap.plugin.google.drive.common.FileFromFolder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -23,6 +24,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Writes {@link FileFromFolder} records to Google Drive via {@link GoogleDriveSinkClient}.
@@ -42,7 +44,11 @@ public class GoogleDriveRecordWriter extends RecordWriter<NullWritable, FileFrom
 
   @Override
   public void write(NullWritable nullWritable, FileFromFolder fileFromFolder) throws IOException {
-    driveSinkClient.createFile(fileFromFolder);
+    try {
+      driveSinkClient.createFile(fileFromFolder);
+    } catch (ExecutionException | RetryException e) {
+      throw new RuntimeException("Exception during file writing.", e);
+    }
   }
 
   @Override

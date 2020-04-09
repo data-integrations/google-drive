@@ -14,9 +14,9 @@
  * the License.
  */
 
-package io.cdap.plugin.google.drive.common;
+package io.cdap.plugin.google.common;
 
-import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +42,7 @@ public enum AuthType {
   public static AuthType fromValue(String value) {
     return Arrays.stream(AuthType.values()).filter(authtype -> authtype.getValue().equals(value))
       .findAny().orElseThrow(() ->
-            new InvalidPropertyTypeException(GoogleDriveBaseConfig.AUTH_TYPE_LABEL, value, getAllowedValues()));
+            new InvalidPropertyTypeException(GoogleAuthBaseConfig.AUTH_TYPE_LABEL, value, getAllowedValues()));
   }
 
   public static List<String> getAllowedValues() {

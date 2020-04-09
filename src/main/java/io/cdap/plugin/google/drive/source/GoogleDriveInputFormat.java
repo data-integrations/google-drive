@@ -16,6 +16,7 @@
 
 package io.cdap.plugin.google.drive.source;
 
+import com.github.rholder.retry.RetryException;
 import com.google.api.services.drive.model.File;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -27,6 +28,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Input format class which generates splits for each query.
@@ -43,7 +45,11 @@ public class GoogleDriveInputFormat extends InputFormat {
     GoogleDriveSourceClient client = new GoogleDriveSourceClient(googleDriveSourceConfig);
     Long maxBodySize = googleDriveSourceConfig.getMaxPartitionSize();
 
-    return getSplitsFromFiles(client.getFilesSummary(), maxBodySize);
+    try {
+      return getSplitsFromFiles(client.getFilesSummary(), maxBodySize);
+    } catch (ExecutionException | RetryException e) {
+      throw new RuntimeException("Failed to prepare splits.", e);
+    }
   }
 
   private List<InputSplit> getSplitsFromFiles(List<File> files, Long maxBodySize) {

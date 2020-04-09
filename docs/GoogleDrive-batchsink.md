@@ -44,3 +44,11 @@ Can be set to 'auto-detect' for getting service account from system variable.
 The file/system variable must be present on every node in the cluster.
 Service account json can be generated on Google Cloud 
 [Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)
+
+### Retrying
+
+**Max Retry Count:** Maximum number of retry attempts.
+
+**Max Retry Wait:** Maximum wait time for attempt in seconds. Initial wait time is one second and it grows exponentially.
+
+**Max Retry Jitter wait:** Maximum additional wait time in milliseconds.

@@ -16,7 +16,7 @@
 
 package io.cdap.plugin.google.drive.source.utils;
 
-import io.cdap.plugin.google.drive.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 import io.cdap.plugin.google.drive.source.GoogleDriveSourceClient;
 import io.cdap.plugin.google.drive.source.GoogleDriveSourceConfig;
 

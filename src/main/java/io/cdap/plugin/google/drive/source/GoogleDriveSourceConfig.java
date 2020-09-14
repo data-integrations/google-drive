@@ -25,8 +25,8 @@ import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.google.common.GoogleFilteringSourceConfig;
 import io.cdap.plugin.google.common.ValidationResult;
 import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
+import io.cdap.plugin.google.common.utils.ExportedType;
 import io.cdap.plugin.google.drive.source.utils.BodyFormat;
-import io.cdap.plugin.google.drive.source.utils.ExportedType;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -23,8 +23,8 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import io.cdap.plugin.google.common.APIRequestRetryer;
 import io.cdap.plugin.google.common.GoogleDriveFilteringClient;
+import io.cdap.plugin.google.common.utils.ExportedType;
 import io.cdap.plugin.google.drive.common.FileFromFolder;
-import io.cdap.plugin.google.drive.source.utils.ExportedType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

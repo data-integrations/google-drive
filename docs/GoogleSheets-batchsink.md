@@ -48,6 +48,12 @@ The file/system variable must be present on every node in the cluster.
 Service account json can be generated on Google Cloud 
 [Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)
 
+* **File Path**: Path on the local file system of the service account key used for
+  authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
+  When running on other clusters, the file must be present on every node in the cluster.
+
+* **JSON**: Contents of the service account JSON file.
+
 ### Retrying
 
 **Max Retry Count:** Maximum number of retry attempts.

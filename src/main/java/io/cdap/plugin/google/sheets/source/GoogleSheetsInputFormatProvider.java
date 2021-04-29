@@ -19,8 +19,11 @@ package io.cdap.plugin.google.sheets.source;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import io.cdap.cdap.api.data.batch.InputFormatProvider;
+import org.apache.hadoop.conf.Configuration;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -40,10 +43,17 @@ public class GoogleSheetsInputFormatProvider implements InputFormatProvider {
    */
   public GoogleSheetsInputFormatProvider(GoogleSheetsSourceConfig config, String schema) {
     this.conf = new ImmutableMap.Builder<String, String>()
-      .put(PROPERTY_CONFIG_JSON, GSON.toJson(config))
+      .put(PROPERTY_CONFIG_JSON, GSON.toJson(config.getProperties()))
       .put(PROPERTY_CONFIG_SCHEMA, schema)
       .put(PROPERTY_HEADERS_JSON, GSON.toJson(config.getHeaderTitlesRow()))
       .build();
+  }
+
+  public static GoogleSheetsSourceConfig extractPropertiesFromConfig(Configuration config) throws IOException {
+    String configJson = config.get(PROPERTY_CONFIG_JSON);
+    JsonObject properties = GSON.fromJson(configJson, JsonObject.class)
+      .getAsJsonObject(GoogleSheetsSourceConfig.CONFIGURATION_PARSE_PROPERTY_NAME);
+    return GoogleSheetsSourceConfig.of(properties);
   }
 
   @Override

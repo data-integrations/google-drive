@@ -20,7 +20,6 @@ import com.github.rholder.retry.RetryException;
 import com.google.api.services.drive.model.File;
 import com.google.gson.reflect.TypeToken;
 import io.cdap.plugin.google.common.GoogleDriveFilteringClient;
-import io.cdap.plugin.google.common.GoogleFilteringSourceConfig;
 import io.cdap.plugin.google.common.utils.ExportedType;
 import io.cdap.plugin.google.sheets.source.utils.MetadataKeyValueAddress;
 import org.apache.hadoop.conf.Configuration;
@@ -48,13 +47,9 @@ public class GoogleSheetsInputFormat extends InputFormat {
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
     Configuration conf = jobContext.getConfiguration();
 
-    String configJson = conf.get(GoogleSheetsInputFormatProvider.PROPERTY_CONFIG_JSON);
     String headersJson = conf.get(GoogleSheetsInputFormatProvider.PROPERTY_HEADERS_JSON);
-
-    GoogleFilteringSourceConfig googleFilteringSourceConfig =
-        GoogleSheetsInputFormatProvider.GSON.fromJson(configJson, GoogleFilteringSourceConfig.class);
     GoogleSheetsSourceConfig googleSheetsSourceConfig =
-        GoogleSheetsInputFormatProvider.GSON.fromJson(configJson, GoogleSheetsSourceConfig.class);
+      GoogleSheetsInputFormatProvider.extractPropertiesFromConfig(conf);
 
     Type headersType = new TypeToken<Map<Integer, Map<String, List<String>>>>() {
     }.getType();
@@ -62,7 +57,7 @@ public class GoogleSheetsInputFormat extends InputFormat {
         GoogleSheetsInputFormatProvider.GSON.fromJson(headersJson, headersType);
 
     // get all sheets files according to filter
-    GoogleDriveFilteringClient driveFilteringClient = new GoogleDriveFilteringClient(googleFilteringSourceConfig);
+    GoogleDriveFilteringClient driveFilteringClient = new GoogleDriveFilteringClient(googleSheetsSourceConfig);
     List<File> spreadsheetsFiles;
     try {
       spreadsheetsFiles = driveFilteringClient.getFilesSummary(Collections.singletonList(ExportedType.SPREADSHEETS));

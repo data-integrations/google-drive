@@ -17,6 +17,7 @@
 package io.cdap.plugin.google.drive.source;
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonObject;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
@@ -28,6 +29,7 @@ import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 import io.cdap.plugin.google.common.utils.ExportedType;
 import io.cdap.plugin.google.drive.source.utils.BodyFormat;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +41,7 @@ import javax.annotation.Nullable;
  */
 public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   public static final String FILE_METADATA_PROPERTIES = "fileMetadataProperties";
+  public static final String CONFIGURATION_PARSE_PROPERTY_NAME = "properties";
   public static final String FILE_TYPES_TO_PULL = "fileTypesToPull";
   public static final String MAX_PARTITION_SIZE = "maxPartitionSize";
   public static final String BODY_FORMAT = "bodyFormat";
@@ -97,6 +100,29 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   @Macro
   protected String presentationsExportingFormat;
   private transient Schema schema = null;
+
+  public GoogleDriveSourceConfig(String referenceName, @Nullable String fileMetadataProperties, String fileTypesToPull,
+                                 String maxPartitionSize, String bodyFormat, String sheetsExportingFormat,
+                                 String drawingsExportingFormat, String presentationsExportingFormat,
+                                 @Nullable String filter, Integer maxRetryWait, Integer maxRetryJitterWait,
+                                 String modificationDateRange, @Nullable String startDate, @Nullable String endDate,
+                                 Integer maxRetryCount) {
+    super(referenceName);
+    this.fileMetadataProperties = fileMetadataProperties;
+    this.fileTypesToPull = fileTypesToPull;
+    this.maxPartitionSize = maxPartitionSize;
+    this.bodyFormat = bodyFormat;
+    this.sheetsExportingFormat = sheetsExportingFormat;
+    this.drawingsExportingFormat = drawingsExportingFormat;
+    this.presentationsExportingFormat = presentationsExportingFormat;
+    this.filter = filter;
+    this.maxRetryWait = maxRetryWait;
+    this.maxRetryCount = maxRetryCount;
+    this.maxRetryJitterWait = maxRetryJitterWait;
+    this.modificationDateRange = modificationDateRange;
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
 
   /**
    * Returns the instance of Schema.
@@ -201,5 +227,169 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
 
   public String getPresentationsExportingFormat() {
     return presentationsExportingFormat;
+  }
+
+  public GoogleDriveSourceConfig(String referenceName) {
+    super(referenceName);
+  }
+
+  private static GoogleDriveSourceConfig of(String referenceName) {
+    return new GoogleDriveSourceConfig(referenceName);
+  }
+
+  public void setFileMetadataProperties(String fileMetadataProperties) {
+    this.fileMetadataProperties = fileMetadataProperties;
+  }
+
+  public void getBodyFormat(String bodyFormat) {
+    this.bodyFormat = bodyFormat;
+  }
+
+  public void setFileTypesToPull(String fileTypesToPull) {
+    this.fileTypesToPull = fileTypesToPull;
+  }
+
+  public void setMaxPartitionSize(String maxPartitionSize) {
+    this.maxPartitionSize = maxPartitionSize;
+  }
+
+  public void setDocsExportingFormat(String docsExportingFormat) {
+    this.docsExportingFormat = docsExportingFormat;
+  }
+
+  public void setSheetsExportingFormat(String sheetsExportingFormat) {
+    this.sheetsExportingFormat = sheetsExportingFormat;
+  }
+
+  public void setDrawingsExportingFormat(String drawingsExportingFormat) {
+    this.drawingsExportingFormat = drawingsExportingFormat;
+  }
+
+  public void setPresentationsExportingFormat(String presentationsExportingFormat) {
+    this.presentationsExportingFormat = presentationsExportingFormat;
+  }
+
+  public void setFilter(String filter) {
+    this.filter = filter;
+  }
+
+  public void setSchema(String schema) throws IOException {
+    this.schema = Schema.parseJson(schema);
+  }
+
+  public void setMaxRetryWait(String maxRetryWait) {
+    this.maxRetryWait = Integer.valueOf(maxRetryWait);
+  }
+
+  public void setMaxRetryJitterWait(String maxRetryJitterWait) {
+    this.maxRetryJitterWait = Integer.valueOf(maxRetryJitterWait);
+  }
+
+  public void setMaxRetryCount(String maxRetryCount) {
+    this.maxRetryCount = Integer.valueOf(maxRetryCount);
+  }
+
+  public void setModificationDateRange(String modificationDateRange) {
+    this.modificationDateRange = modificationDateRange;
+  }
+
+  public void setStartDate(String startDate) {
+    this.startDate = startDate;
+  }
+
+  public void setEndDate(String endDate) {
+    this.endDate = endDate;
+  }
+
+  public static GoogleDriveSourceConfig of(JsonObject properties) throws IOException {
+    GoogleDriveSourceConfig googleDriveSourceConfig = GoogleDriveSourceConfig
+      .of(properties.get(GoogleDriveSourceConfig.REFERENCE_NAME).getAsString());
+
+    if (properties.has(GoogleDriveSourceConfig.FILE_METADATA_PROPERTIES)) {
+      googleDriveSourceConfig.setFileMetadataProperties(
+        properties.get(GoogleDriveSourceConfig.FILE_METADATA_PROPERTIES).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.FILE_TYPES_TO_PULL)) {
+      googleDriveSourceConfig.setFileTypesToPull(
+        properties.get(GoogleDriveSourceConfig.FILE_TYPES_TO_PULL).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.MAX_PARTITION_SIZE)) {
+      googleDriveSourceConfig.setMaxPartitionSize(
+        properties.get(GoogleDriveSourceConfig.MAX_PARTITION_SIZE).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.DOCS_EXPORTING_FORMAT)) {
+      googleDriveSourceConfig.setDocsExportingFormat(
+        properties.get(GoogleDriveSourceConfig.DOCS_EXPORTING_FORMAT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.SHEETS_EXPORTING_FORMAT)) {
+      googleDriveSourceConfig.setSheetsExportingFormat(
+        properties.get(GoogleDriveSourceConfig.SHEETS_EXPORTING_FORMAT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.BODY_FORMAT)) {
+      googleDriveSourceConfig.getBodyFormat(properties.get(GoogleDriveSourceConfig.BODY_FORMAT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.DRAWINGS_EXPORTING_FORMAT)) {
+      googleDriveSourceConfig.setDrawingsExportingFormat(
+        properties.get(GoogleDriveSourceConfig.DRAWINGS_EXPORTING_FORMAT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.PRESENTATIONS_EXPORTING_FORMAT)) {
+      googleDriveSourceConfig.setPresentationsExportingFormat(
+        properties.get(GoogleDriveSourceConfig.PRESENTATIONS_EXPORTING_FORMAT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.DIRECTORY_IDENTIFIER)) {
+      googleDriveSourceConfig.setDirectoryIdentifier(
+        properties.get(GoogleDriveSourceConfig.DIRECTORY_IDENTIFIER).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.FILTER)) {
+      googleDriveSourceConfig.setFilter(properties.get(GoogleDriveSourceConfig.FILTER).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.NAME_SERVICE_ACCOUNT_TYPE)) {
+      googleDriveSourceConfig.setServiceAccountType(
+        properties.get(GoogleDriveSourceConfig.NAME_SERVICE_ACCOUNT_TYPE).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.NAME_SERVICE_ACCOUNT_JSON)) {
+      googleDriveSourceConfig.setServiceAccountJson(
+        properties.get(GoogleDriveSourceConfig.NAME_SERVICE_ACCOUNT_JSON).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.ACCOUNT_FILE_PATH)) {
+      googleDriveSourceConfig.setAccountFilePath(
+        properties.get(GoogleDriveSourceConfig.ACCOUNT_FILE_PATH).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.SCHEMA)) {
+      googleDriveSourceConfig.setSchema(properties.get(GoogleDriveSourceConfig.SCHEMA).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.AUTH_TYPE)) {
+      googleDriveSourceConfig.setAuthType(properties.get(GoogleDriveSourceConfig.AUTH_TYPE).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.MAX_RETRY_WAIT)) {
+      googleDriveSourceConfig.setMaxRetryWait(properties.get(GoogleDriveSourceConfig.MAX_RETRY_WAIT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.MAX_RETRY_JITTER_WAIT)) {
+      googleDriveSourceConfig.setMaxRetryJitterWait(
+        properties.get(GoogleDriveSourceConfig.MAX_RETRY_JITTER_WAIT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.MAX_RETRY_COUNT)) {
+      googleDriveSourceConfig.setMaxRetryCount(properties.get(GoogleDriveSourceConfig.MAX_RETRY_COUNT).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.MODIFICATION_DATE_RANGE)) {
+      googleDriveSourceConfig.setModificationDateRange(
+        properties.get(GoogleDriveSourceConfig.MODIFICATION_DATE_RANGE).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.START_DATE)) {
+      googleDriveSourceConfig.setStartDate(properties.get(GoogleDriveSourceConfig.START_DATE).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.END_DATE)) {
+      googleDriveSourceConfig.setEndDate(properties.get(GoogleDriveSourceConfig.END_DATE).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.CLIENT_ID)) {
+      googleDriveSourceConfig.setClientId(properties.get(GoogleDriveSourceConfig.CLIENT_ID).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.CLIENT_SECRET)) {
+      googleDriveSourceConfig.setClientSecret(properties.get(GoogleDriveSourceConfig.CLIENT_SECRET).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.REFRESH_TOKEN)) {
+      googleDriveSourceConfig.setRefreshToken(properties.get(GoogleDriveSourceConfig.REFRESH_TOKEN).getAsString());
+    }
+    return googleDriveSourceConfig;
   }
 }

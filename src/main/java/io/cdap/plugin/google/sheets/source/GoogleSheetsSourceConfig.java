@@ -23,6 +23,7 @@ import com.google.api.services.sheets.v4.model.CellFormat;
 import com.google.api.services.sheets.v4.model.ExtendedValue;
 import com.google.api.services.sheets.v4.model.GridRange;
 import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.gson.JsonObject;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
@@ -96,6 +97,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   public static final String FIRST_FOOTER_ROW_LABEL = "First Footer Row Index";
   public static final String LAST_FOOTER_ROW_LABEL = "Last Footer Row Index";
   public static final String METADATA_CELLS_LABEL = "Metadata Cells\n";
+  public static final String CONFIGURATION_PARSE_PROPERTY_NAME = "properties";
   private static final Logger LOG = LoggerFactory.getLogger(GoogleSheetsSourceConfig.class);
   private static final Pattern CELL_ADDRESS = Pattern.compile("^([A-Z]+)([0-9]+)$");
   private static final Pattern COLUMN_NAME = Pattern.compile("^[A-Za-z_][A-Za-z0-9_-]*$");
@@ -228,15 +230,53 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   @Macro
   private String sheetFieldName;
 
+  public GoogleSheetsSourceConfig(String referenceName, @Nullable String sheetsIdentifiers, String formatting,
+                                  Boolean skipEmptyData, String columnNamesSelection,
+                                  @Nullable Integer customColumnNamesRow, String metadataFieldName,
+                                  Boolean extractMetadata, @Nullable Integer firstFooterRow,
+                                  @Nullable Integer lastHeaderRow, @Nullable Integer lastFooterRow,
+                                  @Nullable String lastDataColumn, @Nullable String lastDataRow,
+                                  @Nullable String metadataCells, @Nullable Integer readBufferSize,
+                                  @Nullable Boolean addNameFields, @Nullable String spreadsheetFieldName,
+                                  @Nullable String sheetFieldName) {
+
+    super(referenceName);
+    this.sheetsIdentifiers = sheetsIdentifiers;
+    this.formatting = formatting;
+    this.skipEmptyData = skipEmptyData;
+    this.metadataFieldName = metadataFieldName;
+    this.columnNamesSelection = columnNamesSelection;
+    this.customColumnNamesRow = customColumnNamesRow;
+    this.extractMetadata = extractMetadata;
+    this.firstFooterRow = firstFooterRow;
+    this.lastHeaderRow = lastHeaderRow;
+    this.lastDataColumn = lastDataColumn;
+    this.lastDataRow = lastDataRow;
+    this.lastFooterRow = lastFooterRow;
+    this.metadataCells = metadataCells;
+    this.readBufferSize = readBufferSize;
+    this.addNameFields = addNameFields;
+    this.spreadsheetFieldName = spreadsheetFieldName;
+    this.sheetFieldName = sheetFieldName;
+  }
+
+
+  public GoogleSheetsSourceConfig(String referenceName) {
+    super(referenceName);
+  }
+
   /**
    * Returns the instance of Schema.
    * @return The instance of Schema
+   * @param collector throws validation exception
    */
-  public Schema getSchema() {
-    if (schema == null) {
+  public Schema getSchema(FailureCollector collector) {
+    if (schema == null && !containsMacro(NAME_SERVICE_ACCOUNT_TYPE) && !containsMacro(ACCOUNT_FILE_PATH)
+      && !containsMacro(NAME_SERVICE_ACCOUNT_JSON)) {
       if (dataSchemaInfo.isEmpty()) {
-        throw new RuntimeException("There are no headers to process. " +
-          "Perhaps no validation step was executed before schema generation.");
+        collector.addFailure("There are no headers to process.",
+                             "Perhaps no validation step was executed before schema generation.")
+          .withConfigProperty(SCHEMA);
       }
       schema = SchemaBuilder.buildSchema(this, new ArrayList<>(dataSchemaInfo.values()));
     }
@@ -920,5 +960,296 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   @Nullable
   public String getSheetFieldName() {
     return sheetFieldName;
+  }
+
+  private static GoogleSheetsSourceConfig of(String referenceName) {
+    return new GoogleSheetsSourceConfig(referenceName);
+  }
+
+  public void setSheetsToPull(String sheetsToPull) {
+    this.sheetsToPull = sheetsToPull;
+  }
+
+  public void setSheetsIdentifiers(String sheetsIdentifiers) {
+    this.sheetsIdentifiers = sheetsIdentifiers;
+  }
+
+  public void setSchema(String schema) throws IOException {
+    this.schema = Schema.parseJson(schema);
+  }
+
+  public void setFormatting(String formatting) {
+    this.formatting = formatting;
+  }
+
+  public void setSkipEmptyData(Boolean skipEmptyData) {
+    this.skipEmptyData = skipEmptyData;
+  }
+
+  public void setColumnNamesSelection(String columnNamesSelection) {
+    this.columnNamesSelection = columnNamesSelection;
+  }
+
+  public void setCustomColumnNamesRow(Integer customColumnNamesRow) {
+    this.customColumnNamesRow = customColumnNamesRow;
+  }
+
+  public void setMetadataFieldName(String metadataFieldName) {
+    this.metadataFieldName = metadataFieldName;
+  }
+
+  public void setExtractMetadata(Boolean extractMetadata) {
+    this.extractMetadata = extractMetadata;
+  }
+
+  public void setFirstHeaderRow(Integer firstHeaderRow) {
+    this.firstHeaderRow = firstHeaderRow;
+  }
+
+  public void setLastHeaderRow(Integer lastHeaderRow) {
+    this.lastHeaderRow = lastHeaderRow;
+  }
+
+  public void setFirstFooterRow(Integer firstFooterRow) {
+    this.firstFooterRow = firstFooterRow;
+  }
+
+  public void setLastFooterRow(Integer lastFooterRow) {
+    this.lastFooterRow = lastFooterRow;
+  }
+
+  public void setLastDataColumn(String lastDataColumn) {
+    this.lastDataColumn = lastDataColumn;
+  }
+
+  public void setLastDataRow(String lastDataRow) {
+    this.lastDataRow = lastDataRow;
+  }
+
+  public void setMetadataCells(String metadataCells) {
+    this.metadataCells = metadataCells;
+  }
+
+  public void setReadBufferSize(Integer bufferSize) {
+    this.readBufferSize = bufferSize;
+  }
+
+  public void setAddNameFields(Boolean addNameFields) {
+    this.addNameFields = addNameFields;
+  }
+
+  public void setSpreadsheetFieldName(String spreadsheetFieldName) {
+    this.spreadsheetFieldName = spreadsheetFieldName;
+  }
+
+  public void setSheetFieldName(String sheetFieldName) {
+    this.sheetFieldName = sheetFieldName;
+  }
+
+  public void setFilter(String filter) {
+    this.filter = filter;
+  }
+
+  public void setModificationDateRange(String modificationDateRange) {
+    this.modificationDateRange = modificationDateRange;
+  }
+
+  public void setStartDate(String startDate) {
+    this.startDate = startDate;
+  }
+
+  public void setEndDate(String endDate) {
+    this.endDate = endDate;
+  }
+
+  public void setMaxRetryCount(Integer maxRetryCount) {
+    this.maxRetryCount = maxRetryCount;
+  }
+
+  public void setMaxRetryWait(Integer maxRetryWait) {
+    this.maxRetryWait = maxRetryWait;
+  }
+
+  public void setMaxRetryJitterWait(Integer maxRetryJitterWait) {
+    this.maxRetryJitterWait = maxRetryJitterWait;
+  }
+
+  public static GoogleSheetsSourceConfig of(JsonObject properties) throws IOException {
+
+    GoogleSheetsSourceConfig googleSheetsSourceConfig = GoogleSheetsSourceConfig
+      .of(properties.get(GoogleSheetsSourceConfig.REFERENCE_NAME).getAsString());
+
+    if (properties.has(GoogleSheetsSourceConfig.SHEETS_TO_PULL)) {
+      googleSheetsSourceConfig.setSheetsToPull(properties.get(GoogleSheetsSourceConfig.SHEETS_TO_PULL).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.SHEETS_IDENTIFIERS)) {
+      googleSheetsSourceConfig.setSheetsIdentifiers(
+        properties.get(GoogleSheetsSourceConfig.SHEETS_IDENTIFIERS).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.SCHEMA)) {
+      googleSheetsSourceConfig.setSchema(
+        properties.get(GoogleSheetsSourceConfig.SCHEMA).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.FORMATTING)) {
+      googleSheetsSourceConfig.setFormatting(
+        properties.get(GoogleSheetsSourceConfig.FORMATTING).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.SKIP_EMPTY_DATA)) {
+      googleSheetsSourceConfig.setSkipEmptyData(
+        Boolean.valueOf(properties.get(GoogleSheetsSourceConfig.SKIP_EMPTY_DATA).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.COLUMN_NAMES_SELECTION)) {
+      googleSheetsSourceConfig.setColumnNamesSelection(
+        properties.get(GoogleSheetsSourceConfig.COLUMN_NAMES_SELECTION).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.CUSTOM_COLUMN_NAMES_ROW)) {
+      googleSheetsSourceConfig.setCustomColumnNamesRow(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.CUSTOM_COLUMN_NAMES_ROW).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.METADATA_FIELD_NAME)) {
+      googleSheetsSourceConfig.setMetadataFieldName(
+        properties.get(GoogleSheetsSourceConfig.METADATA_FIELD_NAME).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.EXTRACT_METADATA)) {
+      googleSheetsSourceConfig.setExtractMetadata(
+        Boolean.valueOf(properties.get(GoogleSheetsSourceConfig.EXTRACT_METADATA).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.FIRST_HEADER_ROW)) {
+      googleSheetsSourceConfig.setFirstHeaderRow(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.FIRST_HEADER_ROW).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.LAST_HEADER_ROW)) {
+      googleSheetsSourceConfig.setLastHeaderRow(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.LAST_HEADER_ROW).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.FIRST_FOOTER_ROW)) {
+      googleSheetsSourceConfig.setFirstFooterRow(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.FIRST_FOOTER_ROW).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.LAST_FOOTER_ROW)) {
+      googleSheetsSourceConfig.setLastFooterRow(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.LAST_FOOTER_ROW).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.LAST_DATA_COLUMN)) {
+      googleSheetsSourceConfig.setLastDataColumn(
+        properties.get(GoogleSheetsSourceConfig.LAST_DATA_COLUMN).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.LAST_DATA_ROW)) {
+      googleSheetsSourceConfig.setLastDataRow(
+        properties.get(GoogleSheetsSourceConfig.LAST_DATA_ROW).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.METADATA_CELLS)) {
+      googleSheetsSourceConfig.setMetadataCells(
+        properties.get(GoogleSheetsSourceConfig.METADATA_CELLS).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.READ_BUFFER_SIZE)) {
+      googleSheetsSourceConfig.setReadBufferSize(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.READ_BUFFER_SIZE).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.ADD_NAME_FIELDS)) {
+      googleSheetsSourceConfig.setAddNameFields(
+        Boolean.valueOf(properties.get(GoogleSheetsSourceConfig.ADD_NAME_FIELDS).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.SPREADSHEET_FIELD_NAME)) {
+      googleSheetsSourceConfig.setSpreadsheetFieldName(
+        properties.get(GoogleSheetsSourceConfig.SPREADSHEET_FIELD_NAME).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.SHEET_FIELD_NAME)) {
+      googleSheetsSourceConfig.setSheetFieldName(
+        properties.get(GoogleSheetsSourceConfig.SHEET_FIELD_NAME).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.FILTER)) {
+      googleSheetsSourceConfig.setFilter(
+        properties.get(GoogleSheetsSourceConfig.FILTER).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.MODIFICATION_DATE_RANGE)) {
+      googleSheetsSourceConfig.setModificationDateRange(
+        properties.get(GoogleSheetsSourceConfig.MODIFICATION_DATE_RANGE).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.START_DATE)) {
+      googleSheetsSourceConfig.setStartDate(
+        properties.get(GoogleSheetsSourceConfig.START_DATE).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.END_DATE)) {
+      googleSheetsSourceConfig.setEndDate(
+        properties.get(GoogleSheetsSourceConfig.END_DATE).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.MAX_RETRY_COUNT)) {
+      googleSheetsSourceConfig.setMaxRetryCount(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.MAX_RETRY_COUNT).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.MAX_RETRY_WAIT)) {
+      googleSheetsSourceConfig.setMaxRetryWait(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.MAX_RETRY_WAIT).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.MAX_RETRY_JITTER_WAIT)) {
+      googleSheetsSourceConfig.setMaxRetryJitterWait(
+        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.MAX_RETRY_JITTER_WAIT).getAsString()));
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.AUTH_TYPE)) {
+      googleSheetsSourceConfig.setAuthType(
+        properties.get(GoogleSheetsSourceConfig.AUTH_TYPE).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.NAME_SERVICE_ACCOUNT_TYPE)) {
+      googleSheetsSourceConfig.setServiceAccountType(
+        properties.get(GoogleSheetsSourceConfig.NAME_SERVICE_ACCOUNT_TYPE).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.NAME_SERVICE_ACCOUNT_JSON)) {
+      googleSheetsSourceConfig.setServiceAccountJson(
+        properties.get(GoogleSheetsSourceConfig.NAME_SERVICE_ACCOUNT_JSON).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.ACCOUNT_FILE_PATH)) {
+      googleSheetsSourceConfig.setAccountFilePath(
+        properties.get(GoogleSheetsSourceConfig.ACCOUNT_FILE_PATH).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.CLIENT_ID)) {
+      googleSheetsSourceConfig.setClientId(properties.get(GoogleSheetsSourceConfig.CLIENT_ID).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.CLIENT_SECRET)) {
+      googleSheetsSourceConfig.setClientSecret(properties.get(GoogleSheetsSourceConfig.CLIENT_SECRET).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.REFRESH_TOKEN)) {
+      googleSheetsSourceConfig.setRefreshToken(properties.get(GoogleSheetsSourceConfig.REFRESH_TOKEN).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.DIRECTORY_IDENTIFIER)) {
+      googleSheetsSourceConfig.setDirectoryIdentifier(
+        properties.get(GoogleSheetsSourceConfig.DIRECTORY_IDENTIFIER).getAsString());
+    }
+
+    return googleSheetsSourceConfig;
   }
 }

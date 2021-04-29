@@ -19,6 +19,7 @@ package io.cdap.plugin.google.common;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.common.base.Strings;
 import io.cdap.cdap.api.annotation.Description;
+import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
@@ -28,6 +29,7 @@ import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
@@ -47,6 +49,11 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   public static final String REFRESH_TOKEN_LABEL = "Refresh token";
   public static final String ACCOUNT_FILE_PATH = "accountFilePath";
   public static final String DIRECTORY_IDENTIFIER = "directoryIdentifier";
+  public static final String NAME_SERVICE_ACCOUNT_TYPE = "serviceAccountType";
+  public static final String NAME_SERVICE_ACCOUNT_JSON = "serviceAccountJSON";
+  public static final String SERVICE_ACCOUNT_FILE_PATH = "filePath";
+  public static final String SERVICE_ACCOUNT_JSON = "JSON";
+  public static final String SCHEMA = "schema";
 
   private static final String IS_SET_FAILURE_MESSAGE_PATTERN = "'%s' property is empty or macro is not available.";
 
@@ -60,6 +67,13 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   @Description("Type of authentication used to access Google API. \n" +
     "OAuth2 and Service account types are available.")
   private String authType;
+
+  @Name(NAME_SERVICE_ACCOUNT_TYPE)
+  @Description("Service account type, file path where the service account is located or the JSON content of the " +
+    "service account.")
+  @Nullable
+  @Macro
+  protected String serviceAccountType;
 
   @Nullable
   @Name(CLIENT_ID)
@@ -77,14 +91,21 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   private String refreshToken;
 
   @Nullable
+  @Macro
   @Name(ACCOUNT_FILE_PATH)
   @Description("Path on the local file system of the service account key used for authorization. " +
     "Can be set to 'auto-detect' for getting service account from system variable. " +
     "The file/system variable must be present on every node in the cluster. " +
     "Service account json can be generated on Google Cloud " +
     "Service Account page (https://console.cloud.google.com/iam-admin/serviceaccounts).")
-  private String accountFilePath;
+  protected String accountFilePath;
   // end of workaround
+
+  @Name(NAME_SERVICE_ACCOUNT_JSON)
+  @Description("Content of the service account file.")
+  @Nullable
+  @Macro
+  protected String serviceAccountJson;
 
   @Name(DIRECTORY_IDENTIFIER)
   @Description("Identifier of the destination folder.")
@@ -108,7 +129,7 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
           propertiesAreValid = validateOAuth2Properties(collector);
           break;
         case SERVICE_ACCOUNT:
-          propertiesAreValid = validateAccountFilePath(collector);
+          propertiesAreValid = validateServiceAccount(collector);
           break;
         default:
           collector.addFailure(String.format("'%s' is not processed value.", authType.toString()), null)
@@ -158,17 +179,28 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
       & checkPropertyIsSet(collector, refreshToken, REFRESH_TOKEN, REFRESH_TOKEN_LABEL);
   }
 
-  private boolean validateAccountFilePath(FailureCollector collector) {
-    if (!containsMacro(ACCOUNT_FILE_PATH)) {
+  private boolean validateServiceAccount(FailureCollector collector) {
+    if (containsMacro(ACCOUNT_FILE_PATH) || containsMacro(NAME_SERVICE_ACCOUNT_JSON)) {
+      return false;
+    }
+    final Boolean serviceAccountFilePath = isServiceAccountFilePath();
+    final Boolean serviceAccountJson = isServiceAccountJson();
+
+    if (serviceAccountFilePath != null && serviceAccountFilePath) {
       if (!AUTO_DETECT_VALUE.equals(accountFilePath) && !new File(accountFilePath).exists()) {
-        collector.addFailure("Account file is not available.",
-                             "Provide path to existing account file.")
+        collector.addFailure("Service Account File Path is not available.",
+                             "Please provide path to existing Service Account file.")
           .withConfigProperty(ACCOUNT_FILE_PATH);
-      } else {
-        return true;
       }
     }
-    return false;
+    if (serviceAccountJson != null && serviceAccountJson) {
+      if (!Optional.ofNullable(getServiceAccountJson()).isPresent()) {
+        collector.addFailure("Service Account JSON can not be empty.",
+                             "Please provide Service Account JSON.")
+          .withConfigProperty(NAME_SERVICE_ACCOUNT_JSON);
+      }
+    }
+    return collector.getValidationFailures().size() == 0;
   }
 
   private void validateCredentials(FailureCollector collector, GoogleDriveClient driveClient) throws IOException {
@@ -176,7 +208,7 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
       driveClient.checkRootFolder();
     } catch (GoogleJsonResponseException e) {
       collector.addFailure(e.getMessage(), "Provide valid credentials.")
-        .withConfigProperty(ACCOUNT_FILE_PATH)
+        .withConfigProperty(NAME_SERVICE_ACCOUNT_TYPE)
         .withStacktrace(e.getStackTrace());
     }
   }
@@ -219,9 +251,40 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     return AuthType.fromValue(authType);
   }
 
-  @Nullable
-  public String getAccountFilePath() {
-    return accountFilePath;
+  public void setAuthType(String authType) {
+    this.authType = authType;
+  }
+
+  public void setReferenceName(String referenceName) {
+    this.referenceName = referenceName;
+  }
+
+  public void setServiceAccountType(String serviceAccountType) {
+    this.serviceAccountType = serviceAccountType;
+  }
+
+  public void setServiceAccountJson(String serviceAccountJson) {
+    this.serviceAccountJson = serviceAccountJson;
+  }
+
+  public void setAccountFilePath(String accountFilePath) {
+    this.accountFilePath = accountFilePath;
+  }
+
+  public void setDirectoryIdentifier(String directoryIdentifier) {
+    this.directoryIdentifier = directoryIdentifier;
+  }
+
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
+  }
+
+  public void setClientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
+  }
+
+  public void setRefreshToken(String refreshToken) {
+    this.refreshToken = refreshToken;
   }
 
   @Nullable
@@ -237,5 +300,45 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   @Nullable
   public String getRefreshToken() {
     return refreshToken;
+  }
+
+  @Nullable
+  public String getServiceAccountFilePath() {
+    if (containsMacro(ACCOUNT_FILE_PATH) || Strings.isNullOrEmpty(accountFilePath)
+      || AUTO_DETECT_VALUE.equals(accountFilePath)) {
+      return null;
+    }
+    return accountFilePath;
+  }
+
+  @Nullable
+  public String getServiceAccountJson() {
+    if (containsMacro(NAME_SERVICE_ACCOUNT_JSON) || Strings.isNullOrEmpty(serviceAccountJson)) {
+      return null;
+    }
+    return serviceAccountJson;
+  }
+
+  /**
+   * @return Service Account Type, defaults to filePath.
+   */
+  @Nullable
+  public String getServiceAccountType() {
+    if (containsMacro(NAME_SERVICE_ACCOUNT_TYPE)) {
+      return null;
+    }
+    return Strings.isNullOrEmpty(serviceAccountType) ? SERVICE_ACCOUNT_FILE_PATH : serviceAccountType;
+  }
+
+  @Nullable
+  public Boolean isServiceAccountJson() {
+    String serviceAccountType = getServiceAccountType();
+    return Strings.isNullOrEmpty(serviceAccountType) ? null : serviceAccountType.equals(SERVICE_ACCOUNT_JSON);
+  }
+
+  @Nullable
+  public Boolean isServiceAccountFilePath() {
+    String serviceAccountType = getServiceAccountType();
+    return Strings.isNullOrEmpty(serviceAccountType) ? null : serviceAccountType.equals(SERVICE_ACCOUNT_FILE_PATH);
   }
 }

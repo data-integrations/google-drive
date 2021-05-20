@@ -55,7 +55,7 @@ public class GoogleSheetsSource extends BatchSource<NullWritable, StructuredReco
     config.validate(failureCollector);
     failureCollector.getOrThrowException();
 
-    pipelineConfigurer.getStageConfigurer().setOutputSchema(config.getSchema());
+    pipelineConfigurer.getStageConfigurer().setOutputSchema(config.getSchema(failureCollector));
   }
 
   @Override
@@ -64,7 +64,7 @@ public class GoogleSheetsSource extends BatchSource<NullWritable, StructuredReco
     config.validate(failureCollector);
     failureCollector.getOrThrowException();
 
-    Schema configSchema = config.getSchema();
+    Schema configSchema = config.getSchema(failureCollector);
     LineageRecorder lineageRecorder = new LineageRecorder(context, config.getReferenceName());
     lineageRecorder.createExternalDataset(configSchema);
     lineageRecorder.recordRead("Read", "Reading Google Sheets files",

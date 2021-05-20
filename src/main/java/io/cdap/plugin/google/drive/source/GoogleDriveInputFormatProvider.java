@@ -19,8 +19,11 @@ package io.cdap.plugin.google.drive.source;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import io.cdap.cdap.api.data.batch.InputFormatProvider;
+import org.apache.hadoop.conf.Configuration;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -38,8 +41,15 @@ public class GoogleDriveInputFormatProvider implements InputFormatProvider {
    */
   public GoogleDriveInputFormatProvider(GoogleDriveSourceConfig config) {
     this.conf = new ImmutableMap.Builder<String, String>()
-      .put(PROPERTY_CONFIG_JSON, GSON.toJson(config))
+      .put(PROPERTY_CONFIG_JSON, GSON.toJson(config.getProperties()))
       .build();
+  }
+
+  public static GoogleDriveSourceConfig extractPropertiesFromConfig(Configuration config) throws IOException {
+    String configJson = config.get(PROPERTY_CONFIG_JSON);
+    JsonObject properties = GSON.fromJson(configJson, JsonObject.class)
+      .getAsJsonObject(GoogleDriveSourceConfig.CONFIGURATION_PARSE_PROPERTY_NAME);
+    return GoogleDriveSourceConfig.of(properties);
   }
 
   @Override

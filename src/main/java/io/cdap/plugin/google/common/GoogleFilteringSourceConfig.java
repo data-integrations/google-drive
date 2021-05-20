@@ -67,6 +67,14 @@ public class GoogleFilteringSourceConfig extends GoogleRetryingConfig {
     "RFC3339 (https://tools.ietf.org/html/rfc3339) format, default timezone is UTC, e.g., 2012-06-04T12:00:00-08:00.")
   protected String endDate;
 
+  public GoogleFilteringSourceConfig(String referenceName) {
+    super();
+  }
+
+  public GoogleFilteringSourceConfig() {
+
+  }
+
   /**
    * Returns the ValidationResult.
    *

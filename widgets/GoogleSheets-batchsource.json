@@ -112,12 +112,36 @@
           }
         },
         {
+          "name": "serviceAccountType",
+          "label": "Service Account Type",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "filePath",
+            "options": [
+              {
+                "id": "filePath",
+                "label": "File Path"
+              },
+              {
+                "id": "JSON",
+                "label": "JSON"
+              }
+            ]
+          }
+        },
+        {
           "widget-type": "textbox",
           "label": "Account File Path",
           "name": "accountFilePath",
           "widget-attributes": {
             "default": "auto-detect"
           }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Service Account JSON",
+          "name": "serviceAccountJSON"
         },
         {
           "widget-type": "textbox",
@@ -374,13 +398,7 @@
       ]
     }
   ],
-  "outputs": [
-    {
-      "widget-type": "non-editable-schema-editor",
-      "schema": {
-      }
-    }
-  ],
+  "outputs": [],
   "filters": [
     {
       "name": "Select modification date range",
@@ -443,8 +461,32 @@
       },
       "show": [
         {
-          "name": "accountFilePath",
+          "name": "serviceAccountType",
           "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "ServiceAuthenticationTypeFilePath",
+      "condition": {
+        "expression": "authType == 'serviceAccount' && serviceAccountType == 'filePath'"
+      },
+      "show": [
+        {
+          "type": "property",
+          "name": "accountFilePath"
+        }
+      ]
+    },
+    {
+      "name": "ServiceAuthenticationTypeJSON",
+      "condition": {
+        "expression": "authType == 'serviceAccount' && serviceAccountType == 'JSON'"
+      },
+      "show": [
+        {
+          "type": "property",
+          "name": "serviceAccountJSON"
         }
       ]
     },

@@ -69,10 +69,9 @@ public class GoogleSheetsRecordReader extends RecordReader<NullWritable, Structu
   public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext)
     throws IOException {
     Configuration conf = taskAttemptContext.getConfiguration();
-    String configJson = conf.get(GoogleSheetsInputFormatProvider.PROPERTY_CONFIG_JSON);
     String schemaJson = conf.get(GoogleSheetsInputFormatProvider.PROPERTY_CONFIG_SCHEMA);
     schema = Schema.parseJson(schemaJson);
-    config = GoogleSheetsInputFormatProvider.GSON.fromJson(configJson, GoogleSheetsSourceConfig.class);
+    config =  GoogleSheetsInputFormatProvider.extractPropertiesFromConfig(conf);
     googleSheetsSourceClient = new GoogleSheetsSourceClient(config);
 
     GoogleSheetsSplit split = (GoogleSheetsSplit) inputSplit;

@@ -38,9 +38,8 @@ public class GoogleDriveInputFormat extends InputFormat {
   @Override
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
     Configuration conf = jobContext.getConfiguration();
-    String configJson = conf.get(GoogleDriveInputFormatProvider.PROPERTY_CONFIG_JSON);
     GoogleDriveSourceConfig googleDriveSourceConfig =
-      GoogleDriveInputFormatProvider.GSON.fromJson(configJson, GoogleDriveSourceConfig.class);
+      GoogleDriveInputFormatProvider.extractPropertiesFromConfig(conf);
 
     GoogleDriveSourceClient client = new GoogleDriveSourceClient(googleDriveSourceConfig);
     Long maxBodySize = googleDriveSourceConfig.getMaxPartitionSize();

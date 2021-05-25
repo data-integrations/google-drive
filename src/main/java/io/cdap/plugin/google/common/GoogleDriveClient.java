@@ -24,9 +24,12 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.common.base.Strings;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -82,11 +85,13 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
         credential.setRefreshToken(config.getRefreshToken());
         break;
       case SERVICE_ACCOUNT:
-        String accountFilePath = config.getAccountFilePath();
-        if (GoogleAuthBaseConfig.AUTO_DETECT_VALUE.equals(accountFilePath)) {
-          credential = GoogleCredential.getApplicationDefault();
+        if (config.isServiceAccountJson()) {
+          InputStream jsonInputStream = new ByteArrayInputStream(config.getServiceAccountJson().getBytes());
+          credential = GoogleCredential.fromStream(jsonInputStream);
+        } else if (config.isServiceAccountFilePath()) {
+          credential = GoogleCredential.fromStream(new FileInputStream(config.getServiceAccountFilePath()));
         } else {
-          credential = GoogleCredential.fromStream(new FileInputStream(accountFilePath));
+          credential = GoogleCredential.getApplicationDefault();
         }
         break;
       default:

@@ -41,7 +41,7 @@ import java.util.Map;
 
 public class GoogleSheetsSourceConfigTest {
 
-  private GoogleSheetsSourceConfig config = new GoogleSheetsSourceConfig();
+  private GoogleSheetsSourceConfig config = new GoogleSheetsSourceConfig(null);
 
   @Test
   public void testMetadataInputToMap() throws NoSuchMethodException, InvocationTargetException,

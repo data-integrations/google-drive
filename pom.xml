@@ -38,6 +38,8 @@
     <hadoop.version>2.8.0</hadoop.version>
     <junit.version>4.11</junit.version>
     <powermock.version>1.6.5</powermock.version>
+    <mockito.version>1.10.19</mockito.version>
+    <assertj.version>3.11.1</assertj.version>
     <sheets-api.version>v4-rev581-1.25.0</sheets-api.version>
   </properties>
 
@@ -247,6 +249,31 @@
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
       <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- tests -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cdap.cdap</groupId>
+      <artifactId>hydrator-test</artifactId>
+      <version>${cdap.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>4.2.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

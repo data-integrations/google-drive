@@ -23,12 +23,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import io.cdap.cdap.api.artifact.ArtifactSummary;
-import io.cdap.cdap.api.common.Bytes;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.dataset.table.Table;
@@ -49,6 +46,7 @@ import io.cdap.cdap.test.ApplicationManager;
 import io.cdap.cdap.test.DataSetManager;
 import io.cdap.cdap.test.TestConfiguration;
 import io.cdap.cdap.test.WorkflowManager;
+import io.cdap.plugin.google.common.GenerateCredentials;
 import io.cdap.plugin.google.drive.source.GoogleDriveSource;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -56,14 +54,8 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -76,8 +68,6 @@ public class ETLTestGoogleDrive extends HydratorTestBase {
 
   @ClassRule
   public static final TestConfiguration CONFIG = new TestConfiguration("explore.enabled", true);
-  private static final String GCP_SERVICE_ACCOUNT_PATH = "google.application.credentials.path";
-  private static final String GCP_SERVICE_ACCOUNT_BASE64_ENCODED = "google.application.credentials.base64.encoded";
   protected static Drive service;
   protected static String directoryIdentifier;
   protected static final String APPLICATION_NAME = "Google Drive Test";
@@ -92,30 +82,13 @@ public class ETLTestGoogleDrive extends HydratorTestBase {
   @BeforeClass
   public static void setupClient() throws Exception {
 
-    // base64-encode the credentials, to avoid a commandline-parsing error, since the credentials have dashes in them
-    String property = System.getProperty(GCP_SERVICE_ACCOUNT_BASE64_ENCODED);
-    String serviceAccountCredentials;
-    if (property != null) {
-      serviceAccountCredentials = Bytes.toString(Base64.getDecoder().decode(property));
-    } else {
-      property = Preconditions.checkNotNull(System.getProperty(GCP_SERVICE_ACCOUNT_PATH),
-                                            "The credentials file provided is null. " +
-                                              "Please make sure the path is correct and the file exists.");
+    //Generate credentials
+    GenerateCredentials credentials = new GenerateCredentials();
+    GoogleCredential googleCredential = credentials.getServiceAccountCredentials();
 
-      serviceAccountCredentials = new String(Files.readAllBytes(Paths.get(property)), StandardCharsets.UTF_8);
-    }
+    final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-    NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-
-    GoogleCredential googleCredential = null;
-    if (serviceAccountCredentials != null) {
-      try (InputStream inputStream = new ByteArrayInputStream(
-        serviceAccountCredentials.getBytes(StandardCharsets.UTF_8))) {
-        googleCredential = GoogleCredential.fromStream(inputStream).createScoped(
-          Collections.singletonList(DriveScopes.DRIVE));
-      }
-    }
-
+    //Create the service
     service = new Drive.Builder(httpTransport, JSON_FACTORY, googleCredential)
       .setApplicationName(APPLICATION_NAME)
       .build();

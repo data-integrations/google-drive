@@ -22,16 +22,13 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.SpreadsheetProperties;
 import com.google.api.services.sheets.v4.model.ValueRange;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import io.cdap.cdap.api.artifact.ArtifactSummary;
-import io.cdap.cdap.api.common.Bytes;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.dataset.table.Table;
@@ -52,6 +49,7 @@ import io.cdap.cdap.test.ApplicationManager;
 import io.cdap.cdap.test.DataSetManager;
 import io.cdap.cdap.test.TestConfiguration;
 import io.cdap.cdap.test.WorkflowManager;
+import io.cdap.plugin.google.common.GenerateCredentials;
 import io.cdap.plugin.google.sheets.source.GoogleSheetsSource;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -59,16 +57,9 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,8 +74,6 @@ public class ETLTestGoogleSheets extends HydratorTestBase {
   protected static Sheets service;
   protected static Drive drive;
   protected static String directoryIdentifier;
-  protected static final String GCP_SERVICE_ACCOUNT_PATH = "google.application.credentials.path";
-  protected static final String GCP_SERVICE_ACCOUNT_BASE64_ENCODED = "google.application.credentials.base64.encoded";
   protected static final String APPLICATION_NAME = "Google Sheets Test";
   protected static final Schema INPUT_SCHEMA = Schema.recordOf(
     "input-record",
@@ -98,30 +87,13 @@ public class ETLTestGoogleSheets extends HydratorTestBase {
   @BeforeClass
   public static void setupClient() throws Exception {
 
-    // base64-encode the credentials, to avoid a commandline-parsing error, since the credentials have dashes in them
-    String property = System.getProperty(GCP_SERVICE_ACCOUNT_BASE64_ENCODED);
-    String serviceAccountCredentials;
-    if (property != null) {
-      serviceAccountCredentials = Bytes.toString(Base64.getDecoder().decode(property));
-    } else {
-      property = Preconditions.checkNotNull(System.getProperty(GCP_SERVICE_ACCOUNT_PATH),
-                                            "The credentials file provided is null. " +
-                                              "Please make sure the path is correct and the file exists.");
-
-      serviceAccountCredentials = new String(Files.readAllBytes(Paths.get(property)), StandardCharsets.UTF_8);
-    }
+    //Generate credentials
+    GenerateCredentials credentials = new GenerateCredentials();
+    GoogleCredential googleCredential = credentials.getServiceAccountCredentials();
 
     final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-    GoogleCredential googleCredential = null;
-    if (serviceAccountCredentials != null) {
-      try (InputStream inputStream = new ByteArrayInputStream(
-        serviceAccountCredentials.getBytes(StandardCharsets.UTF_8))) {
-        googleCredential = GoogleCredential.fromStream(inputStream).createScoped(
-          Collections.singletonList(DriveScopes.DRIVE));
-      }
-    }
-
+    //Create necessary services
     service = new Sheets.Builder(httpTransport, JSON_FACTORY, googleCredential)
       .setApplicationName(APPLICATION_NAME)
       .build();

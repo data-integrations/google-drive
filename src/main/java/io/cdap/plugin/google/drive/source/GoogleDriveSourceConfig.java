@@ -104,9 +104,8 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   public GoogleDriveSourceConfig(String referenceName, @Nullable String fileMetadataProperties, String fileTypesToPull,
                                  String maxPartitionSize, String bodyFormat, String sheetsExportingFormat,
                                  String drawingsExportingFormat, String presentationsExportingFormat,
-                                 @Nullable String filter, Integer maxRetryWait, Integer maxRetryJitterWait,
-                                 String modificationDateRange, @Nullable String startDate, @Nullable String endDate,
-                                 Integer maxRetryCount) {
+                                 @Nullable String filter, String modificationDateRange, @Nullable String startDate,
+                                 @Nullable String endDate) {
     super(referenceName);
     this.fileMetadataProperties = fileMetadataProperties;
     this.fileTypesToPull = fileTypesToPull;
@@ -116,9 +115,6 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     this.drawingsExportingFormat = drawingsExportingFormat;
     this.presentationsExportingFormat = presentationsExportingFormat;
     this.filter = filter;
-    this.maxRetryWait = maxRetryWait;
-    this.maxRetryCount = maxRetryCount;
-    this.maxRetryJitterWait = maxRetryJitterWait;
     this.modificationDateRange = modificationDateRange;
     this.startDate = startDate;
     this.endDate = endDate;
@@ -277,18 +273,6 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     this.schema = Schema.parseJson(schema);
   }
 
-  public void setMaxRetryWait(String maxRetryWait) {
-    this.maxRetryWait = Integer.valueOf(maxRetryWait);
-  }
-
-  public void setMaxRetryJitterWait(String maxRetryJitterWait) {
-    this.maxRetryJitterWait = Integer.valueOf(maxRetryJitterWait);
-  }
-
-  public void setMaxRetryCount(String maxRetryCount) {
-    this.maxRetryCount = Integer.valueOf(maxRetryCount);
-  }
-
   public void setModificationDateRange(String modificationDateRange) {
     this.modificationDateRange = modificationDateRange;
   }
@@ -360,16 +344,6 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     }
     if (properties.has(GoogleDriveSourceConfig.AUTH_TYPE)) {
       googleDriveSourceConfig.setAuthType(properties.get(GoogleDriveSourceConfig.AUTH_TYPE).getAsString());
-    }
-    if (properties.has(GoogleDriveSourceConfig.MAX_RETRY_WAIT)) {
-      googleDriveSourceConfig.setMaxRetryWait(properties.get(GoogleDriveSourceConfig.MAX_RETRY_WAIT).getAsString());
-    }
-    if (properties.has(GoogleDriveSourceConfig.MAX_RETRY_JITTER_WAIT)) {
-      googleDriveSourceConfig.setMaxRetryJitterWait(
-        properties.get(GoogleDriveSourceConfig.MAX_RETRY_JITTER_WAIT).getAsString());
-    }
-    if (properties.has(GoogleDriveSourceConfig.MAX_RETRY_COUNT)) {
-      googleDriveSourceConfig.setMaxRetryCount(properties.get(GoogleDriveSourceConfig.MAX_RETRY_COUNT).getAsString());
     }
     if (properties.has(GoogleDriveSourceConfig.MODIFICATION_DATE_RANGE)) {
       googleDriveSourceConfig.setModificationDateRange(

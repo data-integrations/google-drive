@@ -46,8 +46,7 @@ public class GoogleDriveSinkClient extends GoogleDriveClient<GoogleDriveSinkConf
    * @throws RetryException if there was an error getting the column information for the retry
    */
   public void createFile(FileFromFolder fileFromFolder) throws ExecutionException, RetryException {
-    APIRequestRetryer.getRetryer(config,
-      String.format("Creating of file with name '%s'.", fileFromFolder.getFile().getName()))
+    APIRequestRetryer.getRetryer(String.format("Creating of file with name '%s'.", fileFromFolder.getFile().getName()))
       .call(() -> {
         String folderId = config.getDirectoryIdentifier();
 

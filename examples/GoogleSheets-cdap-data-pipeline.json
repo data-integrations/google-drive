@@ -1,0 +1,98 @@
+{
+    "name": "GoogleSheets",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.6.0-SNAPSHOT",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "Google Sheets Source",
+                "to": "Trash"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": false,
+        "stages": [
+            {
+                "name": "Google Sheets Source",
+                "plugin": {
+                    "name": "GoogleSheets",
+                    "type": "batchsource",
+                    "label": "Google Sheets Source",
+                    "artifact": {
+                        "name": "google-drive-plugins",
+                        "version": "1.4.0-SNAPSHOT",
+                        "scope": "USER"
+                    },
+                    "properties": {
+                        "referenceName": "GoogleSheetsSourceExample",
+                        "directoryIdentifier": "",
+                        "modificationDateRange": "lifetime",
+                        "sheetsToPull": "all",
+                        "authType": "serviceAccount",
+                        "extractMetadata": "false",
+                        "metadataFieldName": "metadata",
+                        "formatting": "valuesOnly",
+                        "skipEmptyData": "false",
+                        "addNameFields": "false",
+                        "columnNamesSelection": "firstRowAsColumns",
+                        "lastDataColumn": "26",
+                        "lastDataRow": "1000",
+                        "readBufferSize": "100",
+                        "serviceAccountType": "JSON",
+                        "serviceAccountJSON": "${service_account.key}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": ""
+                    }
+                ],
+                "id": "Google-Sheets-Source",
+                "type": "batchsource",
+                "label": "Google Sheets Source",
+                "icon": "fa-plug"
+            },
+            {
+                "name": "Trash",
+                "plugin": {
+                    "name": "Trash",
+                    "type": "batchsink",
+                    "label": "Trash",
+                    "artifact": {
+                        "name": "trash-plugin",
+                        "version": "1.2.0",
+                        "scope": "USER"
+                    },
+                    "properties": {
+                        "referenceName": "Trash"
+                    }
+                },
+                "id": "Trash",
+                "type": "batchsink",
+                "label": "Trash",
+                "icon": "icon-TrashSink"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "Data Pipeline Application",
+        "maxConcurrentRuns": 1
+    }
+}

@@ -74,7 +74,7 @@ public class GoogleSheetsSinkClient extends GoogleSheetsClient<GoogleSheetsSinkC
    */
   public Spreadsheet createEmptySpreadsheet(String spreadsheetName, String sheetTitle)
     throws ExecutionException, RetryException {
-    Retryer<Spreadsheet> createSpreadsheetRetryer = APIRequestRetryer.getRetryer(config,
+    Retryer<Spreadsheet> createSpreadsheetRetryer = APIRequestRetryer.getRetryer(
       String.format("Creation of empty spreadsheet, name: '%s', sheet title: '%s'.",
         spreadsheetName, sheetTitle));
     return createSpreadsheetRetryer.call(() -> {
@@ -106,7 +106,7 @@ public class GoogleSheetsSinkClient extends GoogleSheetsClient<GoogleSheetsSinkC
    */
   public SheetProperties createEmptySheet(String spreadsheetId, String spreadsheetName, String sheetTitle)
     throws ExecutionException, RetryException {
-    Retryer<SheetProperties> createSheetRetryer = APIRequestRetryer.getRetryer(config,
+    Retryer<SheetProperties> createSheetRetryer = APIRequestRetryer.getRetryer(
       String.format("Creation of empty sheet, spreadsheet name: '%s', sheet title: '%s'.",
         spreadsheetName, sheetTitle));
     return createSheetRetryer.call(() -> {
@@ -149,7 +149,7 @@ public class GoogleSheetsSinkClient extends GoogleSheetsClient<GoogleSheetsSinkC
     appendDimensionRequest.setLength(rowsToAdd);
     Request appendRequest = new Request().setAppendDimension(appendDimensionRequest);
 
-    APIRequestRetryer.getRetryer(config,
+    APIRequestRetryer.getRetryer(
       String.format("Appending dimension of '%d' rows for spreadsheet '%s', sheet name '%s'.",
         rowsToAdd, spreadsheetsName, sheetTitle))
       .call(() -> {
@@ -180,7 +180,7 @@ public class GoogleSheetsSinkClient extends GoogleSheetsClient<GoogleSheetsSinkC
                             List<Request> contentRequests, List<Request> mergeRequests)
     throws ExecutionException, RetryException {
 
-    APIRequestRetryer.getRetryer(config,
+    APIRequestRetryer.getRetryer(
       String.format("Populating of spreadsheet '%s' with records, sheet title names '%s'.",
         spreadsheetName, sheetTitles.toString()))
       .call(() -> {
@@ -360,7 +360,7 @@ public class GoogleSheetsSinkClient extends GoogleSheetsClient<GoogleSheetsSinkC
    */
   public void moveSpreadsheetToDestinationFolder(String spreadsheetsId, String spreadsheetName)
     throws ExecutionException, RetryException {
-    APIRequestRetryer.getRetryer(config,
+    APIRequestRetryer.getRetryer(
       String.format("Moving the spreadsheet '%s' to destination folder.", spreadsheetName))
       .call(() -> {
         drive.files().update(spreadsheetsId, null)

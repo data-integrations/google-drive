@@ -1062,18 +1062,6 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     this.endDate = endDate;
   }
 
-  public void setMaxRetryCount(Integer maxRetryCount) {
-    this.maxRetryCount = maxRetryCount;
-  }
-
-  public void setMaxRetryWait(Integer maxRetryWait) {
-    this.maxRetryWait = maxRetryWait;
-  }
-
-  public void setMaxRetryJitterWait(Integer maxRetryJitterWait) {
-    this.maxRetryJitterWait = maxRetryJitterWait;
-  }
-
   public static GoogleSheetsSourceConfig of(JsonObject properties) throws IOException {
 
     GoogleSheetsSourceConfig googleSheetsSourceConfig = GoogleSheetsSourceConfig
@@ -1197,22 +1185,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
       googleSheetsSourceConfig.setEndDate(
         properties.get(GoogleSheetsSourceConfig.END_DATE).getAsString());
     }
-
-    if (properties.has(GoogleSheetsSourceConfig.MAX_RETRY_COUNT)) {
-      googleSheetsSourceConfig.setMaxRetryCount(
-        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.MAX_RETRY_COUNT).getAsString()));
-    }
-
-    if (properties.has(GoogleSheetsSourceConfig.MAX_RETRY_WAIT)) {
-      googleSheetsSourceConfig.setMaxRetryWait(
-        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.MAX_RETRY_WAIT).getAsString()));
-    }
-
-    if (properties.has(GoogleSheetsSourceConfig.MAX_RETRY_JITTER_WAIT)) {
-      googleSheetsSourceConfig.setMaxRetryJitterWait(
-        Integer.valueOf(properties.get(GoogleSheetsSourceConfig.MAX_RETRY_JITTER_WAIT).getAsString()));
-    }
-
+    
     if (properties.has(GoogleSheetsSourceConfig.AUTH_TYPE)) {
       googleSheetsSourceConfig.setAuthType(
         properties.get(GoogleSheetsSourceConfig.AUTH_TYPE).getAsString());

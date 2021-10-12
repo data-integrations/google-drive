@@ -80,18 +80,18 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
           .setTransport(httpTransport)
           .setJsonFactory(JSON_FACTORY)
           .setClientSecrets(config.getClientId(),
-                config.getClientSecret())
-            .build();
+                            config.getClientSecret())
+          .build();
         credential.setRefreshToken(config.getRefreshToken());
         break;
       case SERVICE_ACCOUNT:
         if (config.isServiceAccountJson()) {
           InputStream jsonInputStream = new ByteArrayInputStream(config.getServiceAccountJson().getBytes());
           credential = GoogleCredential.fromStream(jsonInputStream);
-        } else if (config.isServiceAccountFilePath()) {
+        } else if (config.isServiceAccountFilePath() && !Strings.isNullOrEmpty(config.getServiceAccountFilePath())) {
           credential = GoogleCredential.fromStream(new FileInputStream(config.getServiceAccountFilePath()));
         } else {
-          credential = GoogleCredential.getApplicationDefault();
+          credential = GoogleCredential.getApplicationDefault(httpTransport, JSON_FACTORY);
         }
         break;
       default:

@@ -51,6 +51,9 @@ public abstract class APIRequestRetryer {
   protected static final int LIMIT_RATE_EXCEEDED_CODE = 403;
   protected static final int BACKEND_ERROR_CODE = 500;
   protected static final int SERVICE_UNAVAILABLE_CODE = 503;
+  private static final int MAX_RETRY_WAIT = 200;
+  private static final int MAX_RETRY_COUNT = 8;
+  private static final int MAX_RETRY_JITTER_WAIT = 100;
   protected static final String TOO_MANY_REQUESTS_MESSAGE = "Too Many Requests";
   protected static final String LIMIT_RATE_EXCEEDED_MESSAGE = "Rate Limit Exceeded";
   protected static final String FORBIDDEN_STATUS_MESSAGE = "Forbidden";
@@ -58,12 +61,11 @@ public abstract class APIRequestRetryer {
   /**
    * Returns the Retryer.
    *
-   * @param config the google retrying config is provided with
    * @param operationDescription the operation description is provided
    * @param <T>
    * @return The Retryer
    */
-  public static <T> Retryer<T> getRetryer(GoogleRetryingConfig config, String operationDescription) {
+  public static <T> Retryer<T> getRetryer(String operationDescription) {
     RetryListener listener = new RetryListener() {
       @Override
       public <V> void onRetry(Attempt<V> attempt) {
@@ -94,9 +96,9 @@ public abstract class APIRequestRetryer {
       .retryIfException(APIRequestRetryer::checkThrowable)
       .retryIfExceptionOfType(SocketTimeoutException.class)
       .withWaitStrategy(WaitStrategies.join(
-        new TrueExponentialWaitStrategy(1000, TimeUnit.SECONDS.toMillis(config.getMaxRetryWait())),
-        WaitStrategies.randomWait(config.getMaxRetryJitterWait(), TimeUnit.MILLISECONDS)))
-      .withStopStrategy(StopStrategies.stopAfterAttempt(config.getMaxRetryCount()))
+        new TrueExponentialWaitStrategy(1000, TimeUnit.SECONDS.toMillis(MAX_RETRY_WAIT)),
+        WaitStrategies.randomWait(MAX_RETRY_JITTER_WAIT, TimeUnit.MILLISECONDS)))
+      .withStopStrategy(StopStrategies.stopAfterAttempt(MAX_RETRY_COUNT))
       .withRetryListener(listener)
       .build();
   }

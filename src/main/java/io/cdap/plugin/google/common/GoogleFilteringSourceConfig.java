@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 /**
  * Base Google filtering batch config. Contains common filtering configuration properties and methods.
  */
-public class GoogleFilteringSourceConfig extends GoogleRetryingConfig {
+public class GoogleFilteringSourceConfig extends GoogleAuthBaseConfig {
   public static final String FILTER = "filter";
   public static final String MODIFICATION_DATE_RANGE = "modificationDateRange";
   public static final String START_DATE = "startDate";

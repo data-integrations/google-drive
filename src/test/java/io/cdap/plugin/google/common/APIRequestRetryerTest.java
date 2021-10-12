@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutionException;
 @PrepareForTest({GoogleJsonResponseException.class})
 public class APIRequestRetryerTest {
   private static final int UNPROCESSED_CODE = 504;
-  private static final int RETRY_NUMBER = 5;
+  private static final int RETRY_NUMBER = 8;
 
   @Test
   public void testRetryCount() throws ExecutionException {
@@ -46,7 +46,7 @@ public class APIRequestRetryerTest {
 
     TestAPIClass testAPIClass = new TestAPIClass(exception);
 
-    Retryer<Void> testRetryer = APIRequestRetryer.getRetryer(prepareRetryingConfig(), "Test request");
+    Retryer<Void> testRetryer = APIRequestRetryer.getRetryer("Test request");
     try {
       testRetryer.call(() -> testAPIClass.call());
       Assert.fail("Test api call should be failed.");
@@ -65,7 +65,7 @@ public class APIRequestRetryerTest {
 
     TestAPIClass testAPIClass = new TestAPIClass(exception);
 
-    Retryer<Void> testRetryer = APIRequestRetryer.getRetryer(prepareRetryingConfig(), "Test request");
+    Retryer<Void> testRetryer = APIRequestRetryer.getRetryer("Test request");
     try {
       testRetryer.call(() -> testAPIClass.call());
       Assert.fail("Test api call should be failed.");
@@ -76,14 +76,6 @@ public class APIRequestRetryerTest {
       Assert.fail("Test api call should be failed after on execution.");
     }
     Assert.assertEquals(1, testAPIClass.counter);
-  }
-
-  private GoogleRetryingConfig prepareRetryingConfig() {
-    GoogleRetryingConfig retryingConfig = PowerMockito.mock(GoogleRetryingConfig.class);
-    PowerMockito.when(retryingConfig.getMaxRetryCount()).thenReturn(RETRY_NUMBER);
-    PowerMockito.when(retryingConfig.getMaxRetryWait()).thenReturn(2);
-    PowerMockito.when(retryingConfig.getMaxRetryJitterWait()).thenReturn(1);
-    return retryingConfig;
   }
 
   private static class TestAPIClass {

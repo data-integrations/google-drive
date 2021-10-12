@@ -1,0 +1,96 @@
+{
+    "name": "Google_Drive_Example",
+    "description": "Data Pipeline Application",
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.5.0",
+        "scope": "SYSTEM"
+    },
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "Google Drive Source",
+                "to": "Trash"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": false,
+        "stages": [
+            {
+                "name": "Google Drive Source",
+                "plugin": {
+                    "name": "GoogleDrive",
+                    "type": "batchsource",
+                    "label": "Google Drive Source",
+                    "artifact": {
+                        "name": "google-drive-plugins",
+                        "version": "1.4.0-SNAPSHOT",
+                        "scope": "USER"
+                    },
+                    "properties": {
+                        "referenceName": "GoogleDriveSourceExample",
+                        "directoryIdentifier": "",
+                        "fileMetadataProperties": "name,mimeType",
+                        "modificationDateRange": "lifetime",
+                        "fileTypesToPull": "binary",
+                        "authType": "serviceAccount",
+                        "maxPartitionSize": "0",
+                        "bodyFormat": "string",
+                        "docsExportingFormat": "text/plain",
+                        "sheetsExportingFormat": "text/csv",
+                        "drawingsExportingFormat": "image/svg+xml",
+                        "presentationsExportingFormat": "text/plain",
+                        "serviceAccountType": "JSON",
+                        "filter": "mimeType = 'text/csv'",
+                        "serviceAccountJSON": "${service_account.key}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"FileFromFolder\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"mimeType\",\"type\":\"string\"},{\"name\":\"body\",\"type\":\"string\"},{\"name\":\"offset\",\"type\":\"long\"}]}"
+                    }
+                ],
+                "id": "Google-Drive-Source",
+                "type": "batchsource",
+                "label": "Google Drive Source",
+                "icon": "fa-plug"
+            },
+            {
+                "name": "Trash",
+                "plugin": {
+                    "name": "Trash",
+                    "type": "batchsink",
+                    "label": "Trash",
+                    "artifact": {
+                        "name": "trash-plugin",
+                        "version": "1.2.0",
+                        "scope": "USER"
+                    },
+                    "properties": {
+                        "referenceName": "Trash"
+                    }
+                },
+                "id": "Trash",
+                "type": "batchsink",
+                "label": "Trash",
+                "icon": "icon-TrashSink"
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "maxConcurrentRuns": 1
+    }
+}

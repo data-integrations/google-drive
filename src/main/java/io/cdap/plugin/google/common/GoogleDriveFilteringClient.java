@@ -64,16 +64,16 @@ public class GoogleDriveFilteringClient<C extends GoogleFilteringSourceConfig> e
    */
   public List<File> getFilesSummary(List<ExportedType> exportedTypes, int filesNumber)
       throws ExecutionException, RetryException {
-    Retryer<List<File>> filesSummaryRetryer = APIRequestRetryer.getRetryer(config,
-        String.format("Get files summary, files: '%d'.", filesNumber));
+    Retryer<List<File>> filesSummaryRetryer = APIRequestRetryer.getRetryer(
+      String.format("Get files summary, files: '%d'.", filesNumber));
     return filesSummaryRetryer.call(() -> {
       List<File> files = new ArrayList<>();
       String nextToken = "";
       int retrievedFiles = 0;
       int actualFilesNumber = filesNumber;
       Drive.Files.List request = service.files().list()
-          .setQ(generateFilter(exportedTypes))
-          .setFields("nextPageToken, files(id, size)");
+        .setQ(generateFilter(exportedTypes))
+        .setFields("nextPageToken, files(id, size)");
       if (actualFilesNumber > 0) {
         request.setPageSize(actualFilesNumber);
       } else {

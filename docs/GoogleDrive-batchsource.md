@@ -9,7 +9,9 @@ Properties
 ----------
 ### Basic
 
-**Directory Identifier:** Identifier of the source folder.
+**Directory Identifier:** Identifier of the source folder. This comes after “folders/” in the URL. For example, if 
+the URL was “https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourcekey=0-XVijrJSp3E3gkdJp20MpCQ”,
+then the Directory Identifier would be “1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g”.
 
 **File Metadata Properties:** Properties that represent metadata of files. 
 They will be a part of output structured record. Descriptions for properties can be view at 
@@ -39,18 +41,21 @@ For Google Drive formats user should specify exporting format in **Exporting** s
 
 ### Authentication
 
-**Authentication Type:** Type of authentication used to access Google API. 
+**Authentication Type:** Type of authentication used to access Google API. Make sure Google Drive Api is enabled.
 OAuth2 and Service account types are available.
 
 #### OAuth2 Properties
 
-**Client ID:** OAuth2 client id.
+OAuth2 client credentials can be generated on Google Cloud
+[Credentials Page](https://console.cloud.google.com/apis/credentials)
 
-**Client Secret:** OAuth2 client secret.
+**Client ID:** OAuth2 client id used to identify the application.
 
-**Refresh Token:** OAuth2 refresh token.
+**Client Secret:** OAuth2 client secret used to access the authorization server.
 
-**Access Token:** OAuth2 access token.
+**Refresh Token:** OAuth2 refresh token to acquire new access tokens.
+
+For more details on OAuth2, see [Google Drive Api Documentation](https://developers.google.com/drive/api/v3/about-auth)
 
 #### Service Account Properties
 
@@ -63,16 +68,14 @@ Service account json can be generated on Google Cloud
 * **File Path**: Path on the local file system of the service account key used for
   authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
   When running on other clusters, the file must be present on every node in the cluster.
+  When using 'auto-detect', the cluster needs to be configured with the scope required by the Google Drive Api,
+  otherwise the preview as well as pipeline run will fail with insufficient permission error. Here, the required scope
+  is "https://www.googleapis.com/auth/drive.readonly".
 
 * **JSON**: Contents of the service account JSON file.
 
-### Retrying
-
-**Max Retry Count:** Maximum number of retry attempts.
-
-**Max Retry Wait:** Maximum wait time for attempt in seconds. Initial wait time is one second and it grows exponentially.
-
-**Max Retry Jitter Wait:** Maximum additional wait time in milliseconds.
+Make sure that the Google Drive Folder is shared to the service account email used. `Viewer` role must be granted to 
+the specified service account to read files from the Google Drive Folder.
 
 ### Advanced
 

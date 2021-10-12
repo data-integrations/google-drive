@@ -104,38 +104,6 @@
           "name": "serviceAccountJSON"
         }
       ]
-    },
-    {
-      "label": "Retrying",
-      "properties": [
-        {
-          "widget-type": "number",
-          "label": "Max Retry Count",
-          "name": "maxRetryCount",
-          "widget-attributes": {
-            "min": "0",
-            "default": "8"
-          }
-        },
-        {
-          "widget-type": "number",
-          "label": "Max Retry Wait",
-          "name": "maxRetryWait",
-          "widget-attributes": {
-            "min": "0",
-            "default": "200"
-          }
-        },
-        {
-          "widget-type": "number",
-          "label": "Max Retry Jitter Wait",
-          "name": "maxRetryJitterWait",
-          "widget-attributes": {
-            "min": "0",
-            "default": "100"
-          }
-        }
-      ]
     }
   ],
   "outputs": [],

@@ -65,7 +65,8 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   // start of workaround
   @Name(AUTH_TYPE)
   @Description("Type of authentication used to access Google API. \n" +
-    "OAuth2 and Service account types are available.")
+    "OAuth2 and Service account types are available. When using service account type make sure that the Google Drive " +
+    "Folder is shared to the service account email used with the required permission.")
   private String authType;
 
   @Name(NAME_SERVICE_ACCOUNT_TYPE)
@@ -108,7 +109,9 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   protected String serviceAccountJson;
 
   @Name(DIRECTORY_IDENTIFIER)
-  @Description("Identifier of the destination folder.")
+  @Description("Identifier of the folder. This comes after “folders/” in the URL. For example, if the URL was " +
+    "“https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourcekey=0-XVijrJSp3E3gkdJp20MpCQ”, "
+    + "then the Directory Identifier would be “1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g”.")
   private String directoryIdentifier;
 
   /**
@@ -185,6 +188,12 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     }
     final Boolean serviceAccountFilePath = isServiceAccountFilePath();
     final Boolean serviceAccountJson = isServiceAccountJson();
+
+    // we don't want the validation to fail because the VM used during the validation
+    // may be different from the VM used during runtime and may not have the Google Drive Api scope.
+    if (serviceAccountFilePath && AUTO_DETECT_VALUE.equalsIgnoreCase(accountFilePath)) {
+      return false;
+    }
 
     if (serviceAccountFilePath != null && serviceAccountFilePath) {
       if (!AUTO_DETECT_VALUE.equals(accountFilePath) && !new File(accountFilePath).exists()) {

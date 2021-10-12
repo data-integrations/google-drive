@@ -23,7 +23,7 @@ import io.cdap.cdap.etl.api.FailureCollector;
 /**
  * Base Google config for validating of properties that use schema field names as values.
  */
-public class GoogleInputSchemaFieldsUsageConfig extends GoogleRetryingConfig {
+public class GoogleInputSchemaFieldsUsageConfig extends GoogleAuthBaseConfig {
 
   protected void validateSchemaField(FailureCollector collector, Schema schema, String propertyName,
                                    String propertyValue, String propertyLabel, Schema.Type requiredSchemaType) {

@@ -107,10 +107,10 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
   }
 
   public void checkRootFolder() throws IOException {
-    service.files().get(ROOT_FOLDER_ID).execute();
+    service.files().get(ROOT_FOLDER_ID).setSupportsAllDrives(true).execute();
   }
 
   public void isFolderAccessible(String folderId) throws IOException {
-    service.files().get(folderId).execute();
+    service.files().get(folderId).setSupportsAllDrives(true).execute();
   }
 }

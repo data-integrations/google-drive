@@ -83,13 +83,13 @@ public class GoogleDriveSourceClient extends GoogleDriveFilteringClient<GoogleDr
       FileFromFolder fileFromFolder;
 
       Drive.Files.Get request = service.files().get(fileId).setFields("*");
-      File currentFile = request.execute();
+      File currentFile = request.setSupportsAllDrives(true).execute();
 
       String mimeType = currentFile.getMimeType();
       long offset = bytesFrom == null ? 0L : bytesFrom;
       if (!mimeType.startsWith(DRIVE_DOCS_MIME_PREFIX)) {
         OutputStream outputStream = new ByteArrayOutputStream();
-        Drive.Files.Get get = service.files().get(currentFile.getId());
+        Drive.Files.Get get = service.files().get(currentFile.getId()).setSupportsAllDrives(true);
 
         if (bytesFrom != null && bytesTo != null) {
           get.getMediaHttpDownloader().setDirectDownloadEnabled(true);

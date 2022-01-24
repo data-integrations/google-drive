@@ -364,6 +364,7 @@ public class GoogleSheetsSinkClient extends GoogleSheetsClient<GoogleSheetsSinkC
       String.format("Moving the spreadsheet '%s' to destination folder.", spreadsheetName))
       .call(() -> {
         drive.files().update(spreadsheetsId, null)
+          .setSupportsAllDrives(true)
           .setAddParents(config.getDirectoryIdentifier())
           .setRemoveParents("root")
           .setFields("id, parents")

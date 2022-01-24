@@ -72,6 +72,8 @@ public class GoogleDriveFilteringClient<C extends GoogleFilteringSourceConfig> e
       int retrievedFiles = 0;
       int actualFilesNumber = filesNumber;
       Drive.Files.List request = service.files().list()
+        .setSupportsAllDrives(true)
+        .setIncludeItemsFromAllDrives(true)
         .setQ(generateFilter(exportedTypes))
         .setFields("nextPageToken, files(id, size)");
       if (actualFilesNumber > 0) {

@@ -53,11 +53,13 @@ Service account json can be generated on Google Cloud
 * **File Path**: Path on the local file system of the service account key used for
   authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
   When running on other clusters, the file must be present on every node in the cluster.
-  When using 'auto-detect', the cluster needs to be configured with the scope required by the Google Drive Api,
-  otherwise the preview as well as pipeline run will fail with insufficient permission error. Here, the required scope
+  
+  When set to 'auto-detect', the cluster needs to be configured with the scope required by the Google Drive API.
+  Otherwise, the preview as well as pipeline run will fail with insufficient permission error. The required scope
   is "https://www.googleapis.com/auth/drive".
 
 * **JSON**: Contents of the service account JSON file.
 
-Make sure that the Google Drive Folder is shared to the service account email used. `Editor` role must be granted to
-the specified service account to write files to the Google Drive Folder.
+Make sure that the Google Drive Folder is shared with the service account email used. 
+To write files to a Private Google Drive, grant the `Editor` role to the specified service account. 
+To write files to a Shared Google Drive Folder, grant the `Contributor` role to the specified service account.

@@ -326,7 +326,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         // validate all sheets have the same schema
         getAndValidateSheetSchema(collector, sheetsSourceClient, spreadsheetsFiles);
       } catch (ExecutionException | RetryException e) {
-        collector.addFailure(String.format("Exception during validation."), null)
+        collector.addFailure(String.format(e.getMessage()), null)
           .withStacktrace(e.getStackTrace());
       }
     }

@@ -9,9 +9,13 @@ Properties
 ----------
 ### Basic
 
-**Directory Identifier:** Identifier of the source folder. This comes after “folders/” in the URL. For example, if the URL was 
-“https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourcekey=0-XVijrJSp3E3gkdJp20MpCQ”, 
-then the Directory Identifier would be “1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g”.
+**Directory Identifier:** Identifier of the destination folder.
+
+This comes after `folders/` in the URL. For example, if the URL is
+```
+https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourcekey=0-XVijrJSp3E3gkdJp20MpCQ
+```
+Then the Directory Identifier would be `1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g`.
 
 ### Filtering
 
@@ -36,8 +40,12 @@ For 'numbers' or 'titles' selections user can populate specific values in 'Sheet
 **Sheets Identifiers:** Set of sheets' numbers/titles to process. 
 Is shown only when 'titles' or 'numbers' are selected for 'Sheets to pull' field.
 
-**Authentication Type:** Type of authentication used to access Google API. Make sure Google Drive Api is enabled.
-OAuth2 and Service account types are available.
+### Authentication
+
+**Authentication Type:** Type of authentication used to access Google API.
+
+OAuth2 and Service Account types are available.
+Make sure `Google Drive API` and `Google Sheets API` is enabled in the `GCP Project`.
 
 #### OAuth2 Properties
 
@@ -64,15 +72,13 @@ Service account json can be generated on Google Cloud
   authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
   When running on other clusters, the file must be present on every node in the cluster.
 
-  When set to 'auto-detect', the cluster needs to be configured with the scope required by the Google Drive API.
+  When set to 'auto-detect', the GCE VM needs to be configured with the scope required by the Google Drive API.
   Otherwise, the preview as well as pipeline run will fail with insufficient permission error.
-  The required scopes are "https://www.googleapis.com/auth/drive" and 
-  "https://www.googleapis.com/auth/spreadsheets.readonly".
+  The required scopes are `https://www.googleapis.com/auth/drive` and 
+  `https://www.googleapis.com/auth/spreadsheets.readonly`.
 
-* **JSON**: Contents of the service account JSON file.
-
-Make sure that the Google Drive Folder is shared to the service account email used. `Viewer` role must be granted to
-the specified service account to read files from the Google Drive Folder.
+* **JSON**: Contents of the service account JSON file. Make sure that the Google Drive Folder is shared to the service 
+  account email. `Viewer` role must be granted to the specified service account to read files from the Google Drive Folder.
 
 ### Metadata Extraction
 
@@ -122,3 +128,50 @@ Only shown when the 'Column Names Selection' field is set to 'Custom row as colu
 **Last Data Row Index:** Last row plugin will read as data.
 
 **Read Buffer Size:** Number of rows the source reads with a single API request.
+
+### Steps to Generate OAuth2 Credentials
+1. Create credentials for the Client ID and Client Secret properties [here](https://console.cloud.google.com/apis/credentials).
+2. On the Create OAuth client ID page, under Authorized redirect URIs, specify a URI of `http://localhost:8080`.
+   This is just to generate the `refresh token`.
+3. Click `Create`. The OAuth client is created. For more information, see this [doc](https://developers.google.com/adwords/api/docs/guides/authentication#webapp).
+4. Copy the Client ID and Client Secret to the plugin properties.
+5. To get the Refresh Token, follow these steps:
+   1. Authenticate and authorize with the Google Auth server to get an authorization `code`.
+   2. Use that authorization code with the Google Token server to get a `refresh token` that the plugin will use to get future access tokens.
+
+   To get the authorization code, you can copy the URL below, change to use your `client_id`, and
+   then open that URL in a browser window.
+   ```
+   https://accounts.google.com/o/oauth2/v2/auth?
+   scope=https%3A//www.googleapis.com/auth/drive%20https://www.googleapis.com/auth/spreadsheets.readonly&
+   access_type=offline&
+   include_granted_scopes=true&
+   response_type=code&                  
+   state=state_parameter_passthrough_value&
+   redirect_uri=http%3A//localhost:8080&
+   client_id=199375159079-st8toco9pfu1qi5b45fkj59unc5th2v1.apps.googleusercontent.com
+   ```
+   This will prompt you to login, authorize this client for specified scopes,
+   and then redirect you to `http://localhost:8080`. It will look like an error page,
+   but notice that the URL of the error page redirected to include the `code`.
+   In a normal web application, that is how the authorization code is returned to the requesting web application.
+   
+   For example, URL of the page will be something like
+   ```
+   http://localhost:8080/?state=state_parameter_passthrough_value&code=4/0AX4XfWi6PsiJiPO4MjltrcD6uoRgwci-HX16aL1-Ax-tgqYgC47NnjtCCKRoVzv46m8aJw&scope=https://www.googleapis.com/auth/drive
+   ```
+   Here, code=`4/0AX4XfWi6PsiJiPO4MjltrcD6uoRgwci-HX16aL1-Ax-tgqYgC47NnjtCCKRoVzv46m8aJw`.
+
+   **NOTE**: If you see an error like this `Authorization Error — Error 400: admin_policy_enforced`,
+   then the GCP User’s organization has a policy that restricts you from using Client IDs for third party products.
+   In that case, they’ll need to get that restriction lifted, or use a different GCP user in a different org.
+   
+   With that authorization code, you can now call the Google Token server to get the `access token` and
+   the `refresh token` in the response. Set the `code`, `client_id`, and `client_secret` in the curl command below and
+   run it in a Cloud Shell terminal.
+   ```
+   curl -X POST -d "code=4/0AX4XfWjgRdrWXuNxqXOOtw_9THZlwomweFrzcoHMBbTFkrKLMvo8twSXdGT9JramIYq86w&client_id=199375159079-st8toco9pfu1qi5b45fkj59unc5th2v1.apps.googleusercontent.com&client_secret=q2zQ-vc3wG5iF5twSwBQkn68&redirect_uri=http%3A//localhost:8080&grant_type=authorization_code&access_type=offline" \
+   https://oauth2.googleapis.com/token
+   ```
+6. Now, you will have your `refresh_token`, which is the last OAuth 2.0 property that the Google Sheets Batch Source needs
+   to authorize with the Google Drive and Google Sheets API.

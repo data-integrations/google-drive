@@ -17,6 +17,7 @@
 package io.cdap.plugin.google.sheets.source;
 
 import com.github.rholder.retry.RetryException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.model.CellData;
 import com.google.api.services.sheets.v4.model.CellFormat;
@@ -24,7 +25,6 @@ import com.google.api.services.sheets.v4.model.ExtendedValue;
 import com.google.api.services.sheets.v4.model.GridRange;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.gson.JsonObject;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
@@ -312,7 +312,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         spreadsheetsFiles = driveClient
           .getFilesSummary(Collections.singletonList(ExportedType.SPREADSHEETS), 1);
       } catch (ExecutionException | RetryException e) {
-        collector.addFailure("Not a valid search query, see https://developers.google.com/drive/api/v3/ref-search-terms",
+        collector.addFailure("Invalid search query, see https://developers.google.com/drive/api/v3/ref-search-terms",
                         null).withStacktrace(e.getStackTrace());
         return validationResult;
       }

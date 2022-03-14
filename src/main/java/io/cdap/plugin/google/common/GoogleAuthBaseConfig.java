@@ -216,7 +216,7 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     try {
       driveClient.checkRootFolder();
     } catch (GoogleJsonResponseException e) {
-      collector.addFailure(e.getMessage(), "Provide valid credentials.")
+      collector.addFailure(e.getDetails().getMessage(), "Provide valid credentials.")
         .withConfigProperty(NAME_SERVICE_ACCOUNT_TYPE)
         .withStacktrace(e.getStackTrace());
     }
@@ -228,7 +228,7 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
       try {
         driveClient.isFolderAccessible(directoryIdentifier);
       } catch (GoogleJsonResponseException e) {
-        collector.addFailure(e.getMessage(), "Provide an existing folder identifier.")
+        collector.addFailure(e.getDetails().getMessage(), "Provide an existing folder identifier.")
           .withConfigProperty(DIRECTORY_IDENTIFIER)
           .withStacktrace(e.getStackTrace());
       }

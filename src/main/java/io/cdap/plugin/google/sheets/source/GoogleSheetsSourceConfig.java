@@ -17,6 +17,7 @@
 package io.cdap.plugin.google.sheets.source;
 
 import com.github.rholder.retry.RetryException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.model.CellData;
 import com.google.api.services.sheets.v4.model.CellFormat;
@@ -311,8 +312,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         spreadsheetsFiles = driveClient
           .getFilesSummary(Collections.singletonList(ExportedType.SPREADSHEETS), 1);
       } catch (ExecutionException | RetryException e) {
-        collector.addFailure("Files summary retrieving failed.", null)
-          .withStacktrace(e.getStackTrace());
+        collector.addFailure("Invalid search query, see https://developers.google.com/drive/api/v3/ref-search-terms",
+                        null).withStacktrace(e.getStackTrace());
         return validationResult;
       }
 
@@ -326,8 +327,13 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         // validate all sheets have the same schema
         getAndValidateSheetSchema(collector, sheetsSourceClient, spreadsheetsFiles);
       } catch (ExecutionException | RetryException e) {
-        collector.addFailure(String.format("Exception during validation."), null)
-          .withStacktrace(e.getStackTrace());
+        String message = e.getMessage();
+        if (e.getCause() instanceof GoogleJsonResponseException) {
+          GoogleJsonResponseException cause = (GoogleJsonResponseException) e.getCause();
+          message = cause.getDetails().getMessage();
+        }
+        collector.addFailure(String.format(message), null)
+                .withStacktrace(e.getStackTrace());
       }
     }
 

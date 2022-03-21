@@ -40,6 +40,7 @@ public class MultipleRowRecordTest {
     Assert.assertEquals(TEST_SPREADSHEET_NAME, firstRecord.getSpreadsheetName());
     Assert.assertEquals(TEST_SHEET_NAME, firstRecord.getSheetTitle());
 
+    Assert.assertFalse(firstRecord.isEmptyData());
     Map<String, ComplexSingleValueColumn> headeredCells = firstRecord.getHeaderedCells();
 
     // check top-level
@@ -71,11 +72,11 @@ public class MultipleRowRecordTest {
   @Test
   public void testGetRowRecordLastInRange() {
     MultipleRowRecord testMultipleRowRecord = getTestRecord();
-    RowRecord firstRecord = testMultipleRowRecord.getRowRecord(1);
-
+    RowRecord firstRecord = testMultipleRowRecord.getRowRecord(2);
     Assert.assertEquals(TEST_SPREADSHEET_NAME, firstRecord.getSpreadsheetName());
     Assert.assertEquals(TEST_SHEET_NAME, firstRecord.getSheetTitle());
 
+    Assert.assertFalse(firstRecord.isEmptyData());
     Map<String, ComplexSingleValueColumn> headeredCells = firstRecord.getHeaderedCells();
 
     // check top-level
@@ -107,11 +108,12 @@ public class MultipleRowRecordTest {
   @Test
   public void testGetRowRecordOutOfRange() {
     MultipleRowRecord testMultipleRowRecord = getTestRecord();
-    RowRecord firstRecord = testMultipleRowRecord.getRowRecord(2);
+    RowRecord firstRecord = testMultipleRowRecord.getRowRecord(3);
 
     Assert.assertEquals(TEST_SPREADSHEET_NAME, firstRecord.getSpreadsheetName());
     Assert.assertEquals(TEST_SHEET_NAME, firstRecord.getSheetTitle());
 
+    Assert.assertTrue(firstRecord.isEmptyData());
     Map<String, ComplexSingleValueColumn> headeredCells = firstRecord.getHeaderedCells();
 
     // check top-level
@@ -146,6 +148,7 @@ public class MultipleRowRecordTest {
 
     List<CellData> headerCells0 = Arrays.asList(
       new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("r00")),
+      new CellData(),
       new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("r10")));
     headeredCells.put("h0", new ComplexMultiValueColumn(headerCells0));
 
@@ -153,9 +156,11 @@ public class MultipleRowRecordTest {
 
     List<CellData> headerCells10 = Arrays.asList(
       new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("r01")),
+      new CellData(),
       new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("r11")));
     List<CellData> headerCells11 = Arrays.asList(
       new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("r02")),
+      new CellData(),
       new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("r12")));
     subHeaderdCells.put("h10", new ComplexMultiValueColumn(headerCells10));
     subHeaderdCells.put("h11", new ComplexMultiValueColumn(headerCells11));
@@ -163,5 +168,43 @@ public class MultipleRowRecordTest {
 
     return new MultipleRowRecord(TEST_SPREADSHEET_NAME, TEST_SHEET_NAME, metadata,
       headeredCells, Collections.emptyList());
+  }
+
+  @Test
+  public void testEmptyRowRecord() {
+    MultipleRowRecord testMultipleRowRecord = getTestRecord();
+    RowRecord firstRecord = testMultipleRowRecord.getRowRecord(1);
+
+    Assert.assertEquals(TEST_SPREADSHEET_NAME, firstRecord.getSpreadsheetName());
+    Assert.assertEquals(TEST_SHEET_NAME, firstRecord.getSheetTitle());
+
+    Map<String, ComplexSingleValueColumn> headeredCells = firstRecord.getHeaderedCells();
+
+    Assert.assertTrue(firstRecord.isEmptyData());
+
+    // check top-level
+    Assert.assertEquals(2, headeredCells.size());
+    Assert.assertTrue(headeredCells.containsKey("h0"));
+    Assert.assertTrue(headeredCells.containsKey("h1"));
+
+    // check simple header
+    ComplexSingleValueColumn simpleHeader = headeredCells.get("h0");
+    Assert.assertTrue(simpleHeader.getData().isEmpty());
+    Assert.assertTrue(simpleHeader.getSubColumns().isEmpty());
+
+    // check complex header
+    ComplexSingleValueColumn complexHeader = headeredCells.get("h1");
+    Assert.assertNull(complexHeader.getData());
+    Assert.assertEquals(2, complexHeader.getSubColumns().size());
+
+    // check first sub-column
+    ComplexSingleValueColumn subColumn0 = complexHeader.getSubColumns().get("h10");
+    Assert.assertTrue(subColumn0.getData().isEmpty());
+    Assert.assertTrue(subColumn0.getSubColumns().isEmpty());
+
+    // check second sub-column
+    ComplexSingleValueColumn subColumn1 = complexHeader.getSubColumns().get("h11");
+    Assert.assertTrue(subColumn1.getData().isEmpty());
+    Assert.assertTrue(subColumn1.getSubColumns().isEmpty());
   }
 }

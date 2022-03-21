@@ -86,6 +86,13 @@ public class MultipleRowRecord {
     return new RowRecord(spreadsheetName, sheetTitle, metadata, row, isEmptyRow);
   }
 
+  /**
+   * Converts headered cells entries to a single result row of given index and returns true if row is empty.
+   * @param headeredCells The headered cells
+   * @param resultRow The result row
+   * @param index The index
+   * @return true if row is empty, otherwise false.
+   */
   private boolean convertToSingleRow(Map<String, ComplexMultiValueColumn> headeredCells,
                                      Map<String, ComplexSingleValueColumn> resultRow,
                                      int index) {
@@ -99,7 +106,7 @@ public class MultipleRowRecord {
         CellData cellData;
         if (headerValue.getData().size() > index) {
           cellData = headerValue.getData().get(index);
-          isEmptyRow = cellData == null;
+          isEmptyRow = isEmptyRow && (cellData == null || cellData.isEmpty());
         } else {
           cellData = null;
         }

@@ -51,25 +51,23 @@ OAuth2 client credentials can be generated on Google Cloud
 
 For more details on OAuth2, see [Google Drive Api Documentation](https://developers.google.com/drive/api/v3/about-auth)
 
-#### Service Account Properties
+#### Service Account Type
 
-**Account File Path:** Path on the local file system of the service account key used for authorization.
-Can be set to 'auto-detect' for getting service account from system variable.
-The file/system variable must be present on every node in the cluster.
-Service account json can be generated on Google Cloud
-[Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)
+Make sure that the Google Drive Folder is shared with the specified service account email. 
+To write files to a Private Google Drive, grant the `Editor` role to the specified service account.
+To write files to a Shared Google Drive Folder, grant the `Contributor` role to the specified service account.
 
-* **File Path**: Path on the local file system of the service account key used for
+* **Service Account File Path**: Path on the local file system of the service account key used for
   authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
   When running on other clusters, the file must be present on every node in the cluster.
 
   When set to 'auto-detect', the GCE VM needs to be configured with the scope required by the Google Drive API.
-  Otherwise, the preview as well as pipeline run will fail with insufficient permission error.
-  The required scopes are `https://www.googleapis.com/auth/drive` and `https://www.googleapis.com/auth/spreadsheets`.
+  Otherwise, the preview as well as pipeline run will fail with insufficient permission error. The required scopes
+  are `https://www.googleapis.com/auth/drive` and `https://www.googleapis.com/auth/spreadsheets`.
 
-* **JSON**: Contents of the service account JSON file. Make sure that the Google Drive Folder is shared with the 
-  service account email. To write files to a Private Google Drive, grant the `Editor` role to the specified service account. 
-  To write files to a Shared Google Drive Folder, grant the `Contributor` role to the specified service account.
+
+* **Service Account JSON**: Contents of the service account JSON file. Service Account JSON can be generated on Google Cloud
+  [Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)
 
 ### Buffering And Paralellization
 

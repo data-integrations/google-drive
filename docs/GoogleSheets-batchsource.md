@@ -60,25 +60,22 @@ OAuth2 client credentials can be generated on Google Cloud
 
 For more details on OAuth2, see [Google Drive Api Documentation](https://developers.google.com/drive/api/v3/about-auth)
 
-#### Service Account Properties
+#### Service Account Type
 
-**Account File Path:** Path on the local file system of the service account key used for authorization.
-Can be set to 'auto-detect' for getting service account from system variable.
-The file/system variable must be present on every node in the cluster.
-Service account json can be generated on Google Cloud
-[Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)
+Make sure that the Google Drive Folder is shared with the specified service account email. 
+`Viewer` role must be granted to the specified service account to read files from the Google Drive Folder.
 
-* **File Path**: Path on the local file system of the service account key used for
+* **Service Account File Path**: Path on the local file system of the service account key used for
   authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
   When running on other clusters, the file must be present on every node in the cluster.
 
   When set to 'auto-detect', the GCE VM needs to be configured with the scope required by the Google Drive API.
-  Otherwise, the preview as well as pipeline run will fail with insufficient permission error.
-  The required scopes are `https://www.googleapis.com/auth/drive` and 
-  `https://www.googleapis.com/auth/spreadsheets.readonly`.
+  Otherwise, the preview as well as pipeline run will fail with insufficient permission error. The required scopes
+  are `https://www.googleapis.com/auth/drive` and `https://www.googleapis.com/auth/spreadsheets.readonly`.
 
-* **JSON**: Contents of the service account JSON file. Make sure that the Google Drive Folder is shared to the service 
-  account email. `Viewer` role must be granted to the specified service account to read files from the Google Drive Folder.
+
+* **Service Account JSON**: Contents of the service account JSON file. Service Account JSON can be generated on Google Cloud
+  [Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)
 
 ### Metadata Extraction
 

@@ -38,7 +38,7 @@ public class SchemaBuilder {
   public static Schema buildSchema(GoogleSheetsSourceConfig config,
                                    List<ColumnComplexSchemaInfo> dataSchemaInfo) {
     List<Schema.Field> generalFields = new ArrayList<>();
-    if (!config.containsMacro(config.ADD_NAME_FIELDS) && config.getAddNameFields()) {
+    if (!config.containsMacro(GoogleSheetsSourceConfig.ADD_NAME_FIELDS) && config.getAddNameFields()) {
       generalFields.add(Schema.Field.of(config.getSpreadsheetFieldName(), Schema.of(Schema.Type.STRING)));
       generalFields.add(Schema.Field.of(config.getSheetFieldName(), Schema.of(Schema.Type.STRING)));
     }
@@ -55,8 +55,8 @@ public class SchemaBuilder {
       }
     }
 
-    if (!config.containsMacro(config.EXTRACT_METADATA) && !config.containsMacro(config.METADATA_FIELD_NAME)
-      && config.isExtractMetadata()) {
+    if (!config.containsMacro(GoogleSheetsSourceConfig.EXTRACT_METADATA) &&
+      !config.containsMacro(GoogleSheetsSourceConfig.METADATA_FIELD_NAME) && config.isExtractMetadata()) {
       generalFields.add(Schema.Field.of(config.getMetadataFieldName(),
           Schema.mapOf(Schema.of(Schema.Type.STRING), Schema.of(Schema.Type.STRING))));
     }

@@ -188,13 +188,12 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   @Macro
   private Integer lastFooterRow;
 
-  @Nullable
   @Name(LAST_DATA_COLUMN)
-  @Description("Last column plugin will read as data.")
+  @Description("Last column plugin will read as data. It will be ignored if the Column Names " +
+    "Row contain less number of columns.")
   @Macro
   private String lastDataColumn;
 
-  @Nullable
   @Name(LAST_DATA_ROW)
   @Description("Last row plugin will read as data.")
   @Macro
@@ -272,8 +271,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
    * @param collector throws validation exception
    */
   public Schema getSchema(FailureCollector collector) {
-    if (schema == null && !containsMacro(NAME_SERVICE_ACCOUNT_TYPE) && !containsMacro(ACCOUNT_FILE_PATH)
-      && !containsMacro(NAME_SERVICE_ACCOUNT_JSON)) {
+    if (schema == null && shouldGetSchema()) {
       if (dataSchemaInfo.isEmpty()) {
         collector.addFailure("There are no headers to process.",
                              "Perhaps no validation step was executed before schema generation.")
@@ -282,6 +280,13 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
       schema = SchemaBuilder.buildSchema(this, new ArrayList<>(dataSchemaInfo.values()));
     }
     return schema;
+  }
+
+  private boolean shouldGetSchema() {
+    return !containsMacro(SHEETS_TO_PULL) && !containsMacro(SHEETS_IDENTIFIERS) &&
+      !containsMacro(COLUMN_NAMES_SELECTION) && !containsMacro(CUSTOM_COLUMN_NAMES_ROW) &&
+      !containsMacro(LAST_DATA_COLUMN) && !containsMacro(NAME_SERVICE_ACCOUNT_TYPE) &&
+      !containsMacro(ACCOUNT_FILE_PATH) && !containsMacro(NAME_SERVICE_ACCOUNT_JSON);
   }
 
   /**
@@ -296,6 +301,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     dataSchemaInfo = new LinkedHashMap<>();
 
     validateColumnNamesRow(collector);
+    validateLastDataColumnIndexAndLastRowIndex(collector);
 
     if (collector.getValidationFailures().isEmpty() && validationResult.isDirectoryAccessible()) {
       GoogleDriveFilteringClient driveClient;
@@ -348,6 +354,21 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         getColumnNamesSelection();
       } catch (InvalidPropertyTypeException e) {
         collector.addFailure(e.getMessage(), null).withConfigProperty(COLUMN_NAMES_SELECTION);
+      }
+    }
+  }
+
+  private void validateLastDataColumnIndexAndLastRowIndex(FailureCollector collector) {
+    if (!containsMacro(LAST_DATA_COLUMN)) {
+      if (getLastDataColumn() <= 0) {
+        collector.addFailure("Last Data Column Index should be greater than 0",
+                             null).withConfigProperty(LAST_DATA_COLUMN);
+      }
+    }
+    if (!containsMacro(LAST_DATA_ROW)) {
+      if (getLastDataRow() <= 0) {
+        collector.addFailure("Last Data Row Index should be greater than 0",
+                             null).withConfigProperty(LAST_DATA_ROW);
       }
     }
   }
@@ -431,7 +452,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
                                          List<File> spreadsheetsFiles) throws ExecutionException, RetryException {
     if (!containsMacro(SHEETS_TO_PULL) && !containsMacro(SHEETS_IDENTIFIERS)
       && !containsMacro(COLUMN_NAMES_SELECTION) && !containsMacro(CUSTOM_COLUMN_NAMES_ROW)
-      && collector.getValidationFailures().isEmpty()) {
+      && !containsMacro(LAST_DATA_COLUMN) && collector.getValidationFailures().isEmpty()) {
 
       String currentSpreadsheetId = null;
       String currentSheetTitle = null;
@@ -465,14 +486,13 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
           firstDataRow = subColumnNamesRow + 1;
         }
 
+        int lastDataColumn = getLastDataColumn();
+
         if (!getColumnNamesSelection().equals(HeaderSelection.NO_COLUMN_NAMES)) {
           LinkedHashMap<Integer, ColumnComplexSchemaInfo> resultHeaderTitles = new LinkedHashMap<>();
           Map.Entry<String, List<String>> fileTitles = requiredTitles.entrySet().iterator().next();
           currentSpreadsheetId = fileTitles.getKey();
-          currentSheetTitle = null;
-
-          String sheetTitle = fileTitles.getValue().get(0);
-          currentSheetTitle = sheetTitle;
+          currentSheetTitle = fileTitles.getValue().get(0);
 
           // get rows for columns and data
           MergesForNumeredRows headerDataRows = sheetsSourceClient.getSingleRows(currentSpreadsheetId,
@@ -511,7 +531,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
             dataRow = subColumnsRow;
           }
 
-          resultHeaderTitles = processColumns(columnsRow, subColumnsRow, dataRow, columnMerges, collector);
+          resultHeaderTitles = processColumns(columnsRow, subColumnsRow, dataRow, columnMerges,
+                                              lastDataColumn, collector);
           if (collector.getValidationFailures().isEmpty()) {
             dataSchemaInfo = resultHeaderTitles;
           }
@@ -524,9 +545,9 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
             firstFileTitles.getValue().get(0), Collections.singleton(firstDataRow));
           List<CellData> dataCells = firstRowData.getNumeredRows().get(firstDataRow);
           if (CollectionUtils.isEmpty(dataCells)) {
-            dataSchemaInfo = defaultGeneratedHeaders(getLastDataColumn());
+            dataSchemaInfo = defaultGeneratedHeaders(lastDataColumn);
           } else {
-            dataSchemaInfo = defaultGeneratedHeaders(dataCells.size());
+            dataSchemaInfo = defaultGeneratedHeaders(Math.min(dataCells.size(), lastDataColumn));
           }
         }
       } catch (IOException e) {
@@ -541,11 +562,12 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
                                                                          List<CellData> subColumnsRow,
                                                                          List<CellData> dataRow,
                                                                          List<GridRange> columnMerges,
+                                                                         int lastDataColumn,
                                                                          FailureCollector collector) {
     LinkedHashMap<Integer, ColumnComplexSchemaInfo> columnHeaders = new LinkedHashMap<>();
 
     List<String> headerTitles = new ArrayList<>();
-    for (int i = 0; i < columnsRow.size(); i++) {
+    for (int i = 0; i < Math.min(columnsRow.size(), lastDataColumn); i++) {
       CellData columnHeaderCell = columnsRow.get(i);
       int index = i;
       GridRange partOfMerge = columnMerges.stream()
@@ -874,12 +896,10 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     return lastFooterRow == null ? 0 : lastFooterRow;
   }
 
-  @Nullable
   public Integer getLastDataColumn() {
     return Integer.parseInt(lastDataColumn);
   }
 
-  @Nullable
   public Integer getLastDataRow() {
     return Integer.parseInt(lastDataRow);
   }

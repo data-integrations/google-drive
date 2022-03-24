@@ -120,7 +120,8 @@ _Treat first row as column names_ - the plugin uses first row for schema definin
 **Custom Row Index For Column Names:** Number of the row to be treated as a header.
 Only shown when the 'Column Names Selection' field is set to 'Custom row as column names' header.
 
-**Last Data Column Index:** Last column plugin will read as data.
+**Last Data Column Index:** Last column plugin will read as data. It will be ignored if the Column 
+Names Row contains less number of columns.
 
 **Last Data Row Index:** Last row plugin will read as data.
 

@@ -24,6 +24,7 @@ import com.google.api.services.sheets.v4.model.CellFormat;
 import com.google.api.services.sheets.v4.model.ExtendedValue;
 import com.google.api.services.sheets.v4.model.GridRange;
 import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
@@ -93,11 +94,6 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   public static final String SHEETS_TO_PULL_LABEL = "Sheets to pull";
   public static final String FORMATTING_LABEL = "Formatting";
   public static final String SHEETS_IDENTIFIERS_LABEL = "Sheets identifiers";
-  public static final String FIRST_HEADER_ROW_LABEL = "First Header Row Index";
-  public static final String LAST_HEADER_ROW_LABEL = "Last Header Row Index";
-  public static final String FIRST_FOOTER_ROW_LABEL = "First Footer Row Index";
-  public static final String LAST_FOOTER_ROW_LABEL = "Last Footer Row Index";
-  public static final String METADATA_CELLS_LABEL = "Metadata Cells\n";
   public static final String CONFIGURATION_PARSE_PROPERTY_NAME = "properties";
   private static final Logger LOG = LoggerFactory.getLogger(GoogleSheetsSourceConfig.class);
   private static final Pattern CELL_ADDRESS = Pattern.compile("^([A-Z]+)([0-9]+)$");
@@ -302,6 +298,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
 
     validateColumnNamesRow(collector);
     validateLastDataColumnIndexAndLastRowIndex(collector);
+    validateSpreadsheetAndSheetFieldNames(collector);
 
     if (collector.getValidationFailures().isEmpty() && validationResult.isDirectoryAccessible()) {
       GoogleDriveFilteringClient driveClient;
@@ -369,6 +366,21 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
       if (getLastDataRow() <= 0) {
         collector.addFailure("Last Data Row Index should be greater than 0",
                              null).withConfigProperty(LAST_DATA_ROW);
+      }
+    }
+  }
+
+  private void validateSpreadsheetAndSheetFieldNames(FailureCollector collector) {
+    if (!containsMacro(SPREADSHEET_FIELD_NAME) && getAddNameFields()) {
+      if (Strings.isNullOrEmpty(getSpreadsheetFieldName())) {
+        collector.addFailure("Spreadsheet Field Name cannot be empty or null",
+                             null).withConfigProperty(SPREADSHEET_FIELD_NAME);
+      }
+    }
+    if (!containsMacro(SHEET_FIELD_NAME) && getAddNameFields()) {
+      if (Strings.isNullOrEmpty(getSpreadsheetFieldName())) {
+        collector.addFailure("Sheet Field Name cannot be empty or null",
+                             null).withConfigProperty(SHEET_FIELD_NAME);
       }
     }
   }
@@ -805,7 +817,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   }
 
   private Map<String, String> validateMetadataCells(FailureCollector collector) {
-    Map<String, String> pairs = metadataInputToMap(metadataCells);
+    Map<String, String> pairs = metadataInputToMap(getMetadataCells());
     Set<String> keys = new HashSet<>();
     Set<String> values = new HashSet<>();
     for (Map.Entry<String, String> pairEntry : pairs.entrySet()) {
@@ -904,9 +916,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     return Integer.parseInt(lastDataRow);
   }
 
-  @Nullable
   public String getMetadataCells() {
-    return metadataCells;
+    return metadataCells == null ? "" : metadataCells;
   }
 
   public String getMetadataFieldName() {
@@ -950,7 +961,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   public List<MetadataKeyValueAddress> getMetadataCoordinates() {
     List<MetadataKeyValueAddress> metadataCoordinates = new ArrayList<>();
     if (extractMetadata) {
-      Map<String, String> keyValuePairs = metadataInputToMap(metadataCells);
+      Map<String, String> keyValuePairs = metadataInputToMap(getMetadataCells());
 
       for (Map.Entry<String, String> pair : keyValuePairs.entrySet()) {
         metadataCoordinates.add(new MetadataKeyValueAddress(toCoordinate(pair.getKey()),
@@ -968,14 +979,12 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     throw new IllegalArgumentException(String.format("Cannot to parse '%s' cell address.", address));
   }
 
-  @Nullable
   public Integer getReadBufferSize() {
-    return readBufferSize;
+    return readBufferSize == null ? 100 : readBufferSize;
   }
 
-  @Nullable
   public Boolean getAddNameFields() {
-    return addNameFields;
+    return addNameFields != null && addNameFields;
   }
 
   @Nullable

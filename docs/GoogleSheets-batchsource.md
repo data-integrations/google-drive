@@ -125,7 +125,7 @@ Names Row contains less number of columns.
 
 **Last Data Row Index:** Last row plugin will read as data.
 
-**Read Buffer Size:** Number of rows the source reads with a single API request.
+**Read Buffer Size:** Number of rows the source reads with a single API request. Default value is 100.
 
 ### Steps to Generate OAuth2 Credentials
 1. Create credentials for the Client ID and Client Secret properties [here](https://console.cloud.google.com/apis/credentials).

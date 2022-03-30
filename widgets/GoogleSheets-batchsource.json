@@ -189,7 +189,7 @@
         },
         {
           "widget-type": "number",
-          "label": "First Header Row Index",
+          "label": "First Row of Header",
           "name": "firstHeaderRow",
           "widget-attributes": {
             "default": null,
@@ -198,7 +198,7 @@
         },
         {
           "widget-type": "number",
-          "label": "Last Header Row Index",
+          "label": "Last Row of Header",
           "name": "lastHeaderRow",
           "widget-attributes": {
             "default": null,
@@ -207,7 +207,7 @@
         },
         {
           "widget-type": "number",
-          "label": "First Footer Row Index",
+          "label": "First Row of Footer",
           "name": "firstFooterRow",
           "widget-attributes": {
             "default": null,
@@ -216,7 +216,7 @@
         },
         {
           "widget-type": "number",
-          "label": "Last Footer Row Index",
+          "label": "Last Row of Footer",
           "name": "lastFooterRow",
           "widget-attributes": {
             "default": null,
@@ -329,7 +329,7 @@
         },
         {
           "widget-type": "number",
-          "label": "Custom Row Index For Column Names",
+          "label": "Column Names Row Number",
           "name": "customColumnNamesRow",
           "widget-attributes": {
             "default": "1",
@@ -338,7 +338,7 @@
         },
         {
           "widget-type": "number",
-          "label": "Last Data Column Index",
+          "label": "Number of Columns to Read",
           "name": "lastDataColumn",
           "widget-attributes": {
             "default": "26",
@@ -347,7 +347,7 @@
         },
         {
           "widget-type": "number",
-          "label": "Last Data Row Index",
+          "label": "Number of Rows to Read",
           "name": "lastDataRow",
           "widget-attributes": {
             "default": "1000",

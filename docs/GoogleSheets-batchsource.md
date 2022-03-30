@@ -86,13 +86,13 @@ Instead, they are available in every record as a field called 'metadata', which 
 **Metadata Field Name:** Name of the record with metadata content. 
 It is needed to distinguish metadata record from possible column with the same name.
 
-**First Header Row Index:** Row number of the first row to be treated as header.
+**First Row of Header:** Row number of the first row to be treated as header.
 
-**Last Header Row Index:** Row number of the last row to be treated as header.
+**Last Row of Header:** Row number of the last row to be treated as header.
 
-**First Footer Row Index:** Row number of the first row to be treated as footer.
+**First Row of Footer:** Row number of the first row to be treated as footer.
 
-**Last Footer Row Index:** Row number of the last row to be treated as footer.
+**Last Row of Footer:** Row number of the last row to be treated as footer.
 
 **Metadata Cells:** Set of the cells for key-value pairs to extract as metadata from the specified metadata sections.
 Only shown if **Extract metadata** is set to true. The cell numbers should be within the header or footer.
@@ -117,13 +117,13 @@ Are available following values: _No column names_ - default sheet column names w
 _Treat first row as column names_ - the plugin uses first row for schema defining and field names,
  _Custom row as column names_ - as previous, but for custom row index.
 
-**Custom Row Index For Column Names:** Number of the row to be treated as a header.
+**Column Names Row Number:** Number of the row to be treated as a header.
 Only shown when the 'Column Names Selection' field is set to 'Custom row as column names' header.
 
-**Last Data Column Index:** Last column plugin will read as data. It will be ignored if the Column 
+**Number of Columns to Read:** Last column plugin will read as data. It will be ignored if the Column 
 Names Row contains less number of columns.
 
-**Last Data Row Index:** Last row plugin will read as data.
+**Number of Rows to Read:** Last row plugin will read as data.
 
 **Read Buffer Size:** Number of rows the source reads with a single API request. Default value is 100.
 

@@ -9,7 +9,7 @@ Properties
 ----------
 ### Basic
 
-**Directory Identifier:** Identifier of the destination folder.
+**Directory Identifier:** Identifier of the source folder.
 
 This comes after `folders/` in the URL. For example, if the URL is
 ```
@@ -48,7 +48,10 @@ For Google Drive formats user should specify exporting format in **Exporting** s
 **Authentication Type:** Type of authentication used to access Google API. 
 
 OAuth2 and Service Account types are available.
-Make sure `Google Drive API` is enabled in the `GCP Project`.
+
+Make sure that:
+* `Google Drive API` is enabled in the `GCP Project`.
+* `Google Drive Folder` is shared to the service account email used with the required permission.
 
 #### OAuth2 Properties
 

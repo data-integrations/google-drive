@@ -36,7 +36,10 @@ output sheet.
 **Authentication Type:** Type of authentication used to access Google API.
 
 OAuth2 and Service Account types are available.
-Make sure `Google Drive API` and `Google Sheets API` is enabled in the `GCP Project`.
+
+Make sure that:
+* `Google Drive API` and `Google Sheets API` is enabled in the `GCP Project`.
+* `Google Drive Folder` is shared to the service account email used with the required permission.
 
 #### OAuth2 Properties
 

@@ -155,8 +155,7 @@ public class GoogleSheetsRecordWriter extends RecordWriter<NullWritable, Flatter
 
       // 3. extend column dimension if needed
       if (record.getHeader().getWidth() > sheetsColumnCount.get(spreadsheetName).get(sheetTitle)) {
-        int extensionSize = record.getHeader().getWidth() -
-          sheetsRowCount.get(spreadsheetName).get(sheetTitle);
+        int extensionSize = record.getHeader().getWidth();
         sheetsSinkClient.extendDimension(spreadsheetId, spreadsheetName, sheetTitle, sheetId, extensionSize,
           DimensionType.COLUMNS);
         sheetsColumnCount.get(spreadsheetName).put(sheetTitle, record.getHeader().getWidth());

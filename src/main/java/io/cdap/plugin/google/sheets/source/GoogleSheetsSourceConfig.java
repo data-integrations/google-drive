@@ -117,7 +117,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   @Name(NAME_SCHEMA)
   @Description("The schema of the table to read.")
   @Macro
-  private transient Schema schema = null;
+  private String schema;
 
   @Name(FORMATTING)
   @Description("Output format for numeric sheet cells. " +
@@ -186,12 +186,12 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
 
   @Name(LAST_DATA_COLUMN)
   @Description("Last column plugin will read as data. It will be ignored if the Column Names " +
-    "Row contain less number of columns.")
+    "Row contain less number of columns. Set it to 0 to read all the columns in the sheet.")
   @Macro
   private String lastDataColumn;
 
   @Name(LAST_DATA_ROW)
-  @Description("Last row plugin will read as data.")
+  @Description("Last row plugin will read as data. Set it to 0 to read all the rows in the sheet.")
   @Macro
   private String lastDataRow;
 
@@ -267,22 +267,26 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
    * @param collector throws validation exception
    */
   public Schema getSchema(FailureCollector collector) {
-    if (schema == null && shouldGetSchema()) {
+    Schema existingSchema = this.getSchema();
+    if (existingSchema == null && shouldGetSchema()) {
       if (dataSchemaInfo.isEmpty()) {
         collector.addFailure("There are no headers to process.",
                              "Perhaps no validation step was executed before schema generation.")
           .withConfigProperty(SCHEMA);
       }
-      schema = SchemaBuilder.buildSchema(this, new ArrayList<>(dataSchemaInfo.values()));
+      existingSchema = SchemaBuilder.buildSchema(this, new ArrayList<>(dataSchemaInfo.values()));
     }
-    return schema;
+    return existingSchema;
   }
 
   private boolean shouldGetSchema() {
     return !containsMacro(SHEETS_TO_PULL) && !containsMacro(SHEETS_IDENTIFIERS) &&
       !containsMacro(COLUMN_NAMES_SELECTION) && !containsMacro(CUSTOM_COLUMN_NAMES_ROW) &&
       !containsMacro(LAST_DATA_COLUMN) && !containsMacro(NAME_SERVICE_ACCOUNT_TYPE) &&
-      !containsMacro(ACCOUNT_FILE_PATH) && !containsMacro(NAME_SERVICE_ACCOUNT_JSON);
+      !containsMacro(ACCOUNT_FILE_PATH) && !containsMacro(NAME_SERVICE_ACCOUNT_JSON) &&
+      !containsMacro(CLIENT_ID) && !containsMacro(CLIENT_SECRET) &&
+      !containsMacro(REFRESH_TOKEN) && !containsMacro(FILE_IDENTIFIER) &&
+      !containsMacro(DIRECTORY_IDENTIFIER) && !containsMacro(ACCESS_TOKEN);
   }
 
   /**
@@ -300,7 +304,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     validateLastDataColumnIndexAndLastRowIndex(collector);
     validateSpreadsheetAndSheetFieldNames(collector);
 
-    if (collector.getValidationFailures().isEmpty() && validationResult.isDirectoryAccessible()) {
+    if (collector.getValidationFailures().isEmpty() &&
+      (validationResult.isDirectoryOrFileAccessible())) {
       GoogleDriveFilteringClient driveClient;
       GoogleSheetsSourceClient sheetsSourceClient;
       try {
@@ -315,7 +320,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         spreadsheetsFiles = driveClient
           .getFilesSummary(Collections.singletonList(ExportedType.SPREADSHEETS), 1);
       } catch (ExecutionException | RetryException e) {
-        collector.addFailure("Invalid search query, see https://developers.google.com/drive/api/v3/ref-search-terms",
+        collector.addFailure(String.format("Failed while getting file schema due to reason : %s", e.getMessage()),
                         null).withStacktrace(e.getStackTrace());
         return validationResult;
       }
@@ -357,14 +362,14 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
 
   private void validateLastDataColumnIndexAndLastRowIndex(FailureCollector collector) {
     if (!containsMacro(LAST_DATA_COLUMN)) {
-      if (getLastDataColumn() <= 0) {
-        collector.addFailure("Last Data Column Index should be greater than 0",
+      if (getLastDataColumn() < 0) {
+        collector.addFailure("Last Data Column Index should be equal or greater than 0",
                              null).withConfigProperty(LAST_DATA_COLUMN);
       }
     }
     if (!containsMacro(LAST_DATA_ROW)) {
-      if (getLastDataRow() <= 0) {
-        collector.addFailure("Last Data Row Index should be greater than 0",
+      if (getLastDataRow() < 0) {
+        collector.addFailure("Last Data Row Index should be equal or greater than 0",
                              null).withConfigProperty(LAST_DATA_ROW);
       }
     }
@@ -579,6 +584,9 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     LinkedHashMap<Integer, ColumnComplexSchemaInfo> columnHeaders = new LinkedHashMap<>();
 
     List<String> headerTitles = new ArrayList<>();
+    if (lastDataColumn == 0) {
+      lastDataColumn = columnsRow.size();
+    }
     for (int i = 0; i < Math.min(columnsRow.size(), lastDataColumn); i++) {
       CellData columnHeaderCell = columnsRow.get(i);
       int index = i;
@@ -691,8 +699,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
    * Returns the int.
    * @return The int
    */
-  public int getActualLastDataRow() {
-    int lastDataRow = getLastDataRow();
+  public int getActualLastDataRow(int recordsInSheet) {
+    int lastDataRow = getLastDataRow() == 0 ? recordsInSheet : getLastDataRow();
     if (isExtractMetadata() && getFirstFooterRow() > 0) {
       lastDataRow = Math.min(lastDataRow, getFirstFooterRow() - 1);
     }
@@ -909,11 +917,11 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   }
 
   public Integer getLastDataColumn() {
-    return Integer.parseInt(lastDataColumn);
+    return lastDataColumn != null ? Integer.parseInt(lastDataColumn) : 0;
   }
 
   public Integer getLastDataRow() {
-    return Integer.parseInt(lastDataRow);
+    return lastDataRow != null ? Integer.parseInt(lastDataRow) : 0;
   }
 
   public String getMetadataCells() {
@@ -1010,7 +1018,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   }
 
   public void setSchema(String schema) throws IOException {
-    this.schema = Schema.parseJson(schema);
+    this.schema = schema;
   }
 
   public void setFormatting(String formatting) {
@@ -1257,7 +1265,27 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
       googleSheetsSourceConfig.setDirectoryIdentifier(
         properties.get(GoogleSheetsSourceConfig.DIRECTORY_IDENTIFIER).getAsString());
     }
-
+    if (properties.has(GoogleSheetsSourceConfig.FILE_IDENTIFIER)) {
+      googleSheetsSourceConfig.setFileIdentifier(
+        properties.get(GoogleSheetsSourceConfig.FILE_IDENTIFIER).getAsString());
+    }
+    if (properties.has(GoogleSheetsSourceConfig.OAUTH_METHOD)) {
+      googleSheetsSourceConfig.setOauthMethod(
+        properties.get(GoogleSheetsSourceConfig.OAUTH_METHOD).getAsString());
+    }
+    if (properties.has(GoogleSheetsSourceConfig.ACCESS_TOKEN)) {
+      googleSheetsSourceConfig.setAccessToken(
+        properties.get(GoogleSheetsSourceConfig.ACCESS_TOKEN).getAsString());
+    }
     return googleSheetsSourceConfig;
+  }
+  @Nullable
+  public Schema getSchema() {
+    try {
+      return !this.containsMacro("schema") &&
+        !Strings.isNullOrEmpty(this.schema) ? Schema.parseJson(this.schema) : null;
+    } catch (Exception var2) {
+      throw new IllegalArgumentException("Invalid schema: " + var2.getMessage(), var2);
+    }
   }
 }

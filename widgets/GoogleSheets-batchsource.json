@@ -16,6 +16,11 @@
           "widget-type": "textbox",
           "label": "Directory Identifier",
           "name": "directoryIdentifier"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "File Identifier",
+          "name": "fileIdentifier"
         }
       ]
     },
@@ -142,6 +147,33 @@
           "widget-type": "textbox",
           "label": "Service Account JSON",
           "name": "serviceAccountJSON"
+        },
+        {
+          "name": "oauthMethod",
+          "label": "OAuth Method",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "REFRESH_TOKEN",
+            "options": [
+              {
+                "id": "REFRESH_TOKEN",
+                "label": "Refresh Token"
+              },
+              {
+                "id": "ACCESS_TOKEN",
+                "label": "Access Token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "accessToken",
+          "label": "Access Token",
+          "widget-type": "textbox",
+          "widget-attributes": {
+            "placeholder": "${oauthAccessToken(provider,credential)}"
+          }
         },
         {
           "widget-type": "textbox",
@@ -341,7 +373,7 @@
           "label": "Number of Columns to Read",
           "name": "lastDataColumn",
           "widget-attributes": {
-            "default": "26",
+            "default": "0",
             "min": "0"
           }
         },
@@ -350,7 +382,7 @@
           "label": "Number of Rows to Read",
           "name": "lastDataRow",
           "widget-attributes": {
-            "default": "1000",
+            "default": "0",
             "min": "0"
           }
         },
@@ -366,7 +398,12 @@
       ]
     }
   ],
-  "outputs": [],
+  "outputs": [
+    {
+      "name": "schema",
+      "widget-type": "schema"
+    }
+  ],
   "filters": [
     {
       "name": "Select modification date range",
@@ -404,6 +441,30 @@
         "property": "authType",
         "operator": "equal to",
         "value": "oAuth2"
+      },
+      "show": [
+        {
+          "name": "oauthMethod",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Access Token",
+      "condition": {
+        "expression": "oauthMethod == 'ACCESS_TOKEN' && authType == 'oAuth2'"
+      },
+      "show": [
+        {
+          "name": "accessToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Refresh Token",
+      "condition": {
+        "expression": "oauthMethod == 'REFRESH_TOKEN' && authType == 'oAuth2'"
       },
       "show": [
         {

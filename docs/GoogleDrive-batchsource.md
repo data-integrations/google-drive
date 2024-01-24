@@ -17,6 +17,16 @@ https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourc
 ```
 Then the Directory Identifier would be `1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g`.
 
+**File Identifier:** Identifier of the file.
+
+This comes after `file/d/ or document/d/ or spreadsheets/d/` in the URL. For example, if the URL is
+```
+https://docs.google.com/file/d/17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows
+```
+Then the File Identifier would be `17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows`.  
+Either Directory Identifier or File Identifier should have a value. Filters will not work 
+while providing File Identifier.
+
 **File Metadata Properties:** Properties that represent metadata of files. 
 They will be a part of output structured record. Descriptions for properties can be view at 
 [Drive API file reference](https://developers.google.com/drive/api/v3/reference/files).
@@ -57,6 +67,11 @@ Make sure that:
 
 OAuth2 client credentials can be generated on Google Cloud
 [Credentials Page](https://console.cloud.google.com/apis/credentials)
+
+**OAuth Method:** The method used to get OAuth access tokens. The oauth access token can be directly provided,
+or a client id, client secret, and refresh token can be provided.
+
+**Access Token:** Short lived access token for connect.
 
 **Client ID:** OAuth2 client id used to identify the application.
 

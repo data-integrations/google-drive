@@ -17,6 +17,16 @@ https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourc
 ```
 Then the Directory Identifier would be `1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g`.
 
+**File Identifier:** Identifier of the spreadsheet file.
+
+This comes after `spreadsheets/d/` in the URL. For example, if the URL is
+```
+https://docs.google.com/spreadsheets/d/17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows
+```
+Then the File Identifier would be `17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows`.  
+Either Directory Identifier or File Identifier should have a value. Filters will not work
+while providing File Identifier.
+
 ### Filtering
 
 **Filter:** Filter that can be applied to the files in the selected directory. 
@@ -54,6 +64,11 @@ Make sure that:
 
 OAuth2 client credentials can be generated on Google Cloud 
 [Credentials Page](https://console.cloud.google.com/apis/credentials)
+
+**OAuth Method:** The method used to get OAuth access tokens. The oauth access token can be directly provided,
+or a client id, client secret, and refresh token can be provided.
+
+**Access Token:** Short lived access token for connect.
 
 **Client ID:** OAuth2 client id used to identify the application.
 
@@ -124,10 +139,10 @@ _Treat first row as column names_ - the plugin uses first row for schema definin
 **Column Names Row Number:** Number of the row to be treated as a header.
 Only shown when the 'Column Names Selection' field is set to 'Custom row as column names' header.
 
-**Number of Columns to Read:** Last column plugin will read as data. It will be ignored if the Column 
-Names Row contains less number of columns.
+**Number of Columns to Read:** Last column plugin will read as data. It will be ignored if the Column
+Names Row contains less number of columns. Set it to 0 to read all the columns in the sheet.
 
-**Number of Rows to Read:** Last row plugin will read as data.
+**Number of Rows to Read:** Last row plugin will read as data. Set it to 0 to read all the rows in the sheet.
 
 **Read Buffer Size:** Number of rows the source reads with a single API request. Default value is 100.
 

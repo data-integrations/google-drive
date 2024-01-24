@@ -71,6 +71,10 @@ public class GoogleDriveFilteringClient<C extends GoogleFilteringSourceConfig> e
       String nextToken = "";
       int retrievedFiles = 0;
       int actualFilesNumber = filesNumber;
+      if (config.getFileIdentifier() != null) {
+        files.add(service.files().get(config.getFileIdentifier()).setSupportsAllDrives(true).execute());
+        return files;
+      }
       Drive.Files.List request = service.files().list()
         .setSupportsAllDrives(true)
         .setIncludeItemsFromAllDrives(true)

@@ -43,6 +43,11 @@ Make sure that:
 OAuth2 client credentials can be generated on Google Cloud
 [Credentials Page](https://console.cloud.google.com/apis/credentials)
 
+**OAuth Method:** The method used to get OAuth access tokens. The oauth access token can be directly provided,
+or a client id, client secret, and refresh token can be provided.
+
+**Access Token:** Short lived access token for connect.
+
 **Client ID:** OAuth2 client id used to identify the application.
 
 **Client Secret:** OAuth2 client secret used to access the authorization server.

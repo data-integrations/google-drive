@@ -21,6 +21,7 @@ import com.google.api.services.sheets.v4.model.GridRange;
 import com.google.api.services.sheets.v4.model.MergeCellsRequest;
 import com.google.api.services.sheets.v4.model.RowData;
 import io.cdap.plugin.google.common.AuthType;
+import io.cdap.plugin.google.common.OAuthMethod;
 import io.cdap.plugin.google.sheets.sink.utils.ComplexHeader;
 import io.cdap.plugin.google.sheets.sink.utils.FlatteredRowsRecord;
 import io.cdap.plugin.google.sheets.sink.utils.FlatteredRowsRequest;
@@ -46,6 +47,7 @@ public class GoogleSheetsSinkClientTest {
   public static void setupClient() throws IOException {
     sinkConfig = EasyMock.createMock(GoogleSheetsSinkConfig.class);
     EasyMock.expect(sinkConfig.getAuthType()).andReturn(AuthType.OAUTH2).anyTimes();
+    EasyMock.expect(sinkConfig.getOAuthMethod()).andReturn(OAuthMethod.REFRESH_TOKEN).anyTimes();
     EasyMock.expect(sinkConfig.getRefreshToken()).andReturn("dsfdsfdsfdsf").anyTimes();
     EasyMock.expect(sinkConfig.getClientSecret()).andReturn("dsfdsfdsfdsf").anyTimes();
     EasyMock.expect(sinkConfig.getClientId()).andReturn("dsdsrfegvrb").anyTimes();

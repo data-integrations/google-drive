@@ -17,6 +17,7 @@
 package io.cdap.plugin.google.sheets.source;
 
 import com.github.rholder.retry.RetryException;
+import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.gson.reflect.TypeToken;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
@@ -89,48 +90,55 @@ public class GoogleSheetsRecordReader extends RecordReader<NullWritable, Structu
   }
 
   private void populateBufferedTasks() {
-    int firstDataRow = config.getActualFirstDataRow();
-    int lastDataRow = config.getActualLastDataRow();
-    List<String> sheetTitles;
+    List<Sheet> sheetTitles;
     try {
       sheetTitles = getSheetTitles();
     } catch (ExecutionException | RetryException e) {
       throw new RuntimeException("Exception during sheet titles retrieving.", e);
     }
     sheetTitles.forEach(t -> {
+      int firstDataRow = config.getActualFirstDataRow();
+      // Each sheet can have different number of records so last row can be different sheet wise
+      // and in case last data row is set to 0, It will fetch all records from the sheet
+      int lastDataRow = config.getActualLastDataRow(t.getProperties().getGridProperties().getRowCount());
       int rowsNumber = lastDataRow - firstDataRow + 1;
       overallRowsNumber += rowsNumber;
       int counter = 0;
+      String title = t.getProperties().getTitle();
       while (rowsNumber > bufferSize) {
-        rowTaskQueue.add(new GroupedRowTask(t, counter * bufferSize + firstDataRow, bufferSize));
+        rowTaskQueue.add(
+          new GroupedRowTask(title, counter * bufferSize + firstDataRow, bufferSize));
         counter++;
         rowsNumber -= bufferSize;
       }
-      rowTaskQueue.add(new GroupedRowTask(t, counter * bufferSize + firstDataRow,
+      rowTaskQueue.add(new GroupedRowTask(title, counter * bufferSize + firstDataRow,
         rowsNumber));
     });
     currentRowIndex = -1;
     currentGroupedRowTask = null;
   }
 
-  private List<String> getSheetTitles() throws ExecutionException, RetryException {
-    List<String> sheetTitles = new ArrayList<>();
+  private List<Sheet> getSheetTitles() throws ExecutionException, RetryException {
+    List<Sheet> sheetList = new ArrayList<>();
     switch (config.getSheetsToPull()) {
       case ALL:
-        sheetTitles = googleSheetsSourceClient.getSheetsTitles(fileId);
+        sheetList = googleSheetsSourceClient.getSheets(fileId);
         break;
       case NUMBERS:
         List<Integer> sheetIndexes = config.getSheetsIdentifiers().stream()
           .map(s -> Integer.parseInt(s)).collect(Collectors.toList());
-        sheetTitles = googleSheetsSourceClient.getSheets(fileId).stream()
+        sheetList = googleSheetsSourceClient.getSheets(fileId).stream()
           .filter(s -> sheetIndexes.contains(s.getProperties().getIndex()))
-          .map(s -> s.getProperties().getTitle()).collect(Collectors.toList());
+          .collect(Collectors.toList());
         break;
       case TITLES:
-        sheetTitles = config.getSheetsIdentifiers();
+        List<String> sheetTitles = config.getSheetsIdentifiers();
+        sheetList = googleSheetsSourceClient.getSheets(fileId).stream()
+          .filter(s -> sheetTitles.contains(s.getProperties().getTitle()))
+          .collect(Collectors.toList());
         break;
     }
-    return sheetTitles;
+    return sheetList;
   }
 
   @Override

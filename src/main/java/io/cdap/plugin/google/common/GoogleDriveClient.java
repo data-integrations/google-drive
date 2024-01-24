@@ -43,7 +43,6 @@ import java.util.List;
  */
 public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  private static final String ROOT_FOLDER_ID = "root";
   protected final Drive service;
   protected final C config;
   protected NetHttpTransport httpTransport;
@@ -88,13 +87,18 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
   }
 
   protected Credential getOAuth2Credential() {
-    GoogleCredential credential = new GoogleCredential.Builder()
-        .setTransport(httpTransport)
-        .setJsonFactory(JSON_FACTORY)
-        .setClientSecrets(config.getClientId(),
-            config.getClientSecret())
-        .build();
-    credential.createScoped(getRequiredScopes()).setRefreshToken(config.getRefreshToken());
+    GoogleCredential credential;
+    GoogleCredential.Builder builder = new GoogleCredential.Builder()
+      .setTransport(httpTransport)
+      .setJsonFactory(JSON_FACTORY);
+    if (OAuthMethod.ACCESS_TOKEN.equals(config.getOAuthMethod())) {
+      credential = builder.build();
+      credential.createScoped(getRequiredScopes()).setAccessToken(config.getAccessToken());
+    } else {
+      credential = builder.setClientSecrets(config.getClientId(),
+                                            config.getClientSecret()).build();
+      credential.createScoped(getRequiredScopes()).setRefreshToken(config.getRefreshToken());
+    }
     return credential;
   }
 
@@ -121,11 +125,11 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
     return Collections.singletonList(DriveScopes.DRIVE_READONLY);
   }
 
-  public void checkRootFolder() throws IOException {
-    service.files().get(ROOT_FOLDER_ID).setSupportsAllDrives(true).execute();
-  }
-
   public void isFolderAccessible(String folderId) throws IOException {
     service.files().get(folderId).setSupportsAllDrives(true).execute();
+  }
+
+  public void isFileAccessible(String fileId) throws IOException {
+    service.files().get(fileId).setSupportsAllDrives(true).execute();
   }
 }

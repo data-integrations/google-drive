@@ -18,6 +18,11 @@
           "name": "directoryIdentifier"
         },
         {
+          "widget-type": "textbox",
+          "label": "File Identifier",
+          "name": "fileIdentifier"
+        },
+        {
           "name": "fileMetadataProperties",
           "widget-type": "multi-select",
           "label": "File Metadata Properties",
@@ -312,6 +317,33 @@
           }
         },
         {
+          "name": "oauthMethod",
+          "label": "OAuth Method",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "REFRESH_TOKEN",
+            "options": [
+              {
+                "id": "REFRESH_TOKEN",
+                "label": "Refresh Token"
+              },
+              {
+                "id": "ACCESS_TOKEN",
+                "label": "Access Token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "accessToken",
+          "label": "Access Token",
+          "widget-type": "textbox",
+          "widget-attributes": {
+            "placeholder": "${oauthAccessToken(provider,credential)}"
+          }
+        },
+        {
           "widget-type": "textbox",
           "label": "Client ID",
           "name": "clientId"
@@ -487,6 +519,30 @@
         "property": "authType",
         "operator": "equal to",
         "value": "oAuth2"
+      },
+      "show": [
+        {
+          "name": "oauthMethod",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Access Token",
+      "condition": {
+        "expression": "oauthMethod == 'ACCESS_TOKEN' && authType == 'oAuth2'"
+      },
+      "show": [
+        {
+          "name": "accessToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Refresh Token",
+      "condition": {
+        "expression": "oauthMethod == 'REFRESH_TOKEN' && authType == 'oAuth2'"
       },
       "show": [
         {

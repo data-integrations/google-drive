@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -99,17 +100,19 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
 
   protected HttpCredentialsAdapter getServiceAccountCredential() throws IOException {
     GoogleCredentials googleCredentials;
+    List<String> scopes = getRequiredScopes();
     if (Boolean.TRUE.equals(config.isServiceAccountJson())) {
       InputStream jsonInputStream = new ByteArrayInputStream(
-          config.getServiceAccountJson().getBytes());
-      googleCredentials = GoogleCredentials.fromStream(jsonInputStream);
+          config.getServiceAccountJson().getBytes(StandardCharsets.UTF_8));
+      googleCredentials = GoogleCredentials.fromStream(jsonInputStream).createScoped(scopes);
     } else if (Boolean.TRUE.equals(config.isServiceAccountFilePath()) && !Strings.isNullOrEmpty(
         config.getServiceAccountFilePath())) {
       googleCredentials =
-          GoogleCredentials.fromStream(new FileInputStream(config.getServiceAccountFilePath()));
+          GoogleCredentials.fromStream(
+              new FileInputStream(config.getServiceAccountFilePath())).createScoped(scopes);
     } else {
       googleCredentials =
-          GoogleCredentials.getApplicationDefault().createScoped(getRequiredScopes());
+          GoogleCredentials.getApplicationDefault().createScoped(scopes);
     }
     return new HttpCredentialsAdapter(googleCredentials);
   }

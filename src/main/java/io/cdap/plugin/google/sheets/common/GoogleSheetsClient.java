@@ -20,6 +20,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.sheets.v4.Sheets;
+import io.cdap.plugin.google.common.AuthType;
 import io.cdap.plugin.google.common.GoogleAuthBaseConfig;
 import io.cdap.plugin.google.common.GoogleDriveClient;
 
@@ -33,8 +34,8 @@ import java.util.List;
  */
 public abstract class GoogleSheetsClient<C extends GoogleAuthBaseConfig> extends GoogleDriveClient<C> {
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  protected Sheets service;
-  protected Drive drive;
+  protected final Sheets service;
+  protected final Drive drive;
 
   /**
    * Constructor for GoogleSheetsClient object.
@@ -43,10 +44,31 @@ public abstract class GoogleSheetsClient<C extends GoogleAuthBaseConfig> extends
    */
   public GoogleSheetsClient(C config) throws IOException {
     super(config);
-    service = new Sheets.Builder(httpTransport, JSON_FACTORY, getCredentials())
-      .build();
-    drive = new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials())
-      .build();
+    this.drive = getDriveClient();
+    this.service = getSheetsClient();
+  }
+
+  /**
+   * Generates sheets client for Google Sheets API based on the authentication type.
+   * @return {@link Sheets} client.
+   * @throws IOException on issues with service account file reading.
+   */
+  protected Sheets getSheetsClient() throws IOException {
+    Sheets sheets;
+    AuthType authType = config.getAuthType();
+    switch (authType) {
+      case OAUTH2:
+        sheets = new Sheets.Builder(httpTransport, JSON_FACTORY, getOAuth2Credential()).build();
+        break;
+      case SERVICE_ACCOUNT:
+        sheets =
+            new Sheets.Builder(httpTransport, JSON_FACTORY, getServiceAccountCredential()).build();
+        break;
+      default:
+        throw new IllegalStateException(
+            String.format("Untreated value '%s' for authentication type.", authType));
+    }
+    return sheets;
   }
 
   protected abstract List<String> getRequiredScopes();

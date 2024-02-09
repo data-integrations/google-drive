@@ -69,13 +69,13 @@ Make sure that the Google Drive Folder is shared with the specified service acco
 `Viewer` role must be granted to the specified service account to read files from the Google Drive Folder.
 
 * **Service Account File Path**: Path on the local file system of the service account key used for
-  authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
-  When running on other clusters, the file must be present on every node in the cluster.
+  authorization.
 
-  When set to 'auto-detect', the GCE VM needs to be configured with the scope required by the Google Drive API.
-  Otherwise, the preview as well as pipeline run will fail with insufficient permission error. The required scope
-  is `https://www.googleapis.com/auth/drive.readonly`.
-  
+  Can be set to 'auto-detect' when running on a Dataproc cluster which needs to be
+  created with the following scopes:
+  * https://www.googleapis.com/auth/drive.readonly
+
+  When running on other clusters, the file must be present on every node in the cluster.
 
 * **Service Account JSON**: Contents of the service account JSON file. Service Account JSON can be generated on Google Cloud
   [Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)

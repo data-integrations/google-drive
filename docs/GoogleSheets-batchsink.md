@@ -61,13 +61,14 @@ To write files to a Private Google Drive, grant the `Editor` role to the specifi
 To write files to a Shared Google Drive Folder, grant the `Contributor` role to the specified service account.
 
 * **Service Account File Path**: Path on the local file system of the service account key used for
-  authorization. Can be set to 'auto-detect' when running on a Dataproc cluster.
+  authorization.
+
+  Can be set to 'auto-detect' when running on a Dataproc cluster which needs to be
+  created with the following scopes:
+  * https://www.googleapis.com/auth/drive
+  * https://www.googleapis.com/auth/spreadsheets
+
   When running on other clusters, the file must be present on every node in the cluster.
-
-  When set to 'auto-detect', the GCE VM needs to be configured with the scope required by the Google Drive API.
-  Otherwise, the preview as well as pipeline run will fail with insufficient permission error. The required scopes
-  are `https://www.googleapis.com/auth/drive` and `https://www.googleapis.com/auth/spreadsheets`.
-
 
 * **Service Account JSON**: Contents of the service account JSON file. Service Account JSON can be generated on Google Cloud
   [Service Account page](https://console.cloud.google.com/iam-admin/serviceaccounts)

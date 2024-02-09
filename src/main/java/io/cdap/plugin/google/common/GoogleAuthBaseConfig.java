@@ -189,12 +189,6 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     final Boolean serviceAccountFilePath = isServiceAccountFilePath();
     final Boolean serviceAccountJson = isServiceAccountJson();
 
-    // we don't want the validation to fail because the VM used during the validation
-    // may be different from the VM used during runtime and may not have the Google Drive Api scope.
-    if (serviceAccountFilePath && AUTO_DETECT_VALUE.equalsIgnoreCase(accountFilePath)) {
-      return false;
-    }
-
     if (serviceAccountFilePath != null && serviceAccountFilePath) {
       if (!AUTO_DETECT_VALUE.equals(accountFilePath) && !new File(accountFilePath).exists()) {
         collector.addFailure("Service Account File Path is not available.",

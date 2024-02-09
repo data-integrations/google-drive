@@ -24,6 +24,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Strings;
 
 import java.io.ByteArrayInputStream;
@@ -41,7 +43,7 @@ import java.util.List;
 public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final String ROOT_FOLDER_ID = "root";
-  protected Drive service;
+  protected final Drive service;
   protected final C config;
   protected NetHttpTransport httpTransport;
 
@@ -58,48 +60,58 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
     } catch (Exception e) {
       throw new RuntimeException("There was issue during communicating with Google Drive API.", e);
     }
-    service = new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials())
-      .build();
+    this.service = getDriveClient();
   }
 
   /**
-   * Provides credential object for Google APIs that supports this credential type.
-   * @return filled credential.
+   * Generates drive client for Google Drive API based on the authentication type.
+   * @return {@link Drive} client.
    * @throws IOException on issues with service account file reading.
    */
-  protected Credential getCredentials() throws IOException {
-    GoogleCredential credential;
-
-    // TODO fix authentication after OAuth2 will be provided by cdap
-    // So for now plugins require user or service account json
-    // start of workaround
+  protected Drive getDriveClient() throws IOException {
+    Drive drive;
     AuthType authType = config.getAuthType();
     switch (authType) {
       case OAUTH2:
-        credential = new GoogleCredential.Builder()
-          .setTransport(httpTransport)
-          .setJsonFactory(JSON_FACTORY)
-          .setClientSecrets(config.getClientId(),
-                            config.getClientSecret())
-          .build();
-        credential.setRefreshToken(config.getRefreshToken());
+        drive = new Drive.Builder(httpTransport, JSON_FACTORY, getOAuth2Credential()).build();
         break;
       case SERVICE_ACCOUNT:
-        if (config.isServiceAccountJson()) {
-          InputStream jsonInputStream = new ByteArrayInputStream(config.getServiceAccountJson().getBytes());
-          credential = GoogleCredential.fromStream(jsonInputStream);
-        } else if (config.isServiceAccountFilePath() && !Strings.isNullOrEmpty(config.getServiceAccountFilePath())) {
-          credential = GoogleCredential.fromStream(new FileInputStream(config.getServiceAccountFilePath()));
-        } else {
-          credential = GoogleCredential.getApplicationDefault(httpTransport, JSON_FACTORY);
-        }
+        drive =
+            new Drive.Builder(httpTransport, JSON_FACTORY, getServiceAccountCredential()).build();
         break;
       default:
-        throw new IllegalStateException(String.format("Untreated value '%s' for authentication type.", authType));
+        throw new IllegalStateException(
+            String.format("Untreated value '%s' for authentication type.", authType));
     }
+    return drive;
+  }
 
-    return credential.createScoped(getRequiredScopes());
-    // end of workaround
+  protected Credential getOAuth2Credential() {
+    GoogleCredential credential = new GoogleCredential.Builder()
+        .setTransport(httpTransport)
+        .setJsonFactory(JSON_FACTORY)
+        .setClientSecrets(config.getClientId(),
+            config.getClientSecret())
+        .build();
+    credential.setRefreshToken(config.getRefreshToken());
+    return credential;
+  }
+
+  protected HttpCredentialsAdapter getServiceAccountCredential() throws IOException {
+    GoogleCredentials googleCredentials;
+    if (Boolean.TRUE.equals(config.isServiceAccountJson())) {
+      InputStream jsonInputStream = new ByteArrayInputStream(
+          config.getServiceAccountJson().getBytes());
+      googleCredentials = GoogleCredentials.fromStream(jsonInputStream);
+    } else if (Boolean.TRUE.equals(config.isServiceAccountFilePath()) && !Strings.isNullOrEmpty(
+        config.getServiceAccountFilePath())) {
+      googleCredentials =
+          GoogleCredentials.fromStream(new FileInputStream(config.getServiceAccountFilePath()));
+    } else {
+      googleCredentials =
+          GoogleCredentials.getApplicationDefault().createScoped(getRequiredScopes());
+    }
+    return new HttpCredentialsAdapter(googleCredentials);
   }
 
   protected List<String> getRequiredScopes() {

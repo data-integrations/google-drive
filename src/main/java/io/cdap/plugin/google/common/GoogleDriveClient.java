@@ -88,13 +88,18 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
   }
 
   protected Credential getOAuth2Credential() {
-    GoogleCredential credential = new GoogleCredential.Builder()
-        .setTransport(httpTransport)
-        .setJsonFactory(JSON_FACTORY)
-        .setClientSecrets(config.getClientId(),
-            config.getClientSecret())
-        .build();
-    credential.createScoped(getRequiredScopes()).setRefreshToken(config.getRefreshToken());
+    GoogleCredential credential;
+    GoogleCredential.Builder builder = new GoogleCredential.Builder()
+      .setTransport(httpTransport)
+      .setJsonFactory(JSON_FACTORY);
+    if (OAuthMethod.ACCESS_TOKEN.equals(config.getOAuthMethod())) {
+      credential = builder.build();
+      credential.createScoped(getRequiredScopes()).setAccessToken(config.getAccessToken());
+    } else {
+      credential = builder.setClientSecrets(config.getClientId(),
+                                            config.getClientSecret()).build();
+      credential.createScoped(getRequiredScopes()).setRefreshToken(config.getRefreshToken());
+    }
     return credential;
   }
 

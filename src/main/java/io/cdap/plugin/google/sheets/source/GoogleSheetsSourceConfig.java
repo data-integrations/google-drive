@@ -282,7 +282,10 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     return !containsMacro(SHEETS_TO_PULL) && !containsMacro(SHEETS_IDENTIFIERS) &&
       !containsMacro(COLUMN_NAMES_SELECTION) && !containsMacro(CUSTOM_COLUMN_NAMES_ROW) &&
       !containsMacro(LAST_DATA_COLUMN) && !containsMacro(NAME_SERVICE_ACCOUNT_TYPE) &&
-      !containsMacro(ACCOUNT_FILE_PATH) && !containsMacro(NAME_SERVICE_ACCOUNT_JSON);
+      !containsMacro(ACCOUNT_FILE_PATH) && !containsMacro(NAME_SERVICE_ACCOUNT_JSON) &&
+      !containsMacro(CLIENT_ID) && !containsMacro(CLIENT_SECRET) &&
+      !containsMacro(REFRESH_TOKEN) && !containsMacro(ACCESS_TOKEN) &&
+      !containsMacro(OAUTH_METHOD);
   }
 
   /**
@@ -1258,6 +1261,15 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         properties.get(GoogleSheetsSourceConfig.DIRECTORY_IDENTIFIER).getAsString());
     }
 
+    if (properties.has(GoogleSheetsSourceConfig.OAUTH_METHOD)) {
+      googleSheetsSourceConfig.setoAuthMethod(
+        properties.get(GoogleSheetsSourceConfig.OAUTH_METHOD).getAsString());
+    }
+
+    if (properties.has(GoogleSheetsSourceConfig.ACCESS_TOKEN)) {
+      googleSheetsSourceConfig.setAccessToken(
+        properties.get(GoogleSheetsSourceConfig.ACCESS_TOKEN).getAsString());
+    }
     return googleSheetsSourceConfig;
   }
 }

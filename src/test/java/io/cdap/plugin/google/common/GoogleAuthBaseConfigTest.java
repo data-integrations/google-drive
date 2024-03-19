@@ -84,4 +84,48 @@ public class GoogleAuthBaseConfigTest {
     Assert.assertEquals("serviceAccountJSON",
                         collector.getValidationFailures().get(0).getCauses().get(0).getAttribute("stageConfig"));
   }
+
+  @Test
+  public void testValidationOauthWithoutAccessToken() {
+    GoogleDriveSourceConfig config = new GoogleDriveSourceConfig("ref");
+    config.setReferenceName("validationErrorFilePath");
+    config.setAuthType("oAuth2");
+    config.setoAuthMethod(OAuthMethod.ACCESS_TOKEN.name());
+    config.setModificationDateRange("today");
+    config.getBodyFormat("string");
+    config.setStartDate("today");
+    FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals("'Access Token' property is empty or macro is not available.",
+                        collector.getValidationFailures().get(0).getMessage());
+    Assert.assertEquals("accessToken",
+                        collector.getValidationFailures().get(0).getCauses().get(0).getAttribute("stageConfig"));
+  }
+
+  @Test
+  public void testValidationOauthWithoutRefreshToken() {
+    GoogleDriveSourceConfig config = new GoogleDriveSourceConfig(null);
+    config.setReferenceName("validationErrorFilePath");
+    config.setAuthType("oAuth2");
+    config.setoAuthMethod(OAuthMethod.REFRESH_TOKEN.name());
+    config.setModificationDateRange("today");
+    config.getBodyFormat("string");
+    config.setStartDate("today");
+    FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
+    config.validate(collector);
+    Assert.assertEquals(3, collector.getValidationFailures().size());
+    Assert.assertEquals("'Client ID' property is empty or macro is not available.",
+                        collector.getValidationFailures().get(0).getMessage());
+    Assert.assertEquals("'Client Secret' property is empty or macro is not available.",
+                        collector.getValidationFailures().get(1).getMessage());
+    Assert.assertEquals("'Refresh Token' property is empty or macro is not available.",
+                        collector.getValidationFailures().get(2).getMessage());
+    Assert.assertEquals("clientId",
+                        collector.getValidationFailures().get(0).getCauses().get(0).getAttribute("stageConfig"));
+    Assert.assertEquals("clientSecret",
+                        collector.getValidationFailures().get(1).getCauses().get(0).getAttribute("stageConfig"));
+    Assert.assertEquals("refreshToken",
+                        collector.getValidationFailures().get(2).getCauses().get(0).getAttribute("stageConfig"));
+  }
 }

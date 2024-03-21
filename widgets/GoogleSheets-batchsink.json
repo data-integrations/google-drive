@@ -18,6 +18,16 @@
           "name": "directoryIdentifier"
         },
         {
+          "widget-type": "hidden",
+          "label": "File Identifier",
+          "name": "fileIdentifier"
+        },
+        {
+          "widget-type": "hidden",
+          "label": "Identifier Type",
+          "name": "identifierType"
+        },
+        {
           "widget-type": "textbox",
           "label": "Spreadsheet Name Field",
           "name": "schemaSpreadsheetNameFieldName"

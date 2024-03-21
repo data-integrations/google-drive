@@ -57,6 +57,8 @@ public class GoogleAuthBaseConfigTest {
     config.setModificationDateRange("today");
     config.getBodyFormat("string");
     config.setStartDate("today");
+    config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
+    config.setFileIdentifier("fileId");
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
     config.validate(collector);
     Assert.assertEquals(1, collector.getValidationFailures().size());
@@ -76,6 +78,8 @@ public class GoogleAuthBaseConfigTest {
     config.setModificationDateRange("today");
     config.getBodyFormat("string");
     config.setStartDate("today");
+    config.setFileIdentifier("fileId");
+    config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
     config.validate(collector);
     Assert.assertEquals(1, collector.getValidationFailures().size());
@@ -94,6 +98,8 @@ public class GoogleAuthBaseConfigTest {
     config.setModificationDateRange("today");
     config.getBodyFormat("string");
     config.setStartDate("today");
+    config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
+    config.setFileIdentifier("fileId");
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
     config.validate(collector);
     Assert.assertEquals(1, collector.getValidationFailures().size());
@@ -112,6 +118,8 @@ public class GoogleAuthBaseConfigTest {
     config.setModificationDateRange("today");
     config.getBodyFormat("string");
     config.setStartDate("today");
+    config.setFileIdentifier("fileId");
+    config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
     config.validate(collector);
     Assert.assertEquals(3, collector.getValidationFailures().size());
@@ -127,5 +135,50 @@ public class GoogleAuthBaseConfigTest {
                         collector.getValidationFailures().get(1).getCauses().get(0).getAttribute("stageConfig"));
     Assert.assertEquals("refreshToken",
                         collector.getValidationFailures().get(2).getCauses().get(0).getAttribute("stageConfig"));
+  }
+
+  @Test
+  public void testWithDirectoryIdAsNull() {
+    GoogleDriveSourceConfig config = new GoogleDriveSourceConfig("ref");
+    config.setReferenceName("validationErrorFilePath");
+    config.setAuthType("oAuth2");
+    config.setModificationDateRange("today");
+    config.getBodyFormat("string");
+    config.setStartDate("today");
+    config.setAccessToken("access");
+    config.setoAuthMethod(OAuthMethod.ACCESS_TOKEN.name());
+    FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
+    config.validate(collector);
+    Assert.assertEquals(2, collector.getValidationFailures().size());
+    Assert.assertEquals("Directory Identifier can not be null.",
+                        collector.getValidationFailures().get(0).getMessage());
+    Assert.assertEquals("directoryIdentifier",
+                        collector.getValidationFailures().get(0).getCauses().get(0).getAttribute("stageConfig"));
+    Assert.assertEquals("Exception during authentication/directory properties check: " +
+                          "Errors were encountered during validation. Directory Identifier can not be null..",
+                        collector.getValidationFailures().get(1).getMessage());
+  }
+
+  @Test
+  public void testWithFileIdAsNull() {
+    GoogleDriveSourceConfig config = new GoogleDriveSourceConfig("ref");
+    config.setReferenceName("validationErrorFilePath");
+    config.setAuthType("oAuth2");
+    config.setModificationDateRange("today");
+    config.getBodyFormat("string");
+    config.setStartDate("today");
+    config.setAccessToken("access");
+    config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
+    config.setoAuthMethod(OAuthMethod.ACCESS_TOKEN.name());
+    FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
+    config.validate(collector);
+    Assert.assertEquals(2, collector.getValidationFailures().size());
+    Assert.assertEquals("File Identifier can not be null.",
+                        collector.getValidationFailures().get(0).getMessage());
+    Assert.assertEquals("fileIdentifier",
+                        collector.getValidationFailures().get(0).getCauses().get(0).getAttribute("stageConfig"));
+    Assert.assertEquals("Exception during authentication/directory properties check: " +
+                          "Errors were encountered during validation. File Identifier can not be null..",
+                        collector.getValidationFailures().get(1).getMessage());
   }
 }

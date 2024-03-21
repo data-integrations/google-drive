@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Cask Data, Inc.
+ * Copyright © 2024 Cask Data, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,16 +17,9 @@
 package io.cdap.plugin.google.common;
 
 /**
- * Wrapper to save validation results. Is used to transfer validation results.
+ * Identifier type specifies whether the selected Google Drive entity is a file or directory.
  */
-public class ValidationResult {
-  private boolean directoryOrFileAccessible = false;
-
-  public boolean isDirectoryOrFileAccessible() {
-    return directoryOrFileAccessible;
-  }
-
-  public void setDirectoryOrFileAccessible(boolean directoryOrFileAccessible) {
-    this.directoryOrFileAccessible = directoryOrFileAccessible;
-  }
+public enum IdentifierType {
+  FILE_IDENTIFIER,
+  DIRECTORY_IDENTIFIER
 }

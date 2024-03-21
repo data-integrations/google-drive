@@ -9,6 +9,8 @@ Properties
 ----------
 ### Basic
 
+**Identifier Type:**  Identifier specifies whether the given ID for Google Drive entity is a file or directory.
+
 **Directory Identifier:** Identifier of the source folder.
 
 This comes after `folders/` in the URL. For example, if the URL is
@@ -16,6 +18,15 @@ This comes after `folders/` in the URL. For example, if the URL is
 https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourcekey=0-XVijrJSp3E3gkdJp20MpCQ
 ```
 Then the Directory Identifier would be `1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g`.
+
+**File Identifier:** Identifier of the spreadsheet file.
+
+This comes after `spreadsheets/d/` in the URL. For example, if the URL is
+```
+https://docs.google.com/spreadsheets/d/17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows
+```
+Then the File Identifier would be `17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows`.  
+**Note:** Either Directory Identifier or File Identifier should have a value.
 
 ### Filtering
 

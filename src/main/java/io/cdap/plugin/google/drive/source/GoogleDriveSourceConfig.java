@@ -370,6 +370,14 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     if (properties.has(GoogleDriveSourceConfig.OAUTH_METHOD)) {
       googleDriveSourceConfig.setoAuthMethod(properties.get(GoogleDriveSourceConfig.OAUTH_METHOD).getAsString());
     }
+    if (properties.has(GoogleDriveSourceConfig.FILE_IDENTIFIER)) {
+      googleDriveSourceConfig.setFileIdentifier(
+        properties.get(GoogleDriveSourceConfig.FILE_IDENTIFIER).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.IDENTIFIER_TYPE)) {
+      googleDriveSourceConfig.setIdentifierType(
+        properties.get(GoogleDriveSourceConfig.IDENTIFIER_TYPE).getAsString());
+    }
     return googleDriveSourceConfig;
   }
 }

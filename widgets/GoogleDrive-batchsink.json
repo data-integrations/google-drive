@@ -31,6 +31,16 @@
           "widget-type": "textbox",
           "label": "Directory Identifier",
           "name": "directoryIdentifier"
+        },
+        {
+          "widget-type": "hidden",
+          "label": "File Identifier",
+          "name": "fileIdentifier"
+        },
+        {
+          "widget-type": "hidden",
+          "label": "Identifier Type",
+          "name": "identifierType"
         }
       ]
     },

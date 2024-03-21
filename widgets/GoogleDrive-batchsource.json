@@ -13,9 +13,33 @@
           "name": "referenceName"
         },
         {
+          "name": "identifierType",
+          "label": "Identifier Type",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "DIRECTORY_IDENTIFIER",
+            "options": [
+              {
+                "id": "DIRECTORY_IDENTIFIER",
+                "label": "Directory Identifier"
+              },
+              {
+                "id": "FILE_IDENTIFIER",
+                "label": "File Identifier"
+              }
+            ]
+          }
+        },
+        {
           "widget-type": "textbox",
           "label": "Directory Identifier",
           "name": "directoryIdentifier"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "File Identifier",
+          "name": "fileIdentifier"
         },
         {
           "name": "fileMetadataProperties",
@@ -537,7 +561,7 @@
     {
       "name": "Authenticate with OAuth2 Refresh Token",
       "condition": {
-        "expression": "oAuthMethod == null || (oAuthMethod != 'ACCESS_TOKEN' && authType == 'oAuth2')"
+        "expression": "oAuthMethod != 'ACCESS_TOKEN' && authType == 'oAuth2'"
       },
       "show": [
         {
@@ -589,6 +613,48 @@
         {
           "type": "property",
           "name": "serviceAccountJSON"
+        }
+      ]
+    },
+    {
+      "name": "Select Identifier Type",
+      "condition": {
+        "expression": "identifierType != 'FILE_IDENTIFIER'"
+      },
+      "show": [
+        {
+          "name": "directoryIdentifier",
+          "type": "property"
+        },
+        {
+          "name": "startDate",
+          "type": "property"
+        },
+        {
+          "name": "endDate",
+          "type": "property"
+        },
+        {
+          "name": "filter",
+          "type": "property"
+        },
+        {
+          "name": "modificationDateRange",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Select Identifier Type",
+      "condition": {
+        "property": "identifierType",
+        "operator": "equal to",
+        "value": "FILE_IDENTIFIER"
+      },
+      "show": [
+        {
+          "name": "fileIdentifier",
+          "type": "property"
         }
       ]
     }

@@ -285,7 +285,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
       !containsMacro(ACCOUNT_FILE_PATH) && !containsMacro(NAME_SERVICE_ACCOUNT_JSON) &&
       !containsMacro(CLIENT_ID) && !containsMacro(CLIENT_SECRET) &&
       !containsMacro(REFRESH_TOKEN) && !containsMacro(ACCESS_TOKEN) &&
-      !containsMacro(OAUTH_METHOD);
+      !containsMacro(OAUTH_METHOD) && !containsMacro(FILE_IDENTIFIER) &&
+      !containsMacro(DIRECTORY_IDENTIFIER);
   }
 
   /**
@@ -303,7 +304,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     validateLastDataColumnIndexAndLastRowIndex(collector);
     validateSpreadsheetAndSheetFieldNames(collector);
 
-    if (collector.getValidationFailures().isEmpty() && validationResult.isDirectoryAccessible()) {
+    if (collector.getValidationFailures().isEmpty() && validationResult.isDirectoryOrFileAccessible()) {
       GoogleDriveFilteringClient driveClient;
       GoogleSheetsSourceClient sheetsSourceClient;
       try {
@@ -318,7 +319,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         spreadsheetsFiles = driveClient
           .getFilesSummary(Collections.singletonList(ExportedType.SPREADSHEETS), 1);
       } catch (ExecutionException | RetryException e) {
-        collector.addFailure("Invalid search query, see https://developers.google.com/drive/api/v3/ref-search-terms",
+        collector.addFailure(
+          String.format("Failed to get spreadsheet file summary due to reason : %s", e.getMessage()),
                         null).withStacktrace(e.getStackTrace());
         return validationResult;
       }
@@ -1270,6 +1272,15 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
       googleSheetsSourceConfig.setAccessToken(
         properties.get(GoogleSheetsSourceConfig.ACCESS_TOKEN).getAsString());
     }
+    if (properties.has(GoogleSheetsSourceConfig.FILE_IDENTIFIER)) {
+      googleSheetsSourceConfig.setFileIdentifier(
+        properties.get(GoogleSheetsSourceConfig.FILE_IDENTIFIER).getAsString());
+    }
+    if (properties.has(GoogleSheetsSourceConfig.IDENTIFIER_TYPE)) {
+      googleSheetsSourceConfig.setIdentifierType(
+        properties.get(GoogleSheetsSourceConfig.IDENTIFIER_TYPE).getAsString());
+    }
+
     return googleSheetsSourceConfig;
   }
 }

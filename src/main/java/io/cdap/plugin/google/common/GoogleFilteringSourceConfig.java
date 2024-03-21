@@ -48,6 +48,7 @@ public class GoogleFilteringSourceConfig extends GoogleAuthBaseConfig {
   protected String filter;
 
   @Name(MODIFICATION_DATE_RANGE)
+  @Nullable
   @Description("Filter that narrows set of files by modified date range. \n" +
     "User can select either among predefined or custom entered ranges. \n" +
     "For _Custom_ selection the dates range can be specified via **Start date** and **End date**.")
@@ -98,7 +99,7 @@ public class GoogleFilteringSourceConfig extends GoogleAuthBaseConfig {
   }
 
   private boolean validateModificationDateRange(FailureCollector collector) {
-    if (!containsMacro(MODIFICATION_DATE_RANGE)) {
+    if (!containsMacro(MODIFICATION_DATE_RANGE) && IdentifierType.DIRECTORY_IDENTIFIER.equals(getIdentifierType())) {
       try {
         getModificationDateRangeType();
         return true;

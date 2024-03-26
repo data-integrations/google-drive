@@ -43,7 +43,6 @@ import java.util.List;
  */
 public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  private static final String ROOT_FOLDER_ID = "root";
   protected final Drive service;
   protected final C config;
   protected NetHttpTransport httpTransport;
@@ -126,11 +125,11 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
     return Collections.singletonList(DriveScopes.DRIVE_READONLY);
   }
 
-  public void checkRootFolder() throws IOException {
-    service.files().get(ROOT_FOLDER_ID).setSupportsAllDrives(true).execute();
-  }
-
   public void isFolderAccessible(String folderId) throws IOException {
     service.files().get(folderId).setSupportsAllDrives(true).execute();
+  }
+
+  public void isFileAccessible(String fileId) throws IOException {
+    service.files().get(fileId).setSupportsAllDrives(true).execute();
   }
 }

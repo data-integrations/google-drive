@@ -57,6 +57,8 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   public static final String ACCESS_TOKEN = "accessToken";
   public static final String ACCESS_TOKEN_LABEL = "Access Token";
   public static final String OAUTH_METHOD = "oAuthMethod";
+  public static final String FILE_IDENTIFIER = "fileIdentifier";
+  public static final String IDENTIFIER_TYPE = "identifierType";
 
   private static final String IS_SET_FAILURE_MESSAGE_PATTERN = "'%s' property is empty or macro is not available.";
 
@@ -127,11 +129,26 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
   @Macro
   protected String serviceAccountJson;
 
+  @Name(IDENTIFIER_TYPE)
+  @Nullable
+  @Description("Identifier specifies whether the given Id for Google Drive entity is a file or directory")
+  private String identifierType;
+
   @Name(DIRECTORY_IDENTIFIER)
+  @Nullable
+  @Macro
   @Description("Identifier of the folder. This comes after “folders/” in the URL. For example, if the URL was " +
     "“https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourcekey=0-XVijrJSp3E3gkdJp20MpCQ”, "
     + "then the Directory Identifier would be “1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g”.")
   private String directoryIdentifier;
+
+  @Nullable
+  @Macro
+  @Name(FILE_IDENTIFIER)
+  @Description("Identifier of the file. This comes after “file/d/ or spreadsheets/d/ or document/d/” in the URL. " +
+    "For example, if the URL was “https://drive.google.com/file/d/16npTpL3ozkAzB5kLQ-oQD3IlTZhnnh2w1/view”, "
+    + "then the File Identifier would be “16npTpL3ozkAzB5kLQ-oQD3IlTZhnnh2w1”.")
+  private String fileIdentifier;
 
   /**
    * Returns the ValidationResult.
@@ -141,7 +158,7 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
    */
   public ValidationResult validate(FailureCollector collector) {
     IdUtils.validateReferenceName(referenceName, collector);
-
+    checkIfDirectoryOrFileIdentifierExists(collector);
     ValidationResult validationResult = new ValidationResult();
     if (validateAuthType(collector)) {
       AuthType authType = getAuthType();
@@ -162,13 +179,10 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
         try {
           GoogleDriveClient client = new GoogleDriveClient(this);
 
-          // validate auth
-          validateCredentials(collector, client);
-
-          // validate directory
-          validateDirectoryIdentifier(collector, client);
-
-          validationResult.setDirectoryAccessible(true);
+          // check directory or file access
+          if (isDirectoryOrFileAccessible(collector, client)) {
+            validationResult.setDirectoryOrFileAccessible(true);
+          }
         } catch (Exception e) {
           collector.addFailure(
             String.format("Exception during authentication/directory properties check: %s.", e.getMessage()),
@@ -229,26 +243,50 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     return collector.getValidationFailures().size() == 0;
   }
 
-  private void validateCredentials(FailureCollector collector, GoogleDriveClient driveClient) throws IOException {
-    try {
-      driveClient.checkRootFolder();
-    } catch (GoogleJsonResponseException e) {
-      collector.addFailure(e.getDetails().getMessage(), "Provide valid credentials.")
-        .withConfigProperty(NAME_SERVICE_ACCOUNT_TYPE)
-        .withStacktrace(e.getStackTrace());
-    }
-  }
-
-  private void validateDirectoryIdentifier(FailureCollector collector, GoogleDriveClient driveClient)
+  private boolean isDirectoryOrFileAccessible(FailureCollector collector, GoogleDriveClient driveClient)
     throws IOException {
-    if (!containsMacro(DIRECTORY_IDENTIFIER)) {
+    if (containsMacro(FILE_IDENTIFIER) || containsMacro(DIRECTORY_IDENTIFIER)) {
+      return false;
+    }
+
+    if (IdentifierType.DIRECTORY_IDENTIFIER.equals(getIdentifierType()) &&
+      !Strings.isNullOrEmpty(directoryIdentifier) && !containsMacro(DIRECTORY_IDENTIFIER)) {
       try {
         driveClient.isFolderAccessible(directoryIdentifier);
+        return true;
       } catch (GoogleJsonResponseException e) {
         collector.addFailure(e.getDetails().getMessage(), "Provide an existing folder identifier.")
           .withConfigProperty(DIRECTORY_IDENTIFIER)
           .withStacktrace(e.getStackTrace());
       }
+    }
+
+    if (IdentifierType.FILE_IDENTIFIER.equals(getIdentifierType()) &&
+      !Strings.isNullOrEmpty(fileIdentifier) && !containsMacro(FILE_IDENTIFIER)) {
+      try {
+        driveClient.isFileAccessible(fileIdentifier);
+        return true;
+      } catch (GoogleJsonResponseException e) {
+        collector.addFailure(e.getDetails().getMessage(), "Provide an existing file identifier.")
+          .withConfigProperty(FILE_IDENTIFIER)
+          .withStacktrace(e.getStackTrace());
+      }
+    }
+    throw collector.getOrThrowException();
+  }
+
+  protected void checkIfDirectoryOrFileIdentifierExists(FailureCollector collector) {
+    if (IdentifierType.DIRECTORY_IDENTIFIER.equals(getIdentifierType()) && Strings.isNullOrEmpty(directoryIdentifier)
+      && !containsMacro(DIRECTORY_IDENTIFIER)) {
+      collector.addFailure("Directory Identifier can not be null.",
+                           "Provide Directory Identifier.")
+        .withConfigProperty(DIRECTORY_IDENTIFIER);
+    }
+    if (IdentifierType.FILE_IDENTIFIER.equals(getIdentifierType()) && Strings.isNullOrEmpty(fileIdentifier)
+      && !containsMacro(FILE_IDENTIFIER)) {
+      collector.addFailure("File Identifier can not be null.",
+                           "Provide File Identifier.")
+        .withConfigProperty(FILE_IDENTIFIER);
     }
   }
 
@@ -269,8 +307,16 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     return referenceName;
   }
 
+  public IdentifierType getIdentifierType() {
+    return Strings.isNullOrEmpty(identifierType) ? IdentifierType.DIRECTORY_IDENTIFIER :
+      IdentifierType.valueOf(identifierType.toUpperCase());
+  }
   public String getDirectoryIdentifier() {
     return directoryIdentifier;
+  }
+
+  public String getFileIdentifier() {
+    return fileIdentifier;
   }
 
   public AuthType getAuthType() {
@@ -297,8 +343,15 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     this.accountFilePath = accountFilePath;
   }
 
+  public void setIdentifierType(String identifierType) {
+    this.identifierType = identifierType;
+  }
   public void setDirectoryIdentifier(String directoryIdentifier) {
     this.directoryIdentifier = directoryIdentifier;
+  }
+
+  public void setFileIdentifier(String fileIdentifier) {
+    this.fileIdentifier = fileIdentifier;
   }
 
   public void setClientId(String clientId) {

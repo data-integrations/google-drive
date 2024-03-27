@@ -388,6 +388,22 @@
           }
         },
         {
+          "widget-type": "toggle",
+          "label": "Auto Detect Number of Rows and Columns",
+          "name": "autoDetectRowsAndColumns",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "true"
+          }
+        },
+        {
           "widget-type": "number",
           "label": "Number of Columns to Read",
           "name": "lastDataColumn",
@@ -629,6 +645,22 @@
       "show": [
         {
           "name": "fileIdentifier",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Auto Detect Rows and Columns",
+      "condition": {
+        "expression": "autoDetectRowsAndColumns != true"
+      },
+      "show": [
+        {
+          "name": "lastDataColumn",
+          "type": "property"
+        },
+        {
+          "name": "lastDataRow",
           "type": "property"
         }
       ]

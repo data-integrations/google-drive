@@ -82,6 +82,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   public static final String LAST_HEADER_ROW = "lastHeaderRow";
   public static final String FIRST_FOOTER_ROW = "firstFooterRow";
   public static final String LAST_FOOTER_ROW = "lastFooterRow";
+  public static final String AUTO_DETECT_ROWS_AND_COLUMNS = "autoDetectRowsAndColumns";
   public static final String LAST_DATA_COLUMN = "lastDataColumn";
   public static final String LAST_DATA_ROW = "lastDataRow";
   public static final String METADATA_CELLS = "metadataCells";
@@ -184,13 +185,20 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
   @Macro
   private Integer lastFooterRow;
 
+  @Nullable
+  @Name(AUTO_DETECT_ROWS_AND_COLUMNS)
+  @Description("Field to enable automatic detection of the number of rows and columns to read from the sheet.")
+  private Boolean autoDetectRowsAndColumns;
+
   @Name(LAST_DATA_COLUMN)
+  @Nullable
   @Description("Last column plugin will read as data. It will be ignored if the Column Names " +
     "Row contain less number of columns.")
   @Macro
   private String lastDataColumn;
 
   @Name(LAST_DATA_ROW)
+  @Nullable
   @Description("Last row plugin will read as data.")
   @Macro
   private String lastDataRow;
@@ -301,7 +309,9 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     dataSchemaInfo = new LinkedHashMap<>();
 
     validateColumnNamesRow(collector);
-    validateLastDataColumnIndexAndLastRowIndex(collector);
+    if (!getAutoDetectRowsAndColumns()) {
+      validateLastDataColumnIndexAndLastRowIndex(collector);
+    }
     validateSpreadsheetAndSheetFieldNames(collector);
 
     if (collector.getValidationFailures().isEmpty() && validationResult.isDirectoryOrFileAccessible()) {
@@ -547,7 +557,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
           if (columnMerges.isEmpty()) {
             dataRow = subColumnsRow;
           }
-
+          lastDataColumn = lastDataColumn == 0 ? columnsRow.size() : lastDataColumn;
           resultHeaderTitles = processColumns(columnsRow, subColumnsRow, dataRow, columnMerges,
                                               lastDataColumn, collector);
           if (collector.getValidationFailures().isEmpty()) {
@@ -561,6 +571,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
           MergesForNumeredRows firstRowData = sheetsSourceClient.getSingleRows(firstFileTitles.getKey(),
             firstFileTitles.getValue().get(0), Collections.singleton(firstDataRow));
           List<CellData> dataCells = firstRowData.getNumeredRows().get(firstDataRow);
+          lastDataColumn = lastDataColumn == 0 ? dataCells.size() : lastDataColumn;
           if (CollectionUtils.isEmpty(dataCells)) {
             dataSchemaInfo = defaultGeneratedHeaders(lastDataColumn);
           } else {
@@ -696,8 +707,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
    * Returns the int.
    * @return The int
    */
-  public int getActualLastDataRow() {
-    int lastDataRow = getLastDataRow();
+  public int getActualLastDataRow(int recordsInSheet) {
+    int lastDataRow = getAutoDetectRowsAndColumns() ? recordsInSheet : getLastDataRow();
     if (isExtractMetadata() && getFirstFooterRow() > 0) {
       lastDataRow = Math.min(lastDataRow, getFirstFooterRow() - 1);
     }
@@ -913,12 +924,17 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     return lastFooterRow == null ? 0 : lastFooterRow;
   }
 
+  @Nullable
+  public boolean getAutoDetectRowsAndColumns() {
+    return Boolean.TRUE.equals(autoDetectRowsAndColumns);
+  }
+
   public Integer getLastDataColumn() {
-    return Integer.parseInt(lastDataColumn);
+    return lastDataColumn == null ? 0 : Integer.parseInt(lastDataColumn);
   }
 
   public Integer getLastDataRow() {
-    return Integer.parseInt(lastDataRow);
+    return lastDataRow == null ? 0 : Integer.parseInt(lastDataRow);
   }
 
   public String getMetadataCells() {
@@ -1056,6 +1072,10 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
 
   public void setLastFooterRow(Integer lastFooterRow) {
     this.lastFooterRow = lastFooterRow;
+  }
+
+  public void setAutoDetectRowsAndColumns(boolean autoDetectRowsAndColumns) {
+    this.autoDetectRowsAndColumns = autoDetectRowsAndColumns;
   }
 
   public void setLastDataColumn(String lastDataColumn) {
@@ -1279,6 +1299,10 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     if (properties.has(GoogleSheetsSourceConfig.IDENTIFIER_TYPE)) {
       googleSheetsSourceConfig.setIdentifierType(
         properties.get(GoogleSheetsSourceConfig.IDENTIFIER_TYPE).getAsString());
+    }
+    if (properties.has(GoogleSheetsSourceConfig.AUTO_DETECT_ROWS_AND_COLUMNS)) {
+      googleSheetsSourceConfig.setAutoDetectRowsAndColumns(
+        properties.get(GoogleSheetsSourceConfig.AUTO_DETECT_ROWS_AND_COLUMNS).getAsBoolean());
     }
 
     return googleSheetsSourceConfig;

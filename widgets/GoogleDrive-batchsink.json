@@ -31,6 +31,16 @@
           "widget-type": "textbox",
           "label": "Directory Identifier",
           "name": "directoryIdentifier"
+        },
+        {
+          "widget-type": "hidden",
+          "label": "File Identifier",
+          "name": "fileIdentifier"
+        },
+        {
+          "widget-type": "hidden",
+          "label": "Identifier Type",
+          "name": "identifierType"
         }
       ]
     },
@@ -54,6 +64,33 @@
                 "label": "Service account"
               }
             ]
+          }
+        },
+        {
+          "name": "oAuthMethod",
+          "label": "OAuth Method",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "REFRESH_TOKEN",
+            "options": [
+              {
+                "id": "REFRESH_TOKEN",
+                "label": "Refresh Token"
+              },
+              {
+                "id": "ACCESS_TOKEN",
+                "label": "Access Token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "accessToken",
+          "label": "Access Token",
+          "widget-type": "textbox",
+          "widget-attributes": {
+            "placeholder": "${oauthAccessToken(provider,credential)}"
           }
         },
         {
@@ -114,6 +151,30 @@
         "property": "authType",
         "operator": "equal to",
         "value": "oAuth2"
+      },
+      "show": [
+        {
+          "name": "oAuthMethod",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Access Token",
+      "condition": {
+        "expression": "oAuthMethod == 'ACCESS_TOKEN' && authType == 'oAuth2'"
+      },
+      "show": [
+        {
+          "name": "accessToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Refresh Token",
+      "condition": {
+        "expression": "oAuthMethod == null || (oAuthMethod != 'ACCESS_TOKEN' && authType == 'oAuth2')"
       },
       "show": [
         {

@@ -9,13 +9,24 @@ Properties
 ----------
 ### Basic
 
-**Directory Identifier:** Identifier of the destination folder.
+**Identifier Type:**  Identifier specifies whether the given ID for Google Drive entity is a file or directory.
+
+**Directory Identifier:** Identifier of the source folder.
 
 This comes after `folders/` in the URL. For example, if the URL is
 ```
 https://drive.google.com/drive/folders/1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g?resourcekey=0-XVijrJSp3E3gkdJp20MpCQ
 ```
 Then the Directory Identifier would be `1dyUEebJaFnWa3Z4n0BFMVAXQ7mfUH11g`.
+
+**File Identifier:** Identifier of the spreadsheet file.
+
+This comes after `spreadsheets/d/` in the URL. For example, if the URL is
+```
+https://docs.google.com/spreadsheets/d/17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows
+```
+Then the File Identifier would be `17W3vOhBwe0i24OdVNsbz8rAMClzUitKeAbumTqWFrkows`.  
+**Note:** Either Directory Identifier or File Identifier should have a value.
 
 ### Filtering
 
@@ -45,12 +56,20 @@ Is shown only when 'titles' or 'numbers' are selected for 'Sheets to pull' field
 **Authentication Type:** Type of authentication used to access Google API.
 
 OAuth2 and Service Account types are available.
-Make sure `Google Drive API` and `Google Sheets API` is enabled in the `GCP Project`.
+
+Make sure that:
+* `Google Drive API` and `Google Sheets API` is enabled in the `GCP Project`.
+* `Google Drive Folder` is shared to the service account email used with the required permission.
 
 #### OAuth2 Properties
 
 OAuth2 client credentials can be generated on Google Cloud 
 [Credentials Page](https://console.cloud.google.com/apis/credentials)
+
+**OAuth Method:** The method used to get OAuth access tokens. Users have the option to either directly provide
+the OAuth access token or supply a client ID, client secret, and refresh token.
+
+**Access Token:** Short lived access token used for connecting.
 
 **Client ID:** OAuth2 client id used to identify the application.
 
@@ -120,6 +139,9 @@ _Treat first row as column names_ - the plugin uses first row for schema definin
 
 **Column Names Row Number:** Number of the row to be treated as a header.
 Only shown when the 'Column Names Selection' field is set to 'Custom row as column names' header.
+
+**Auto Detect Number of Rows and Columns:** Field to enable automatic detection of the number of rows and columns to
+read from the sheet.
 
 **Number of Columns to Read:** Last column plugin will read as data. It will be ignored if the Column 
 Names Row contains less number of columns.

@@ -13,9 +13,33 @@
           "name": "referenceName"
         },
         {
+          "name": "identifierType",
+          "label": "Identifier Type",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "DIRECTORY_IDENTIFIER",
+            "options": [
+              {
+                "id": "DIRECTORY_IDENTIFIER",
+                "label": "Directory Identifier"
+              },
+              {
+                "id": "FILE_IDENTIFIER",
+                "label": "File Identifier"
+              }
+            ]
+          }
+        },
+        {
           "widget-type": "textbox",
           "label": "Directory Identifier",
           "name": "directoryIdentifier"
+        },
+        {
+          "widget-type": "textbox",
+          "label": "File Identifier",
+          "name": "fileIdentifier"
         },
         {
           "name": "fileMetadataProperties",
@@ -312,6 +336,33 @@
           }
         },
         {
+          "name": "oAuthMethod",
+          "label": "OAuth Method",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "REFRESH_TOKEN",
+            "options": [
+              {
+                "id": "REFRESH_TOKEN",
+                "label": "Refresh Token"
+              },
+              {
+                "id": "ACCESS_TOKEN",
+                "label": "Access Token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "accessToken",
+          "label": "Access Token",
+          "widget-type": "textbox",
+          "widget-attributes": {
+            "placeholder": "${oauthAccessToken(provider,credential)}"
+          }
+        },
+        {
           "widget-type": "textbox",
           "label": "Client ID",
           "name": "clientId"
@@ -490,6 +541,30 @@
       },
       "show": [
         {
+          "name": "oAuthMethod",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Access Token",
+      "condition": {
+        "expression": "oAuthMethod == 'ACCESS_TOKEN' && authType == 'oAuth2'"
+      },
+      "show": [
+        {
+          "name": "accessToken",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Authenticate with OAuth2 Refresh Token",
+      "condition": {
+        "expression": "oAuthMethod != 'ACCESS_TOKEN' && authType == 'oAuth2'"
+      },
+      "show": [
+        {
           "name": "clientId",
           "type": "property"
         },
@@ -538,6 +613,48 @@
         {
           "type": "property",
           "name": "serviceAccountJSON"
+        }
+      ]
+    },
+    {
+      "name": "Select Identifier Type",
+      "condition": {
+        "expression": "identifierType != 'FILE_IDENTIFIER'"
+      },
+      "show": [
+        {
+          "name": "directoryIdentifier",
+          "type": "property"
+        },
+        {
+          "name": "startDate",
+          "type": "property"
+        },
+        {
+          "name": "endDate",
+          "type": "property"
+        },
+        {
+          "name": "filter",
+          "type": "property"
+        },
+        {
+          "name": "modificationDateRange",
+          "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Select Identifier Type",
+      "condition": {
+        "property": "identifierType",
+        "operator": "equal to",
+        "value": "FILE_IDENTIFIER"
+      },
+      "show": [
+        {
+          "name": "fileIdentifier",
+          "type": "property"
         }
       ]
     }

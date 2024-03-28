@@ -364,6 +364,20 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     if (properties.has(GoogleDriveSourceConfig.REFRESH_TOKEN)) {
       googleDriveSourceConfig.setRefreshToken(properties.get(GoogleDriveSourceConfig.REFRESH_TOKEN).getAsString());
     }
+    if (properties.has(GoogleDriveSourceConfig.ACCESS_TOKEN)) {
+      googleDriveSourceConfig.setAccessToken(properties.get(GoogleDriveSourceConfig.ACCESS_TOKEN).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.OAUTH_METHOD)) {
+      googleDriveSourceConfig.setoAuthMethod(properties.get(GoogleDriveSourceConfig.OAUTH_METHOD).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.FILE_IDENTIFIER)) {
+      googleDriveSourceConfig.setFileIdentifier(
+        properties.get(GoogleDriveSourceConfig.FILE_IDENTIFIER).getAsString());
+    }
+    if (properties.has(GoogleDriveSourceConfig.IDENTIFIER_TYPE)) {
+      googleDriveSourceConfig.setIdentifierType(
+        properties.get(GoogleDriveSourceConfig.IDENTIFIER_TYPE).getAsString());
+    }
     return googleDriveSourceConfig;
   }
 }

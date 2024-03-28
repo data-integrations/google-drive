@@ -155,7 +155,7 @@ public class GoogleAuthBaseConfigTest {
     Assert.assertEquals("directoryIdentifier",
                         collector.getValidationFailures().get(0).getCauses().get(0).getAttribute("stageConfig"));
     Assert.assertEquals("Exception during authentication/directory properties check: " +
-                          "Errors were encountered during validation. Directory Identifier can not be null..",
+                          "Errors were encountered during validation..",
                         collector.getValidationFailures().get(1).getMessage());
   }
 
@@ -178,7 +178,7 @@ public class GoogleAuthBaseConfigTest {
     Assert.assertEquals("fileIdentifier",
                         collector.getValidationFailures().get(0).getCauses().get(0).getAttribute("stageConfig"));
     Assert.assertEquals("Exception during authentication/directory properties check: " +
-                          "Errors were encountered during validation. File Identifier can not be null..",
+                          "Errors were encountered during validation..",
                         collector.getValidationFailures().get(1).getMessage());
   }
 }

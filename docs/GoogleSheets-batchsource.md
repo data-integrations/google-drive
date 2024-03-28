@@ -140,6 +140,9 @@ _Treat first row as column names_ - the plugin uses first row for schema definin
 **Column Names Row Number:** Number of the row to be treated as a header.
 Only shown when the 'Column Names Selection' field is set to 'Custom row as column names' header.
 
+**Auto Detect Number of Rows and Columns:** Field to enable automatic detection of the number of rows and columns to
+read from the sheet.
+
 **Number of Columns to Read:** Last column plugin will read as data. It will be ignored if the Column 
 Names Row contains less number of columns.
 

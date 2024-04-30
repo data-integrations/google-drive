@@ -359,13 +359,13 @@ public class GoogleSheetsSourceConfigTest {
     Assert.assertTrue(columns.get(0).getSubColumns().isEmpty());
 
     // check complex columns, top header should have column name as name
-    Assert.assertEquals("B", columns.get(1).getHeaderTitle());
+    Assert.assertEquals("title_with_space", columns.get(1).getHeaderTitle());
     List<ColumnComplexSchemaInfo> subColumns = columns.get(1).getSubColumns();
     Assert.assertFalse(subColumns.isEmpty());
 
     // check sub-columns
     Assert.assertEquals(2, subColumns.size());
-    Assert.assertEquals("B", subColumns.get(0).getHeaderTitle());
+    Assert.assertEquals("col_9titleWithFirstNumber", subColumns.get(0).getHeaderTitle());
     Assert.assertTrue(subColumns.get(0).getSubColumns().isEmpty());
     Assert.assertEquals("d", subColumns.get(1).getHeaderTitle());
     Assert.assertTrue(subColumns.get(0).getSubColumns().isEmpty());

@@ -682,8 +682,9 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
     cleanFieldNameBuilder.append(NOT_VALID_PATTERN.matcher(title).replaceAll(replacementChar));
 
     String cleanFieldName = cleanFieldNameBuilder.toString();
-    int count = seenFieldNames.getOrDefault(cleanFieldName, 0) + 1;
-    seenFieldNames.put(cleanFieldName, count);
+    String lowerCaseCleanFieldName = cleanFieldName.toLowerCase();
+    int count = seenFieldNames.getOrDefault(lowerCaseCleanFieldName, 0) + 1;
+    seenFieldNames.put(lowerCaseCleanFieldName, count);
     // In case column already exists in seenFieldNames map, append the count with column name.
     if (count > 1) {
       cleanFieldNameBuilder.append(replacementChar).append(count);

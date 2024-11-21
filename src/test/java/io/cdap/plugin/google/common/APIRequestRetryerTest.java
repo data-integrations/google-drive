@@ -33,14 +33,12 @@ import java.util.concurrent.ExecutionException;
 @PrepareForTest({GoogleJsonResponseException.class})
 public class APIRequestRetryerTest {
   private static final int UNPROCESSED_CODE = 504;
-  private static final int RETRY_NUMBER = 8;
+  private static final int RETRY_NUMBER = 10;
 
   @Test
   public void testRetryCount() throws ExecutionException {
     GoogleJsonResponseException exception = PowerMockito.mock(GoogleJsonResponseException.class);
-    GoogleJsonError googleJsonError = new GoogleJsonError();
-    googleJsonError.setCode(APIRequestRetryer.TOO_MANY_REQUESTS_CODE);
-    PowerMockito.when(exception.getDetails()).thenReturn(googleJsonError);
+    PowerMockito.when(exception.getStatusCode()).thenReturn(APIRequestRetryer.TOO_MANY_REQUESTS_CODE);
     PowerMockito.when(exception.getStatusMessage()).thenReturn(APIRequestRetryer.TOO_MANY_REQUESTS_MESSAGE);
 
 

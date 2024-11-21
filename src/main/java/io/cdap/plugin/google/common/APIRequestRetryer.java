@@ -51,9 +51,9 @@ public abstract class APIRequestRetryer {
   protected static final int LIMIT_RATE_EXCEEDED_CODE = 403;
   protected static final int BACKEND_ERROR_CODE = 500;
   protected static final int SERVICE_UNAVAILABLE_CODE = 503;
-  private static final int MAX_RETRY_WAIT = 200;
-  private static final int MAX_RETRY_COUNT = 8;
-  private static final int MAX_RETRY_JITTER_WAIT = 100;
+  private static final int MAX_RETRY_WAIT_SECONDS = 300;
+  private static final int MAX_RETRY_COUNT = 10;
+  private static final int MAX_RETRY_JITTER_WAIT_MS = 100;
   protected static final String TOO_MANY_REQUESTS_MESSAGE = "Too Many Requests";
   protected static final String LIMIT_RATE_EXCEEDED_MESSAGE = "Rate Limit Exceeded";
   protected static final String FORBIDDEN_STATUS_MESSAGE = "Forbidden";
@@ -76,7 +76,7 @@ public abstract class APIRequestRetryer {
             GoogleJsonResponseException e = (GoogleJsonResponseException) exceptionCause;
             LOG.warn(String.format(
               "Error code: '%d', message: '%s'. Attempt: '%d'. Delay since first: '%d'. Description: '%s'.",
-              e.getDetails().getCode(),
+              e.getStatusCode(),
               e.getStatusMessage(),
               attempt.getAttemptNumber(),
               attempt.getDelaySinceFirstAttempt(),
@@ -96,8 +96,8 @@ public abstract class APIRequestRetryer {
       .retryIfException(APIRequestRetryer::checkThrowable)
       .retryIfExceptionOfType(SocketTimeoutException.class)
       .withWaitStrategy(WaitStrategies.join(
-        new TrueExponentialWaitStrategy(1000, TimeUnit.SECONDS.toMillis(MAX_RETRY_WAIT)),
-        WaitStrategies.randomWait(MAX_RETRY_JITTER_WAIT, TimeUnit.MILLISECONDS)))
+        new TrueExponentialWaitStrategy(1000, TimeUnit.SECONDS.toMillis(MAX_RETRY_WAIT_SECONDS)),
+        WaitStrategies.randomWait(MAX_RETRY_JITTER_WAIT_MS, TimeUnit.MILLISECONDS)))
       .withStopStrategy(StopStrategies.stopAfterAttempt(MAX_RETRY_COUNT))
       .withRetryListener(listener)
       .build();
@@ -125,21 +125,22 @@ public abstract class APIRequestRetryer {
 
   private static boolean isTooManyRequestsError(GoogleJsonResponseException e) {
     List<String> possibleMessages = Arrays.asList(TOO_MANY_REQUESTS_MESSAGE, LIMIT_RATE_EXCEEDED_MESSAGE);
-    return e.getDetails().getCode() == TOO_MANY_REQUESTS_CODE && possibleMessages.contains(e.getStatusMessage());
+    return e.getStatusCode() == TOO_MANY_REQUESTS_CODE && possibleMessages.contains(
+      e.getStatusMessage());
   }
 
   private static boolean isRateLimitError(GoogleJsonResponseException e) {
-    return e.getDetails().getCode() == LIMIT_RATE_EXCEEDED_CODE
+    return e.getStatusCode() == LIMIT_RATE_EXCEEDED_CODE
       && (LIMIT_RATE_EXCEEDED_MESSAGE.equals(e.getStatusMessage())
       || e.getDetails().getMessage().contains(LIMIT_RATE_EXCEEDED_MESSAGE));
   }
 
   private static boolean isBackendError(GoogleJsonResponseException e) {
-    return e.getDetails().getCode() == BACKEND_ERROR_CODE;
+    return e.getStatusCode() == BACKEND_ERROR_CODE;
   }
 
   private static boolean isServiceUnavailableError(GoogleJsonResponseException e) {
-    return e.getDetails().getCode() == SERVICE_UNAVAILABLE_CODE;
+    return e.getStatusCode() == SERVICE_UNAVAILABLE_CODE;
   }
 
   private static boolean isRateLimitError(HttpResponseException e) {

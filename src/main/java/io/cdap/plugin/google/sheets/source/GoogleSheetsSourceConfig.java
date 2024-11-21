@@ -334,7 +334,7 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
       GoogleDriveFilteringClient driveClient;
       GoogleSheetsSourceClient sheetsSourceClient;
       try {
-        driveClient = new GoogleDriveFilteringClient(this);
+        driveClient = new GoogleSheetsFilteringClient(this);
         sheetsSourceClient = new GoogleSheetsSourceClient(this);
       } catch (IOException e) {
         collector.addFailure("Exception during drive and sheets connections instantiating.", null);

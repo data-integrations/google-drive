@@ -69,7 +69,8 @@ public class SheetTransformer {
         builder.set(metadataRecordName, rowRecord.getMetadata());
       } else {
         ComplexSingleValueColumn complexSingleValueColumn = rowRecord.getHeaderedCells().get(name);
-        if (complexSingleValueColumn.getData() == null && complexSingleValueColumn.getSubColumns().isEmpty()) {
+        if (complexSingleValueColumn == null || (complexSingleValueColumn.getData() == null
+          && complexSingleValueColumn.getSubColumns().isEmpty())) {
           builder.set(name, null);
         } else {
           processCellData(builder, field, complexSingleValueColumn);

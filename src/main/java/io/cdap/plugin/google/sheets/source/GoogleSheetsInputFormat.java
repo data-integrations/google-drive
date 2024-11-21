@@ -57,7 +57,7 @@ public class GoogleSheetsInputFormat extends InputFormat {
         GoogleSheetsInputFormatProvider.GSON.fromJson(headersJson, headersType);
 
     // get all sheets files according to filter
-    GoogleDriveFilteringClient driveFilteringClient = new GoogleDriveFilteringClient(googleSheetsSourceConfig);
+    GoogleDriveFilteringClient driveFilteringClient = new GoogleSheetsFilteringClient(googleSheetsSourceConfig);
     List<File> spreadsheetsFiles;
     try {
       spreadsheetsFiles = driveFilteringClient.getFilesSummary(Collections.singletonList(ExportedType.SPREADSHEETS));

@@ -72,9 +72,10 @@ public class GoogleDriveFilteringClient<C extends GoogleFilteringSourceConfig> e
       int retrievedFiles = 0;
       int actualFilesNumber = filesNumber;
       if (IdentifierType.FILE_IDENTIFIER.equals(config.getIdentifierType())) {
-        files.add(service.files().get(config.getFileIdentifier()).setSupportsAllDrives(true).execute());
+        files.add(getFilesSummaryByFileId());
         return files;
       }
+
       Drive.Files.List request = service.files().list()
         .setSupportsAllDrives(true)
         .setIncludeItemsFromAllDrives(true)
@@ -97,6 +98,10 @@ public class GoogleDriveFilteringClient<C extends GoogleFilteringSourceConfig> e
           files.subList(0, actualFilesNumber);
 
     });
+  }
+
+  protected File getFilesSummaryByFileId() throws IOException, ExecutionException {
+    return service.files().get(config.getFileIdentifier()).setSupportsAllDrives(true).execute();
   }
 
   private String generateFilter(List<ExportedType> exportedTypes) throws InterruptedException {

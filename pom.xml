@@ -22,7 +22,7 @@
   <groupId>io.cdap.plugin</groupId>
   <name>Google Drive plugins</name>
   <artifactId>google-drive-plugins</artifactId>
-  <version>1.4.4-SNAPSHOT</version>
+  <version>1.4.4</version>
   <packaging>jar</packaging>
   <description>Google Drive plugins</description>
 

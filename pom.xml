@@ -37,10 +37,11 @@
     <google.auth.oauth2.http.version>1.23.0</google.auth.oauth2.http.version>
     <guava.retrying.version>2.0.0</guava.retrying.version>
     <guava.version>33.0.0-jre</guava.version>
-    <hadoop.version>2.10.2</hadoop.version>
+    <hadoop.version>3.3.6</hadoop.version>
     <junit.version>4.11</junit.version>
     <powermock.version>1.6.5</powermock.version>
     <sheets-api.version>v4-rev612-1.25.0</sheets-api.version>
+    <jackson.databind.version>2.13.4.2</jackson.databind.version>
   </properties>
 
   <repositories>
@@ -203,6 +204,14 @@
           <artifactId>slf4j-api</artifactId>
           <groupId>org.slf4j</groupId>
         </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -243,6 +252,10 @@
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -250,6 +263,11 @@
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.databind.version}</version>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>

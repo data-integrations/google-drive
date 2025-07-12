@@ -31,7 +31,7 @@
     <cdap.version>6.8.0</cdap.version>
     <cdap.plugin.version>2.10.0</cdap.plugin.version>
     <commons-collections.version>3.2.2</commons-collections.version>
-    <commons-lang3.version>3.9</commons-lang3.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
     <drive-api.version>v3-rev197-1.25.0</drive-api.version>
     <easymock.version>4.0.2</easymock.version>
     <google.auth.oauth2.http.version>1.23.0</google.auth.oauth2.http.version>

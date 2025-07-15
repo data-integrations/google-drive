@@ -23,14 +23,11 @@ import io.cdap.cdap.api.annotation.Plugin;
 import io.cdap.cdap.api.data.batch.Input;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
-import io.cdap.cdap.api.dataset.lib.KeyValue;
-import io.cdap.cdap.etl.api.Emitter;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.cdap.etl.api.PipelineConfigurer;
 import io.cdap.cdap.etl.api.batch.BatchSource;
 import io.cdap.cdap.etl.api.batch.BatchSourceContext;
 import io.cdap.plugin.common.LineageRecorder;
-import io.cdap.plugin.google.drive.common.FileFromFolder;
 import org.apache.hadoop.io.NullWritable;
 
 import java.util.stream.Collectors;
@@ -41,42 +38,47 @@ import java.util.stream.Collectors;
 @Plugin(type = BatchSource.PLUGIN_TYPE)
 @Name(GoogleDriveSource.NAME)
 @Description("Reads fileset from specified Google Drive directory.")
-public class GoogleDriveSource extends BatchSource<NullWritable, FileFromFolder, StructuredRecord> {
+public class GoogleDriveSource extends BatchSource<NullWritable, StructuredRecord, StructuredRecord> {
   public static final String NAME = "GoogleDrive";
 
   private final GoogleDriveSourceConfig config;
+  private final GoogleDriveFileSource delegate;
 
   public GoogleDriveSource(GoogleDriveSourceConfig config) {
     this.config = config;
+    this.delegate = new GoogleDriveFileSource(config);
   }
 
   @Override
   public void configurePipeline(PipelineConfigurer pipelineConfigurer) {
     FailureCollector failureCollector = pipelineConfigurer.getStageConfigurer().getFailureCollector();
-    config.validate(failureCollector);
+    config.getValidationResult(failureCollector);
     failureCollector.getOrThrowException();
 
-    pipelineConfigurer.getStageConfigurer().setOutputSchema(config.getSchema());
+    if (!config.isStructuredSchemaRequired()) {
+      pipelineConfigurer.getStageConfigurer().setOutputSchema(config.getSchema());
+      return;
+    }
+    delegate.configurePipeline(pipelineConfigurer);
   }
 
   @Override
-  public void prepareRun(BatchSourceContext context) {
+  public void prepareRun(BatchSourceContext context) throws Exception {
     FailureCollector failureCollector = context.getFailureCollector();
-    config.validate(failureCollector);
+    config.getValidationResult(failureCollector);
     failureCollector.getOrThrowException();
 
-    LineageRecorder lineageRecorder = new LineageRecorder(context, config.getReferenceName());
-    lineageRecorder.createExternalDataset(config.getSchema());
-    lineageRecorder.recordRead("Read", "Reading Google Drive files",
-                               Preconditions.checkNotNull(config.getSchema().getFields()).stream()
-                                 .map(Schema.Field::getName)
-                                 .collect(Collectors.toList()));
+    if (!config.isStructuredSchemaRequired()) {
+      LineageRecorder lineageRecorder = new LineageRecorder(context, config.getReferenceName());
+      lineageRecorder.createExternalDataset(config.getSchema());
+      lineageRecorder.recordRead("Read", "Reading Google Drive files",
+          Preconditions.checkNotNull(config.getSchema().getFields()).stream().map(Schema.Field::getName)
+              .collect(Collectors.toList()));
 
-    context.setInput(Input.of(config.getReferenceName(), new GoogleDriveInputFormatProvider(config)));
+      context.setInput(Input.of(config.getReferenceName(), new GoogleDriveInputFormatProvider(config)));
+      return;
+    }
+    delegate.prepareRun(context);
   }
 
-  @Override
-  public void transform(KeyValue<NullWritable, FileFromFolder> input, Emitter<StructuredRecord> emitter) {
-    emitter.emit(FilesFromFolderTransformer.transform(input.getValue(), config.getSchema()));
-  }
 }

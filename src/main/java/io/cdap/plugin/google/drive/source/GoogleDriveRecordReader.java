@@ -17,6 +17,7 @@
 package io.cdap.plugin.google.drive.source;
 
 import com.github.rholder.retry.RetryException;
+import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.plugin.google.drive.common.FileFromFolder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
@@ -28,12 +29,13 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 /**
- * RecordReader implementation, which reads {@link FileFromFolder} wrappers from Google Drive using
+ * RecordReader implementation, which reads {@link StructuredRecord} wrappers from Google Drive using
  * Google Drive API.
  */
-public class GoogleDriveRecordReader extends RecordReader<NullWritable, FileFromFolder> {
+public class GoogleDriveRecordReader extends RecordReader<NullWritable, StructuredRecord> {
 
   private GoogleDriveSourceClient googleDriveSourceClient;
+  private GoogleDriveSourceConfig googleDriveSourceConfig;
   private String fileId;
   private long bytesFrom;
   private long bytesTo;
@@ -43,8 +45,7 @@ public class GoogleDriveRecordReader extends RecordReader<NullWritable, FileFrom
   @Override
   public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException {
     Configuration conf = taskAttemptContext.getConfiguration();
-    GoogleDriveSourceConfig googleDriveSourceConfig =
-      GoogleDriveInputFormatProvider.extractPropertiesFromConfig(conf);
+    googleDriveSourceConfig = GoogleDriveInputFormatProvider.extractPropertiesFromConfig(conf);
     googleDriveSourceClient = new GoogleDriveSourceClient(googleDriveSourceConfig);
 
     GoogleDriveSplit split = (GoogleDriveSplit) inputSplit;
@@ -62,18 +63,20 @@ public class GoogleDriveRecordReader extends RecordReader<NullWritable, FileFrom
 
   @Override
   public NullWritable getCurrentKey() {
-    return null;
+    return NullWritable.get();
   }
 
   @Override
-  public FileFromFolder getCurrentValue() throws IOException {
+  public StructuredRecord getCurrentValue() throws IOException {
     // read file and content
     isFileProcessed = true;
     try {
       if (isPartitioned) {
-        return googleDriveSourceClient.getFilePartition(fileId, bytesFrom, bytesTo);
+        return FilesFromFolderTransformer.transform(
+            googleDriveSourceClient.getFilePartition(fileId, bytesFrom, bytesTo), googleDriveSourceConfig.getSchema());
       } else {
-        return googleDriveSourceClient.getFile(fileId);
+        return FilesFromFolderTransformer.transform(googleDriveSourceClient.getFile(fileId),
+            googleDriveSourceConfig.getSchema());
       }
     } catch (ExecutionException | RetryException e) {
       throw new RuntimeException("Exception during file or file part reading.", e);
@@ -88,6 +91,6 @@ public class GoogleDriveRecordReader extends RecordReader<NullWritable, FileFrom
 
   @Override
   public void close() {
-
+    // no-op
   }
 }

@@ -5,6 +5,104 @@
   "display-name": "Google Drive Source",
   "configuration-groups": [
     {
+      "label": "Authentication",
+      "properties": [
+        {
+          "widget-type": "radio-group",
+          "label": "Authentication Type",
+          "name": "authType",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "oAuth2",
+            "options": [
+              {
+                "id": "oAuth2",
+                "label": "OAuth2"
+              },
+              {
+                "id": "serviceAccount",
+                "label": "Service account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "oAuthMethod",
+          "label": "OAuth Method",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "REFRESH_TOKEN",
+            "options": [
+              {
+                "id": "REFRESH_TOKEN",
+                "label": "Refresh Token"
+              },
+              {
+                "id": "ACCESS_TOKEN",
+                "label": "Access Token"
+              }
+            ]
+          }
+        },
+        {
+          "name": "accessToken",
+          "label": "Access Token",
+          "widget-type": "textbox",
+          "widget-attributes": {
+            "placeholder": "${oauthAccessToken(provider,credential)}"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Client ID",
+          "name": "clientId"
+        },
+        {
+          "widget-type": "password",
+          "label": "Client Secret",
+          "name": "clientSecret"
+        },
+        {
+          "widget-type": "password",
+          "label": "Refresh Token",
+          "name": "refreshToken"
+        },
+        {
+          "name": "serviceAccountType",
+          "label": "Service Account Type",
+          "widget-type": "radio-group",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "filePath",
+            "options": [
+              {
+                "id": "filePath",
+                "label": "File Path"
+              },
+              {
+                "id": "JSON",
+                "label": "JSON"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Service Account File Path",
+          "name": "accountFilePath",
+          "widget-attributes": {
+            "default": "auto-detect"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Service Account JSON",
+          "name": "serviceAccountJSON"
+        }
+      ]
+    },
+    {
       "label": "Basic",
       "properties": [
         {
@@ -226,6 +324,202 @@
               }
             ]
           }
+        },
+        {
+          "name": "structuredSchemaRequired",
+          "label": "Structured Schema Required",
+          "widget-type": "toggle",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "YES"
+            },
+            "off": {
+              "value": "false",
+              "label": "NO"
+            },
+            "default": "true"
+          }
+        },
+        {
+          "widget-type": "select",
+          "label": "Format",
+          "name": "format",
+          "widget-attributes": {
+            "values": [
+              "avro",
+              "blob",
+              "delimited",
+              "tsv",
+              "csv",
+              "json",
+              "text",
+              "xls"
+            ],
+            "default": "blob"
+          }
+        },
+        {
+          "widget-type": "get-schema",
+          "widget-category": "plugin"
+        },
+        {
+          "widget-type": "hidden",
+          "label": "Path Field",
+          "name": "pathField",
+          "widget-attributes": {
+            "placeholder": "Output field to contain the path of the object that was read from"
+          }
+        },
+        {
+          "widget-type": "hidden",
+          "label": "Regex Path Filter",
+          "name": "fileRegex",
+          "widget-attributes": {
+            "placeholder": "Regular expression for files to read"
+          }
+        },
+        {
+          "widget-type": "hidden",
+          "name": "recursive",
+          "label": "Read Files Recursively",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "false",
+            "options": [
+              {
+                "id": "true",
+                "label": "True"
+              },
+              {
+                "id": "false",
+                "label": "False"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "hidden",
+          "label": "Allow Empty Input",
+          "name": "ignoreNonExistingFolders",
+          "widget-attributes": {
+            "layout": "inline",
+            "default": "false",
+            "options": [
+              {
+                "id": "true",
+                "label": "True"
+              },
+              {
+                "id": "false",
+                "label": "False"
+              }
+            ]
+          }
+        },
+        {
+          "widget-type": "number",
+          "label": "Sample Size",
+          "name": "sampleSize",
+          "widget-attributes": {
+            "default": "1000",
+            "minimum": "1"
+          }
+        },
+        {
+          "widget-type": "keyvalue-dropdown",
+          "label": "Override",
+          "name": "override",
+          "widget-attributes": {
+            "key-placeholder": "Field Name",
+            "value-placeholder": "Data Type",
+            "dropdownOptions": [
+              "boolean",
+              "bytes",
+              "double",
+              "float",
+              "int",
+              "long",
+              "string",
+              "timestamp"
+            ]
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Delimiter",
+          "name": "delimiter",
+          "widget-attributes": {
+            "placeholder": "Delimiter if the format is 'delimited'"
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "name": "enableQuotedValues",
+          "label": "Enable Quoted Values",
+          "widget-attributes": {
+            "default": "false",
+            "on": {
+              "value": "true",
+              "label": "True"
+            },
+            "off": {
+              "value": "false",
+              "label": "False"
+            }
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "name": "skipHeader",
+          "label": "Use First Row as Header",
+          "widget-attributes": {
+            "default": "false",
+            "on": {
+              "value": "true",
+              "label": "True"
+            },
+            "off": {
+              "value": "false",
+              "label": "False"
+            }
+          }
+        },
+        {
+          "widget-type": "toggle",
+          "label": "Terminate Reading After Empty Row",
+          "name": "terminateIfEmptyRow",
+          "widget-attributes": {
+            "default": "false",
+            "on": {
+              "value": "true",
+              "label": "True"
+            },
+            "off": {
+              "value": "false",
+              "label": "False"
+            }
+          }
+        },
+        {
+          "widget-type": "select",
+          "label": "Select Sheet Using",
+          "name": "sheet",
+          "widget-attributes": {
+            "values": [
+              "Sheet Name",
+              "Sheet Number"
+            ],
+            "default": "Sheet Number"
+          }
+        },
+        {
+          "widget-type": "textbox",
+          "label": "Sheet Value",
+          "name": "sheetValue",
+          "widget-attributes": {
+            "default": "0"
+          }
         }
       ]
     },
@@ -314,104 +608,6 @@
       ]
     },
     {
-      "label": "Authentication",
-      "properties": [
-        {
-          "widget-type": "radio-group",
-          "label": "Authentication Type",
-          "name": "authType",
-          "widget-attributes": {
-            "layout": "inline",
-            "default": "oAuth2",
-            "options": [
-              {
-                "id": "oAuth2",
-                "label": "OAuth2"
-              },
-              {
-                "id": "serviceAccount",
-                "label": "Service account"
-              }
-            ]
-          }
-        },
-        {
-          "name": "oAuthMethod",
-          "label": "OAuth Method",
-          "widget-type": "radio-group",
-          "widget-attributes": {
-            "layout": "inline",
-            "default": "REFRESH_TOKEN",
-            "options": [
-              {
-                "id": "REFRESH_TOKEN",
-                "label": "Refresh Token"
-              },
-              {
-                "id": "ACCESS_TOKEN",
-                "label": "Access Token"
-              }
-            ]
-          }
-        },
-        {
-          "name": "accessToken",
-          "label": "Access Token",
-          "widget-type": "textbox",
-          "widget-attributes": {
-            "placeholder": "${oauthAccessToken(provider,credential)}"
-          }
-        },
-        {
-          "widget-type": "textbox",
-          "label": "Client ID",
-          "name": "clientId"
-        },
-        {
-          "widget-type": "password",
-          "label": "Client Secret",
-          "name": "clientSecret"
-        },
-        {
-          "widget-type": "password",
-          "label": "Refresh Token",
-          "name": "refreshToken"
-        },
-        {
-          "name": "serviceAccountType",
-          "label": "Service Account Type",
-          "widget-type": "radio-group",
-          "widget-attributes": {
-            "layout": "inline",
-            "default": "filePath",
-            "options": [
-              {
-                "id": "filePath",
-                "label": "File Path"
-              },
-              {
-                "id": "JSON",
-                "label": "JSON"
-              }
-            ]
-          }
-        },
-        {
-          "widget-type": "textbox",
-          "label": "Service Account File Path",
-          "name": "accountFilePath",
-          "widget-attributes": {
-            "default": "auto-detect"
-          }
-        },
-        {
-          "widget-type": "textbox",
-          "label": "Service Account JSON",
-          "name": "serviceAccountJSON"
-        }
-      ]
-    },
-    {
       "label": "Advanced",
       "properties": [
         {
@@ -440,6 +636,285 @@
                 "label": "String"
               }
             ]
+          }
+        },
+        {
+          "widget-type": "json-editor",
+          "label": "File System Properties",
+          "name": "fileSystemProperties"
+        },
+        {
+          "widget-type": "select",
+          "label": "File encoding",
+          "name": "fileEncoding",
+          "widget-attributes": {
+            "values": [
+              {
+                "label": "UTF-8",
+                "value": "UTF-8"
+              },
+              {
+                "label": "UTF-32",
+                "value": "UTF-32"
+              },
+              {
+                "label": "ISO-8859-1 (Latin-1 Western European)",
+                "value": "ISO-8859-1"
+              },
+              {
+                "label": "ISO-8859-2 (Latin-2 Central European)",
+                "value": "ISO-8859-2"
+              },
+              {
+                "label": "ISO-8859-3 (Latin-3 South European)",
+                "value": "ISO-8859-3"
+              },
+              {
+                "label": "ISO-8859-4 (Latin-4 North European)",
+                "value": "ISO-8859-4"
+              },
+              {
+                "label": "ISO-8859-5 (Latin/Cyrillic)",
+                "value": "ISO-8859-5"
+              },
+              {
+                "label": "ISO-8859-6 (Latin/Arabic)",
+                "value": "ISO-8859-6"
+              },
+              {
+                "label": "ISO-8859-7 (Latin/Greek)",
+                "value": "ISO-8859-7"
+              },
+              {
+                "label": "ISO-8859-8 (Latin/Hebrew)",
+                "value": "ISO-8859-8"
+              },
+              {
+                "label": "ISO-8859-9 (Latin-5 Turkish)",
+                "value": "ISO-8859-9"
+              },
+              {
+                "label": "ISO-8859-11 (Latin/Thai)",
+                "value": "ISO-8859-11"
+              },
+              {
+                "label": "ISO-8859-13 (Latin-7 Baltic Rim)",
+                "value": "ISO-8859-13"
+              },
+              {
+                "label": "ISO-8859-15 (Latin-9)",
+                "value": "ISO-8859-15"
+              },
+              {
+                "label": "Windows-1250",
+                "value": "Windows-1250"
+              },
+              {
+                "label": "Windows-1251",
+                "value": "Windows-1251"
+              },
+              {
+                "label": "Windows-1252",
+                "value": "Windows-1252"
+              },
+              {
+                "label": "Windows-1253",
+                "value": "Windows-1253"
+              },
+              {
+                "label": "Windows-1254",
+                "value": "Windows-1254"
+              },
+              {
+                "label": "Windows-1255",
+                "value": "Windows-1255"
+              },
+              {
+                "label": "Windows-1256",
+                "value": "Windows-1256"
+              },
+              {
+                "label": "Windows-1257",
+                "value": "Windows-1257"
+              },
+              {
+                "label": "Windows-1258",
+                "value": "Windows-1258"
+              },
+              {
+                "label": "IBM00858",
+                "value": "IBM00858"
+              },
+              {
+                "label": "IBM01140",
+                "value": "IBM01140"
+              },
+              {
+                "label": "IBM01141",
+                "value": "IBM01141"
+              },
+              {
+                "label": "IBM01142",
+                "value": "IBM01142"
+              },
+              {
+                "label": "IBM01143",
+                "value": "IBM01143"
+              },
+              {
+                "label": "IBM01144",
+                "value": "IBM01144"
+              },
+              {
+                "label": "IBM01145",
+                "value": "IBM01145"
+              },
+              {
+                "label": "IBM01146",
+                "value": "IBM01146"
+              },
+              {
+                "label": "IBM01147",
+                "value": "IBM01147"
+              },
+              {
+                "label": "IBM01148",
+                "value": "IBM01148"
+              },
+              {
+                "label": "IBM01149",
+                "value": "IBM01149"
+              },
+              {
+                "label": "IBM037",
+                "value": "IBM037"
+              },
+              {
+                "label": "IBM1026",
+                "value": "IBM1026"
+              },
+              {
+                "label": "IBM1047",
+                "value": "IBM1047"
+              },
+              {
+                "label": "IBM273",
+                "value": "IBM273"
+              },
+              {
+                "label": "IBM277",
+                "value": "IBM277"
+              },
+              {
+                "label": "IBM278",
+                "value": "IBM278"
+              },
+              {
+                "label": "IBM280",
+                "value": "IBM280"
+              },
+              {
+                "label": "IBM284",
+                "value": "IBM284"
+              },
+              {
+                "label": "IBM285",
+                "value": "IBM285"
+              },
+              {
+                "label": "IBM290",
+                "value": "IBM290"
+              },
+              {
+                "label": "IBM297",
+                "value": "IBM297"
+              },
+              {
+                "label": "IBM420",
+                "value": "IBM420"
+              },
+              {
+                "label": "IBM424",
+                "value": "IBM424"
+              },
+              {
+                "label": "IBM437",
+                "value": "IBM437"
+              },
+              {
+                "label": "IBM500",
+                "value": "IBM500"
+              },
+              {
+                "label": "IBM775",
+                "value": "IBM775"
+              },
+              {
+                "label": "IBM850",
+                "value": "IBM850"
+              },
+              {
+                "label": "IBM852",
+                "value": "IBM852"
+              },
+              {
+                "label": "IBM855",
+                "value": "IBM855"
+              },
+              {
+                "label": "IBM857",
+                "value": "IBM857"
+              },
+              {
+                "label": "IBM860",
+                "value": "IBM860"
+              },
+              {
+                "label": "IBM861",
+                "value": "IBM861"
+              },
+              {
+                "label": "IBM862",
+                "value": "IBM862"
+              },
+              {
+                "label": "IBM863",
+                "value": "IBM863"
+              },
+              {
+                "label": "IBM864",
+                "value": "IBM864"
+              },
+              {
+                "label": "IBM865",
+                "value": "IBM865"
+              },
+              {
+                "label": "IBM866",
+                "value": "IBM866"
+              },
+              {
+                "label": "IBM868",
+                "value": "IBM868"
+              },
+              {
+                "label": "IBM869",
+                "value": "IBM869"
+              },
+              {
+                "label": "IBM870",
+                "value": "IBM870"
+              },
+              {
+                "label": "IBM871",
+                "value": "IBM871"
+              },
+              {
+                "label": "IBM918",
+                "value": "IBM918"
+              }
+            ],
+            "default": "UTF-8"
           }
         }
       ]
@@ -512,7 +987,28 @@
       ]
     }
   ],
-  "outputs": [],
+  "outputs": [
+    {
+      "name": "schema",
+      "widget-type": "schema",
+      "widget-attributes": {
+        "default-schema": {
+          "name": "fileRecord",
+          "type": "record",
+          "fields": [
+            {
+              "name": "offset",
+              "type": "long"
+            },
+            {
+              "name": "body",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
   "filters": [
     {
       "name": "Select modification date range",
@@ -655,6 +1151,111 @@
         {
           "name": "fileIdentifier",
           "type": "property"
+        }
+      ]
+    },
+    {
+      "name": "Show property delimiter",
+      "condition": {
+        "expression": "format == 'delimited' && structuredSchemaRequired == true"
+      },
+      "show": [
+        {
+          "name": "delimiter"
+        }
+      ]
+    },
+    {
+      "name": "Show property enableQuotedValues",
+      "condition": {
+        "expression": "(format == 'delimited' || format == 'csv' || format == 'tsv') && structuredSchemaRequired == true"
+      },
+      "show": [
+        {
+          "name": "enableQuotedValues"
+        }
+      ]
+    },
+    {
+      "name": "Show property skipHeader",
+      "condition": {
+        "expression": "(format == 'delimited' || format == 'csv' || format == 'tsv' || format == 'xls') && structuredSchemaRequired == true"
+      },
+      "show": [
+        {
+          "name": "skipHeader"
+        }
+      ]
+    },
+    {
+      "name": "Show property sheet, sheetValue, terminateIfEmptyRow",
+      "condition": {
+        "expression": "format == 'xls' && structuredSchemaRequired == true"
+      },
+      "show": [
+        {
+          "name": "sheet"
+        },
+        {
+          "name": "sheetValue"
+        },
+        {
+          "name": "terminateIfEmptyRow"
+        }
+      ]
+    },
+    {
+      "name": "Show property format, get-schema, override, fileEncoding, sampleSize",
+      "condition": {
+        "expression": "structuredSchemaRequired == true"
+      },
+      "show": [
+        {
+          "name": "format"
+        },
+        {
+          "widget-type": "get-schema"
+        },
+        {
+          "name": "override"
+        },
+        {
+          "name": "fileEncoding"
+        },
+        {
+          "name": "sampleSize"
+        }
+      ]
+    },
+    {
+      "name": "Show old properties when structuredSchemaRequired is false",
+      "condition": {
+        "expression": "structuredSchemaRequired == false"
+      },
+      "show": [
+        {
+          "name": "docsExportingFormat"
+        },
+        {
+          "name": "sheetsExportingFormat"
+        },
+        {
+          "name": "drawingsExportingFormat"
+        },
+        {
+          "name": "presentationsExportingFormat"
+        },
+        {
+          "name": "maxPartitionSize"
+        },
+        {
+          "name": "bodyFormat"
+        },
+        {
+          "name": "fileMetadataProperties"
+        },
+        {
+          "name": "fileTypesToPull"
         }
       ]
     }

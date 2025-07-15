@@ -104,7 +104,7 @@ public class GoogleSheetsSourceConfigTest {
   }
 
   @Test
-  public void testValidateMetadataCellsOnlyHeader() throws NoSuchFieldException, IllegalAccessException,
+  public void testGetValidationResultMetadataCellsOnlyHeader() throws NoSuchFieldException, IllegalAccessException,
     NoSuchMethodException, InvocationTargetException {
     Method validateMetadataCellsMethod =
       config.getClass().getDeclaredMethod("validateMetadataCells", FailureCollector.class);
@@ -141,7 +141,7 @@ public class GoogleSheetsSourceConfigTest {
   }
 
   @Test
-  public void testValidateMetadataCellsOnlyFooter() throws NoSuchFieldException, IllegalAccessException,
+  public void testGetValidationResultMetadataCellsOnlyFooter() throws NoSuchFieldException, IllegalAccessException,
     NoSuchMethodException, InvocationTargetException {
     Method validateMetadataCellsMethod =
       config.getClass().getDeclaredMethod("validateMetadataCells", FailureCollector.class);
@@ -180,7 +180,7 @@ public class GoogleSheetsSourceConfigTest {
   }
 
   @Test
-  public void testValidateMetadataCellsHeaderAndFooter() throws NoSuchFieldException, IllegalAccessException,
+  public void testGetValidationResultMetadataCellsHeaderAndFooter() throws NoSuchFieldException, IllegalAccessException,
     NoSuchMethodException, InvocationTargetException {
     Method validateMetadataCellsMethod =
       config.getClass().getDeclaredMethod("validateMetadataCells", FailureCollector.class);

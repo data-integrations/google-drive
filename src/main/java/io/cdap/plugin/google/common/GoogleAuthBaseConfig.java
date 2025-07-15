@@ -156,7 +156,7 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
    * @param collector the failure collector is provided
    * @return The ValidationResult
    */
-  public ValidationResult validate(FailureCollector collector) {
+  public ValidationResult getValidationResult(FailureCollector collector) {
     IdUtils.validateReferenceName(referenceName, collector);
     checkIfDirectoryOrFileIdentifierExists(collector);
     ValidationResult validationResult = new ValidationResult();
@@ -171,14 +171,13 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
           propertiesAreValid = validateServiceAccount(collector);
           break;
         default:
-          collector.addFailure(String.format("'%s' is not processed value.", authType.toString()), null)
+          collector.addFailure(String.format("'%s' is not processed value.", authType), null)
             .withConfigProperty(AUTH_TYPE);
           return validationResult;
       }
       if (propertiesAreValid) {
         try {
-          GoogleDriveClient client = new GoogleDriveClient(this);
-
+          GoogleDriveClient<GoogleAuthBaseConfig> client = new GoogleDriveClient<>(this);
           // check directory or file access
           if (isDirectoryOrFileAccessible(collector, client)) {
             validationResult.setDirectoryOrFileAccessible(true);
@@ -240,10 +239,11 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
           .withConfigProperty(NAME_SERVICE_ACCOUNT_JSON);
       }
     }
-    return collector.getValidationFailures().size() == 0;
+    return collector.getValidationFailures().isEmpty();
   }
 
-  private boolean isDirectoryOrFileAccessible(FailureCollector collector, GoogleDriveClient driveClient)
+  private boolean isDirectoryOrFileAccessible(FailureCollector collector,
+      GoogleDriveClient<GoogleAuthBaseConfig> driveClient)
     throws IOException {
     if (containsMacro(FILE_IDENTIFIER) || containsMacro(DIRECTORY_IDENTIFIER)) {
       return false;

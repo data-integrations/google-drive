@@ -29,7 +29,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cdap.version>6.8.0</cdap.version>
-    <hydrator.version>2.10.0</hydrator.version>
     <cdap.plugin.version>2.10.0</cdap.plugin.version>
     <commons-collections.version>3.2.2</commons-collections.version>
     <commons-lang3.version>3.9</commons-lang3.version>
@@ -67,7 +66,7 @@
     <dependency>
       <groupId>io.cdap.plugin</groupId>
       <artifactId>format-common</artifactId>
-      <version>${hydrator.version}</version>
+      <version>${cdap.plugin.version}</version>
     </dependency>
     <dependency>
       <groupId>io.cdap.cdap</groupId>

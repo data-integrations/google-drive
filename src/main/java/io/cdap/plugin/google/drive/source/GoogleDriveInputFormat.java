@@ -18,7 +18,9 @@ package io.cdap.plugin.google.drive.source;
 
 import com.github.rholder.retry.RetryException;
 import com.google.api.services.drive.model.File;
+import io.cdap.cdap.api.data.format.StructuredRecord;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -33,7 +35,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Input format class which generates splits for each query.
  */
-public class GoogleDriveInputFormat extends InputFormat {
+public class GoogleDriveInputFormat extends InputFormat<NullWritable, StructuredRecord> {
 
   @Override
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
@@ -75,7 +77,8 @@ public class GoogleDriveInputFormat extends InputFormat {
   }
 
   @Override
-  public RecordReader createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) {
+  public RecordReader<NullWritable, StructuredRecord> createRecordReader(InputSplit inputSplit,
+      TaskAttemptContext taskAttemptContext) {
     return new GoogleDriveRecordReader();
   }
 }

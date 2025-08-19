@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @Plugin(type = BatchSource.PLUGIN_TYPE)
 @Name(GoogleDriveSource.NAME)
 @Description("Reads fileset from specified Google Drive directory.")
-public class GoogleDriveSource extends BatchSource<NullWritable, FileFromFolder, StructuredRecord> {
+public class GoogleDriveSource extends BatchSource<NullWritable, StructuredRecord, StructuredRecord> {
   public static final String NAME = "GoogleDrive";
 
   private final GoogleDriveSourceConfig config;
@@ -53,7 +53,7 @@ public class GoogleDriveSource extends BatchSource<NullWritable, FileFromFolder,
   @Override
   public void configurePipeline(PipelineConfigurer pipelineConfigurer) {
     FailureCollector failureCollector = pipelineConfigurer.getStageConfigurer().getFailureCollector();
-    config.validate(failureCollector);
+    config.getValidationResult(failureCollector);
     failureCollector.getOrThrowException();
 
     pipelineConfigurer.getStageConfigurer().setOutputSchema(config.getSchema());
@@ -62,7 +62,7 @@ public class GoogleDriveSource extends BatchSource<NullWritable, FileFromFolder,
   @Override
   public void prepareRun(BatchSourceContext context) {
     FailureCollector failureCollector = context.getFailureCollector();
-    config.validate(failureCollector);
+    config.getValidationResult(failureCollector);
     failureCollector.getOrThrowException();
 
     LineageRecorder lineageRecorder = new LineageRecorder(context, config.getReferenceName());
@@ -73,10 +73,5 @@ public class GoogleDriveSource extends BatchSource<NullWritable, FileFromFolder,
                                  .collect(Collectors.toList()));
 
     context.setInput(Input.of(config.getReferenceName(), new GoogleDriveInputFormatProvider(config)));
-  }
-
-  @Override
-  public void transform(KeyValue<NullWritable, FileFromFolder> input, Emitter<StructuredRecord> emitter) {
-    emitter.emit(FilesFromFolderTransformer.transform(input.getValue(), config.getSchema()));
   }
 }

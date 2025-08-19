@@ -177,7 +177,7 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
       }
       if (propertiesAreValid) {
         try {
-          GoogleDriveClient client = new GoogleDriveClient(this);
+          GoogleDriveClient<GoogleAuthBaseConfig> client = new GoogleDriveClient<>(this);
 
           // check directory or file access
           if (isDirectoryOrFileAccessible(collector, client)) {
@@ -243,7 +243,8 @@ public abstract class GoogleAuthBaseConfig extends PluginConfig {
     return collector.getValidationFailures().isEmpty();
   }
 
-  private boolean isDirectoryOrFileAccessible(FailureCollector collector, GoogleDriveClient driveClient)
+  private boolean isDirectoryOrFileAccessible(FailureCollector collector,
+      GoogleDriveClient<GoogleAuthBaseConfig> driveClient)
     throws IOException {
     if (containsMacro(FILE_IDENTIFIER) || containsMacro(DIRECTORY_IDENTIFIER)) {
       return false;

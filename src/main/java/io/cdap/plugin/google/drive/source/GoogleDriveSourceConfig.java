@@ -50,6 +50,13 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   public static final String DRAWINGS_EXPORTING_FORMAT = "drawingsExportingFormat";
   public static final String PRESENTATIONS_EXPORTING_FORMAT = "presentationsExportingFormat";
 
+  public static final String DEFAULT_BODY_FORMAT = "bytes";
+  public static final long DEFAULT_MAX_PARTITION_SIZE = 0;
+  public static final String DEFAULT_DOCS_EXPORTING_FORMAT = "text/plain";
+  public static final String DEFAULT_SHEETS_EXPORTING_FORMAT = "text/csv";
+  public static final String DEFAULT_DRAWINGS_EXPORTING_FORMAT = "image/svg+xml";
+  public static final String DEFAULT_PRESENTATIONS_EXPORTING_FORMAT = "text/plain";
+
   public static final String FILE_METADATA_PROPERTIES_LABEL = "File properties";
   public static final String FILE_TYPES_TO_PULL_LABEL = "File types to pull";
   public static final String BODY_FORMAT_LABEL = "Body output format";
@@ -66,37 +73,44 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     "The following values are supported: binary (all non-Google Drive formats), Google Documents, " +
     "Google Spreadsheets, Google Drawings, Google Presentations and Google Apps Scripts. \n" +
     "For Google Drive formats user should specify exporting format in **Exporting** section.")
+  @Nullable
   @Macro
   protected String fileTypesToPull;
 
   @Name(MAX_PARTITION_SIZE)
   @Description("Maximum body size for each structured record specified in bytes. \n" +
     "Default 0 value means unlimited. Is not applicable for files in Google formats.")
+  @Nullable
   @Macro
   protected String maxPartitionSize;
 
   @Name(BODY_FORMAT)
   @Description("Output format for body of file. \"Bytes\" and \"String\" values are available.")
+  @Nullable
   @Macro
   protected String bodyFormat;
 
   @Name(DOCS_EXPORTING_FORMAT)
   @Description("MIME type which is used for Google Documents when converted to structured records.")
+  @Nullable
   @Macro
   protected String docsExportingFormat;
 
   @Name(SHEETS_EXPORTING_FORMAT)
   @Description("MIME type which is used for Google Spreadsheets when converted to structured records.")
+  @Nullable
   @Macro
   protected String sheetsExportingFormat;
 
   @Name(DRAWINGS_EXPORTING_FORMAT)
   @Description("MIME type which is used for Google Drawings when converted to structured records.")
+  @Nullable
   @Macro
   protected String drawingsExportingFormat;
 
   @Name(PRESENTATIONS_EXPORTING_FORMAT)
   @Description("MIME type which is used for Google Presentations when converted to structured records.")
+  @Nullable
   @Macro
   protected String presentationsExportingFormat;
   private transient Schema schema = null;
@@ -202,27 +216,28 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   }
 
   public BodyFormat getBodyFormat() {
-    return BodyFormat.fromValue(bodyFormat);
+    return bodyFormat == null ? BodyFormat.fromValue(DEFAULT_BODY_FORMAT) : BodyFormat.fromValue(bodyFormat);
   }
 
   public Long getMaxPartitionSize() {
-    return Long.parseLong(maxPartitionSize);
+    return Strings.isNullOrEmpty(maxPartitionSize) ? DEFAULT_MAX_PARTITION_SIZE : Long.parseLong(maxPartitionSize);
   }
 
   public String getDocsExportingFormat() {
-    return docsExportingFormat;
+    return Strings.isNullOrEmpty(docsExportingFormat) ? DEFAULT_DOCS_EXPORTING_FORMAT : docsExportingFormat;
   }
 
   public String getSheetsExportingFormat() {
-    return sheetsExportingFormat;
+    return Strings.isNullOrEmpty(sheetsExportingFormat) ? DEFAULT_SHEETS_EXPORTING_FORMAT : sheetsExportingFormat;
   }
 
   public String getDrawingsExportingFormat() {
-    return drawingsExportingFormat;
+    return Strings.isNullOrEmpty(drawingsExportingFormat) ? DEFAULT_DRAWINGS_EXPORTING_FORMAT : drawingsExportingFormat;
   }
 
   public String getPresentationsExportingFormat() {
-    return presentationsExportingFormat;
+    return Strings.isNullOrEmpty(presentationsExportingFormat) ? DEFAULT_PRESENTATIONS_EXPORTING_FORMAT
+        : presentationsExportingFormat;
   }
 
   public GoogleDriveSourceConfig(String referenceName) {

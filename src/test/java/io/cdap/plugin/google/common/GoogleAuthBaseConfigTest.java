@@ -60,7 +60,7 @@ public class GoogleAuthBaseConfigTest {
     config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
     config.setFileIdentifier("fileId");
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
-    config.validate(collector);
+    config.getValidationResult(collector);
     Assert.assertEquals(1, collector.getValidationFailures().size());
     Assert.assertEquals("Service Account File Path is not available.",
                         collector.getValidationFailures().get(0).getMessage());
@@ -81,7 +81,7 @@ public class GoogleAuthBaseConfigTest {
     config.setFileIdentifier("fileId");
     config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
-    config.validate(collector);
+    config.getValidationResult(collector);
     Assert.assertEquals(1, collector.getValidationFailures().size());
     Assert.assertEquals("Service Account JSON can not be empty.",
                         collector.getValidationFailures().get(0).getMessage());
@@ -101,7 +101,7 @@ public class GoogleAuthBaseConfigTest {
     config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
     config.setFileIdentifier("fileId");
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
-    config.validate(collector);
+    config.getValidationResult(collector);
     Assert.assertEquals(1, collector.getValidationFailures().size());
     Assert.assertEquals("'Access Token' property is empty or macro is not available.",
                         collector.getValidationFailures().get(0).getMessage());
@@ -121,7 +121,7 @@ public class GoogleAuthBaseConfigTest {
     config.setFileIdentifier("fileId");
     config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
-    config.validate(collector);
+    config.getValidationResult(collector);
     Assert.assertEquals(3, collector.getValidationFailures().size());
     Assert.assertEquals("'Client ID' property is empty or macro is not available.",
                         collector.getValidationFailures().get(0).getMessage());
@@ -148,7 +148,7 @@ public class GoogleAuthBaseConfigTest {
     config.setAccessToken("access");
     config.setoAuthMethod(OAuthMethod.ACCESS_TOKEN.name());
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
-    config.validate(collector);
+    config.getValidationResult(collector);
     Assert.assertEquals(2, collector.getValidationFailures().size());
     Assert.assertEquals("Directory Identifier can not be null.",
                         collector.getValidationFailures().get(0).getMessage());
@@ -171,7 +171,7 @@ public class GoogleAuthBaseConfigTest {
     config.setIdentifierType(IdentifierType.FILE_IDENTIFIER.name());
     config.setoAuthMethod(OAuthMethod.ACCESS_TOKEN.name());
     FailureCollector collector = new DefaultFailureCollector("stageConfig", Collections.EMPTY_MAP);
-    config.validate(collector);
+    config.getValidationResult(collector);
     Assert.assertEquals(2, collector.getValidationFailures().size());
     Assert.assertEquals("File Identifier can not be null.",
                         collector.getValidationFailures().get(0).getMessage());

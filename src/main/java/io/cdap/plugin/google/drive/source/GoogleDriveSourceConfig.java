@@ -136,8 +136,8 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
    * @param collector the failure collector is provided
    * @return The ValidationResult
    */
-  public ValidationResult validate(FailureCollector collector) {
-    ValidationResult validationResult = super.validate(collector);
+  public ValidationResult getValidationResult(FailureCollector collector) {
+    ValidationResult validationResult = super.getValidationResult(collector);
 
     validateFileTypesToPull(collector);
 

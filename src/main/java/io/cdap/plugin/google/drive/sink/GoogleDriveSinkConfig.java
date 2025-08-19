@@ -60,7 +60,8 @@ public class GoogleDriveSinkConfig extends GoogleInputSchemaFieldsUsageConfig {
    * @param schema the schema to check compatibility
    */
   public void validate(FailureCollector collector, Schema schema) {
-    super.validate(collector);
+    super.getValidationResult(collector);
+    collector.getOrThrowException();
 
     // validate body field is in schema and has valid format
     validateSchemaField(collector, schema, SCHEMA_BODY_FIELD_NAME, schemaBodyFieldName,

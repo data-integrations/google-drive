@@ -54,7 +54,7 @@ public class GoogleSheetsSource extends BatchSource<NullWritable, StructuredReco
   public void configurePipeline(PipelineConfigurer pipelineConfigurer) {
     StageConfigurer stageConfigurer = pipelineConfigurer.getStageConfigurer();
     FailureCollector failureCollector = pipelineConfigurer.getStageConfigurer().getFailureCollector();
-    config.validate(failureCollector);
+    config.getValidationResult(failureCollector);
     failureCollector.getOrThrowException();
 
     Schema configuredSchema = config.getSchema(failureCollector);
@@ -64,7 +64,7 @@ public class GoogleSheetsSource extends BatchSource<NullWritable, StructuredReco
   @Override
   public void prepareRun(BatchSourceContext context) {
     FailureCollector failureCollector = context.getFailureCollector();
-    config.validate(failureCollector);
+    config.getValidationResult(failureCollector);
     failureCollector.getOrThrowException();
 
     Schema configSchema = config.getSchema(failureCollector);

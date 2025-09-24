@@ -23,7 +23,11 @@ import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.etl.api.FailureCollector;
+import io.cdap.cdap.etl.api.StageContext;
+import io.cdap.plugin.format.FileFormat;
+import io.cdap.plugin.format.plugin.FileSourceProperties;
 import io.cdap.plugin.google.common.GoogleFilteringSourceConfig;
+import io.cdap.plugin.google.common.IdentifierType;
 import io.cdap.plugin.google.common.ValidationResult;
 import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 import io.cdap.plugin.google.common.utils.ExportedType;
@@ -33,13 +37,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
  * Configurations for Google Drive Batch Source plugin.
  */
-public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
+public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig implements FileSourceProperties {
   public static final String FILE_METADATA_PROPERTIES = "fileMetadataProperties";
   public static final String CONFIGURATION_PARSE_PROPERTY_NAME = "properties";
   public static final String FILE_TYPES_TO_PULL = "fileTypesToPull";
@@ -49,6 +54,9 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   public static final String SHEETS_EXPORTING_FORMAT = "sheetsExportingFormat";
   public static final String DRAWINGS_EXPORTING_FORMAT = "drawingsExportingFormat";
   public static final String PRESENTATIONS_EXPORTING_FORMAT = "presentationsExportingFormat";
+  public static final String IS_STRUCTURED_SCHEMA_REQUIRED = "structuredSchemaRequired";
+  public static final String NAME_SCHEMA = "schema";
+  public static final String NAME_FORMAT = "format";
 
   public static final String DEFAULT_BODY_FORMAT = "bytes";
   public static final long DEFAULT_MAX_PARTITION_SIZE = 0;
@@ -60,6 +68,12 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   public static final String FILE_METADATA_PROPERTIES_LABEL = "File properties";
   public static final String FILE_TYPES_TO_PULL_LABEL = "File types to pull";
   public static final String BODY_FORMAT_LABEL = "Body output format";
+
+  public static final String GOOGLE_DRIVE_SCHEMA = "drive";
+  public static final String GOOGLE_DRIVE_AUTHORITY = "drive.google.com";
+  public static final String GOOGLE_DRIVE_FILE_PATH_PREFIX = "/drive/file/d";
+  public static final String GOOGLE_DRIVE_FOLDER_PATH_PREFIX = "/drive/folders";
+  public static final String GOOGLE_DRIVE_DEFAULT_FILENAME = "default.txt";
 
   @Nullable
   @Name(FILE_METADATA_PROPERTIES)
@@ -113,7 +127,91 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   @Nullable
   @Macro
   protected String presentationsExportingFormat;
-  private transient Schema schema = null;
+
+  @Macro
+  @Nullable
+  @Description("Output schema for the source. Formats like 'avro' and 'parquet' require a schema in order to "
+    + "read the data.")
+  private String schema;
+
+  @Name(IS_STRUCTURED_SCHEMA_REQUIRED)
+  @Description("Wheather to fetch schema or not")
+  @Nullable
+  protected Boolean isStructuredSchemaRequired;
+
+  @Name(NAME_FORMAT)
+  @Macro
+  @Description("Format of the data to read. Supported formats are 'csv'....")
+  @Nullable
+  private String format;
+
+  @Macro
+  @Nullable
+  @Description("Whether to recursively read directories within the input directory. The default is false.")
+  private Boolean recursive;
+
+  @Macro
+  @Nullable
+  @Description("Whether to allow an input that does not exist. When false, the source will fail the run if the input "
+      + "does not exist. When true, the run will not fail and the source will not generate any output. "
+      + "The default value is false.")
+  private Boolean ignoreNonExistingFolders;
+
+  @Macro
+  @Nullable
+  @Description("The maximum number of rows that will get investigated for automatic data type detection.")
+  private Long sampleSize;
+
+  @Macro
+  @Nullable
+  @Description("A list of columns with the corresponding data types for whom the automatic data type detection gets " +
+      "skipped.")
+  private String override;
+
+  @Macro
+  @Nullable
+  @Description("The delimiter to use if the format is 'delimited'. The delimiter will be ignored if the format "
+      + "is anything other than 'delimited'.")
+  private String delimiter;
+
+  @Macro
+  @Nullable
+  @Description("Whether to use first row as header. Supported formats are 'text', 'csv', 'tsv', " +
+      "'delimited'. Default value is false.")
+  private Boolean skipHeader;
+
+  @Macro
+  @Nullable
+  @Description("Whether to treat content between quotes as a value. This value will only be used if the format " +
+      "is 'csv', 'tsv' or 'delimited'. The default value is false.")
+  protected Boolean enableQuotedValues;
+
+  @Macro
+  @Nullable
+  @Description("Any additional properties to use when reading from the filesystem. "
+      + "This is an advanced feature that requires knowledge of the properties supported by the underlying filesystem.")
+  private String fileSystemProperties;
+
+  @Macro
+  @Nullable
+  @Description("File encoding for the source files. The default encoding is 'UTF-8'")
+  private String fileEncoding;
+
+  @Macro
+  @Nullable
+  @Description("Select the sheet by name or number. Default is 'Sheet Number'.")
+  private String sheet;
+
+  @Macro
+  @Nullable
+  @Description("The name/number of the sheet to read from. If not specified, the first sheet will be read." +
+      "Sheet Numbers are 0 based, ie first sheet is 0.")
+  private String sheetValue;
+
+  @Macro
+  @Nullable
+  @Description("Specify whether to stop reading after encountering the first empty row. Defaults to false.")
+  private String terminateIfEmptyRow;
 
   public GoogleDriveSourceConfig(String referenceName, @Nullable String fileMetadataProperties, String fileTypesToPull,
                                  String maxPartitionSize, String bodyFormat, String sheetsExportingFormat,
@@ -134,15 +232,103 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     this.endDate = endDate;
   }
 
+  @Override
+  public void validate(FailureCollector collector) {
+    getSchema();
+    // Extra validation when structure schema is required
+  }
+
+  @Override
+  public String getPath() {
+    IdentifierType idType = getIdentifierType();
+    if (idType == IdentifierType.FILE_IDENTIFIER) {
+      return String.format("%s://%s%s/%s/%s", GOOGLE_DRIVE_SCHEMA, GOOGLE_DRIVE_AUTHORITY,
+        GOOGLE_DRIVE_FILE_PATH_PREFIX, getFileIdentifier(), GOOGLE_DRIVE_DEFAULT_FILENAME);
+    } else if (idType == IdentifierType.DIRECTORY_IDENTIFIER) {
+      return String.format("%s://%s%s/%s/", GOOGLE_DRIVE_SCHEMA, GOOGLE_DRIVE_AUTHORITY,
+        GOOGLE_DRIVE_FOLDER_PATH_PREFIX, getDirectoryIdentifier());
+    }
+    throw new IllegalArgumentException(String.format("Invalid identifier type '%s'. Expected one of: %s or %s.", idType,
+        IdentifierType.FILE_IDENTIFIER, IdentifierType.DIRECTORY_IDENTIFIER));
+  }
+
+  @Override
+  public String getPath(StageContext context) {
+    return getPath();
+  }
+
+  @Override
+  public String getFormatName() {
+    // need to do this for backwards compatibility, where the pre-packaged format names were case insensitive.
+    try {
+      FileFormat fileFormat = FileFormat.from(format, x -> true);
+      return fileFormat.name().toLowerCase();
+    } catch (IllegalArgumentException e) {
+      // ignore
+    }
+    return format;
+  }
+
+  @Nullable
+  @Override
+  public FileFormat getFormat() {
+    throw new UnsupportedOperationException("GDrive does not support: FileFormat getFormat() method");
+  }
+
+  @Nullable
+  @Override
+  public Pattern getFilePattern() {
+    return null;
+  }
+
+  @Override
+  public long getMaxSplitSize() {
+    return Long.MAX_VALUE;
+  }
+
+  @Override
+  public boolean shouldAllowEmptyInput() {
+    return ignoreNonExistingFolders != null && ignoreNonExistingFolders;
+  }
+
+  @Override
+  public boolean shouldReadRecursively() {
+    return recursive != null && recursive;
+  }
+
+  @Nullable
+  @Override
+  public String getPathField() {
+    return null;
+  }
+
+  @Override
+  public boolean useFilenameAsPath() {
+    throw new UnsupportedOperationException("GDrive does not support: boolean useFilenameAsPath() method");
+  }
+
+  @Override
+  public boolean skipHeader() {
+    throw new UnsupportedOperationException("GDrive does not support: boolean skipHeader() method");
+  }
+
   /**
+   * throw new UnsupportedOperationException("GDrive  does not support: /**() method;
    * Returns the instance of Schema.
    * @return The instance of Schema
    */
   public Schema getSchema() {
-    if (schema == null) {
-      schema = SchemaBuilder.buildSchema(getFileMetadataProperties(), getBodyFormat());
+    if (!isStructuredSchemaRequired() && Strings.isNullOrEmpty(schema)) {
+      schema = SchemaBuilder.buildSchema(getFileMetadataProperties(), getBodyFormat()).toString();
     }
-    return schema;
+    if (Strings.isNullOrEmpty(schema)) {
+      return null;
+    }
+    try {
+      return Schema.parseJson(schema);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Invalid schema: " + e.getMessage(), e);
+    }
   }
 
   /**
@@ -236,8 +422,15 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
   }
 
   public String getPresentationsExportingFormat() {
-    return Strings.isNullOrEmpty(presentationsExportingFormat) ? DEFAULT_PRESENTATIONS_EXPORTING_FORMAT
-        : presentationsExportingFormat;
+    return Strings.isNullOrEmpty(presentationsExportingFormat) ?
+      DEFAULT_PRESENTATIONS_EXPORTING_FORMAT : presentationsExportingFormat;
+  }
+
+  public boolean isStructuredSchemaRequired() {
+    if (isStructuredSchemaRequired == null) {
+      return false; // for backward compatibility, default to false
+    }
+    return isStructuredSchemaRequired;
   }
 
   public GoogleDriveSourceConfig(String referenceName) {
@@ -284,8 +477,8 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig {
     this.filter = filter;
   }
 
-  public void setSchema(String schema) throws IOException {
-    this.schema = Schema.parseJson(schema);
+  public void setSchema(String schema) {
+    this.schema = schema;
   }
 
   public void setModificationDateRange(String modificationDateRange) {

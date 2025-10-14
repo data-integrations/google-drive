@@ -69,8 +69,8 @@ public class SheetTransformer {
         builder.set(metadataRecordName, rowRecord.getMetadata());
       } else {
         ComplexSingleValueColumn complexSingleValueColumn = rowRecord.getHeaderedCells().get(name);
-        if (complexSingleValueColumn == null || (complexSingleValueColumn.getData() == null
-          && complexSingleValueColumn.getSubColumns().isEmpty())) {
+        if (complexSingleValueColumn == null || complexSingleValueColumn.getData() == null
+            || complexSingleValueColumn.getSubColumns() == null || complexSingleValueColumn.getSubColumns().isEmpty()) {
           builder.set(name, null);
         } else {
           processCellData(builder, field, complexSingleValueColumn);
@@ -129,7 +129,7 @@ public class SheetTransformer {
     for (Schema.Field subField : fieldSchema.getFields()) {
       String subFieldName = subField.getName();
       ComplexSingleValueColumn complexSubColumn = complexSingleValueColumn.getSubColumns().get(subFieldName);
-      if (complexSubColumn.getData() == null) {
+      if (complexSubColumn == null || complexSubColumn.getData() == null) {
         builder.set(subFieldName, null);
       } else {
         processCellData(builder, subField, complexSubColumn);

@@ -17,7 +17,10 @@
 package io.cdap.plugin.google.drive.source;
 
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
@@ -31,12 +34,16 @@ import io.cdap.plugin.google.common.IdentifierType;
 import io.cdap.plugin.google.common.ValidationResult;
 import io.cdap.plugin.google.common.exceptions.InvalidPropertyTypeException;
 import io.cdap.plugin.google.common.utils.ExportedType;
+import io.cdap.plugin.google.drive.source.fs.GoogleDriveFileSystem;
 import io.cdap.plugin.google.drive.source.utils.BodyFormat;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -57,6 +64,9 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig impleme
   public static final String IS_STRUCTURED_SCHEMA_REQUIRED = "structuredSchemaRequired";
   public static final String NAME_SCHEMA = "schema";
   public static final String NAME_FORMAT = "format";
+  public static final String NAME_DELIMITER = "delimiter";
+  public static final String NAME_FILE_SYSTEM_PROPERTIES = "filesystemproperties";
+  public static final String NAME_FILE_ENCODING = "fileEncoding";
 
   public static final String DEFAULT_BODY_FORMAT = "bytes";
   public static final long DEFAULT_MAX_PARTITION_SIZE = 0;
@@ -74,6 +84,12 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig impleme
   public static final String GOOGLE_DRIVE_FILE_PATH_PREFIX = "/drive/file/d";
   public static final String GOOGLE_DRIVE_FOLDER_PATH_PREFIX = "/drive/folders";
   public static final String GOOGLE_DRIVE_DEFAULT_FILENAME = "default.txt";
+
+  public static final String GOOGLE_DRIVE_FILESYSTEM_IMPL = String.format("fs.%s.impl", GOOGLE_DRIVE_SCHEMA);
+  public static final String GOOGLE_DRIVE_FILESYSTEM_DISABLE_CACHE_KEY = String.format("fs.%s.impl.disable.cache",
+      GOOGLE_DRIVE_SCHEMA);
+  public static final Gson GSON = new GsonBuilder().create();
+  private static final Type MAP_STRING_STRING_TYPE = new TypeToken<Map<String, String>>() { }.getType();
 
   @Nullable
   @Name(FILE_METADATA_PROPERTIES)
@@ -168,6 +184,7 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig impleme
       "skipped.")
   private String override;
 
+  @Name(NAME_DELIMITER)
   @Macro
   @Nullable
   @Description("The delimiter to use if the format is 'delimited'. The delimiter will be ignored if the format "
@@ -186,12 +203,14 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig impleme
       "is 'csv', 'tsv' or 'delimited'. The default value is false.")
   protected Boolean enableQuotedValues;
 
+  @Name(NAME_FILE_SYSTEM_PROPERTIES)
   @Macro
   @Nullable
   @Description("Any additional properties to use when reading from the filesystem. "
       + "This is an advanced feature that requires knowledge of the properties supported by the underlying filesystem.")
   private String fileSystemProperties;
 
+  @Name(NAME_FILE_ENCODING)
   @Macro
   @Nullable
   @Description("File encoding for the source files. The default encoding is 'UTF-8'")
@@ -587,5 +606,32 @@ public class GoogleDriveSourceConfig extends GoogleFilteringSourceConfig impleme
         properties.get(GoogleDriveSourceConfig.IDENTIFIER_TYPE).getAsString());
     }
     return googleDriveSourceConfig;
+  }
+
+  public Map<String, String> getFileSystemProperties(@Nullable FailureCollector collector) {
+    Map<String, String> properties = new HashMap<>();
+    properties.put(GOOGLE_DRIVE_FILESYSTEM_IMPL, GoogleDriveFileSystem.class.getName());
+    properties.put(GoogleDriveInputFormatProvider.PROPERTY_CONFIG_JSON, GSON.toJson(getProperties()));
+    properties.put(GOOGLE_DRIVE_FILESYSTEM_DISABLE_CACHE_KEY, Boolean.TRUE.toString());
+
+    if (fileSystemProperties != null) {
+      try {
+        Map<String, String> userProperties = GSON.fromJson(fileSystemProperties, MAP_STRING_STRING_TYPE);
+        for (Map.Entry<String, String> entry : userProperties.entrySet()) {
+          if (entry.getKey() != null && !entry.getKey().isEmpty()) {
+            // let user override the default properties
+            properties.put(entry.getKey(), entry.getValue());
+          }
+        }
+      } catch (Exception e) {
+        String errorMessage = String.format("Unable to parse filesystem properties, %s: %s", e.getClass().getName(),
+            e.getMessage());
+        if (collector == null) {
+          throw new IllegalArgumentException(errorMessage, e);
+        }
+        collector.addFailure(errorMessage, "Ensure the properties are in a valid JSON format.");
+      }
+    }
+    return properties;
   }
 }

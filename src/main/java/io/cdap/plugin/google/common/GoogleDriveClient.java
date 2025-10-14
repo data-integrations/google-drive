@@ -68,7 +68,7 @@ public class GoogleDriveClient<C extends GoogleAuthBaseConfig> {
    * @return {@link Drive} client.
    * @throws IOException on issues with service account file reading.
    */
-  protected Drive getDriveClient() throws IOException {
+  public Drive getDriveClient() throws IOException {
     Drive drive;
     AuthType authType = config.getAuthType();
     switch (authType) {

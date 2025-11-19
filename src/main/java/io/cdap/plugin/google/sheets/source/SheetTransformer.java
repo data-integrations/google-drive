@@ -44,13 +44,13 @@ public class SheetTransformer {
   /**
    * Returns the StructuredRecord.
    *
-   * @param rowRecord The rowRecord with
-   * @param schema The schema with
-   * @param extractMetadata The extractMetadata with
-   * @param metadataRecordName The metadataRecordName with
-   * @param addNames The addNames with
+   * @param rowRecord            The rowRecord with
+   * @param schema               The schema with
+   * @param extractMetadata      The extractMetadata with
+   * @param metadataRecordName   The metadataRecordName with
+   * @param addNames             The addNames with
    * @param spreadsheetFieldName The spreadsheetFieldName with
-   * @param sheetFieldName The sheetFieldName
+   * @param sheetFieldName       The sheetFieldName
    * @return The StructuredRecord
    */
   public static StructuredRecord transform(RowRecord rowRecord, Schema schema, boolean extractMetadata,
@@ -69,8 +69,9 @@ public class SheetTransformer {
         builder.set(metadataRecordName, rowRecord.getMetadata());
       } else {
         ComplexSingleValueColumn complexSingleValueColumn = rowRecord.getHeaderedCells().get(name);
-        if (complexSingleValueColumn == null || complexSingleValueColumn.getData() == null
-            || complexSingleValueColumn.getSubColumns() == null || complexSingleValueColumn.getSubColumns().isEmpty()) {
+        if (complexSingleValueColumn == null ||
+          (!field.getSchema().getNonNullable().getType()
+            .equals(Schema.Type.RECORD) && complexSingleValueColumn.getData() == null)) {
           builder.set(name, null);
         } else {
           processCellData(builder, field, complexSingleValueColumn);
@@ -120,6 +121,9 @@ public class SheetTransformer {
         builder.set(fieldName, effectiveValue.getNumberValue());
       }
     } else if (Schema.Type.RECORD.equals(fieldType)) {
+      if (complexSingleValueColumn.getSubColumns() == null || complexSingleValueColumn.getSubColumns().isEmpty()) {
+        throw new IllegalArgumentException("Columns are not present in sheet which are defined in the Record schema");
+      }
       builder.set(fieldName, processRecord(fieldSchema.getNonNullable(), complexSingleValueColumn));
     }
   }

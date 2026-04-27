@@ -596,8 +596,8 @@ public class GoogleSheetsSourceConfig extends GoogleFilteringSourceConfig {
         }
       } catch (IOException e) {
         collector.addFailure(
-          String.format("Failed to prepare headers, spreadsheet id: '%s', sheet title: '%s'.",
-            currentSpreadsheetId, currentSheetTitle), null);
+          String.format("Failed to prepare headers, spreadsheet id: '%s', sheet title: '%s' due to reason: '%s'.",
+            currentSpreadsheetId, currentSheetTitle, e.getMessage()), null);
       }
     }
   }

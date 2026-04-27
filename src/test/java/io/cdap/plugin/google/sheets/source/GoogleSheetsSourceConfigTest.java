@@ -16,6 +16,7 @@
 
 package io.cdap.plugin.google.sheets.source;
 
+import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.model.CellData;
 import com.google.api.services.sheets.v4.model.ExtendedValue;
 import com.google.api.services.sheets.v4.model.GridRange;
@@ -27,7 +28,9 @@ import io.cdap.plugin.google.sheets.source.utils.ColumnComplexSchemaInfo;
 import io.cdap.plugin.google.sheets.source.utils.MetadataKeyValueAddress;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -470,5 +473,35 @@ public class GoogleSheetsSourceConfigTest {
     Assert.assertTrue(subColumns.get(0).getSubColumns().isEmpty());
     Assert.assertEquals("d", subColumns.get(1).getHeaderTitle());
     Assert.assertTrue(subColumns.get(0).getSubColumns().isEmpty());
+  }
+
+  @Test
+  public void testGetAndValidateSheetSchemaIOException() throws Exception {
+    FailureCollector collector = new DefaultFailureCollector("", Collections.EMPTY_MAP);
+    GoogleSheetsSourceClient mockClient = Mockito.mock(GoogleSheetsSourceClient.class);
+    
+    List<File> spreadsheetsFiles = new ArrayList<>();
+    File mockFile = new File();
+    mockFile.setId("spreadsheetId");
+    spreadsheetsFiles.add(mockFile);
+    
+    Mockito.when(mockClient.getSheetsTitles("spreadsheetId")).thenReturn(Arrays.asList("Sheet1"));
+    
+    Mockito.when(mockClient.getSingleRows(Mockito.anyString(), Mockito.anyString(), Mockito.anySet()))
+      .thenThrow(new IOException("Mocked IO exception"));
+      
+    setFieldValue("sheetsToPull", "all");
+    setFieldValue("columnNamesSelection", "noColumnNames");
+      
+    Method method = GoogleSheetsSourceConfig.class.getDeclaredMethod("getAndValidateSheetSchema", 
+      FailureCollector.class, GoogleSheetsSourceClient.class, List.class);
+    method.setAccessible(true);
+    
+    method.invoke(config, collector, mockClient, spreadsheetsFiles);
+    
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    ValidationFailure failure = collector.getValidationFailures().get(0);
+    Assert.assertTrue(failure.getMessage().contains("Failed to prepare headers"));
+    Assert.assertTrue(failure.getMessage().contains("due to reason: 'Mocked IO exception'"));
   }
 }
